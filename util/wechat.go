@@ -20,6 +20,7 @@ func GetAccessToken(appID, appSecret string) (string, error) {
 	if token != "" {
 		return token, nil
 	}
+	Logger.Printf("[GetAccessToken] token expired, acquiring new one")
 	// 缓存过期，重新获取
 	getAccessTokenUrl := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/token?appid=%s&secret=%s&js_code=%s&grant_type=client_credential",
 		appID, appSecret)

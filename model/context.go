@@ -10,4 +10,5 @@ type TeamUpContext struct {
 	AppInfo     *AppInfo   `json:"app_info"`
 	BasicUser   *BasicUser `json:"basic_user"`
 	AccessToken string     `json:"access_token"`
+	ID          int64      `json:"id"`
 }
