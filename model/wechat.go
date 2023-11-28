@@ -1,11 +1,15 @@
 package model
 
+type WechatBase struct {
+	ErrCode int32  `json:"errcode"`
+	ErrMsg  string `json:"errmsg"`
+}
+
 type Code2Session struct {
+	*WechatBase
 	OpenID     string `json:"openid"`
 	SessionKey string `json:"session_key"`
 	UnionID    string `json:"unionid"`
-	ErrCode    int32  `json:"errcode"`
-	ErrMsg     string `json:"errmsg"`
 }
 
 type AccessTokenResp struct {
@@ -14,8 +18,7 @@ type AccessTokenResp struct {
 }
 
 type PhoneInfoResp struct {
-	ErrCode   int32      `json:"errcode"`
-	ErrMsg    string     `json:"errmsg"`
+	*WechatBase
 	PhoneInfo *PhoneInfo `json:"phone_info"`
 }
 
@@ -29,4 +32,9 @@ type PhoneInfo struct {
 type Watermark struct {
 	TimeStamp int64  `json:"timeStamp"`
 	AppID     string `json:"appid"`
+}
+
+type WechatUserInfo struct {
+	NickName  string `json:"nick_name"`
+	AvatarUrl string `json:"avatar_url"`
 }

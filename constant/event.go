@@ -7,5 +7,6 @@ const (
 	EventStatusFinished = "finished" // 已结束
 	EventStatusDeleted  = "deleted"
 
-	SportTypePeddle = "paddle"
+	EventMatchTypeEntertainment = "entertainment" // 休闲活动
+	EventMatchTypeCompetitive   = "competitive"
 )

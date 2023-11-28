@@ -1,6 +1,7 @@
 package util
 
 import (
+	"errors"
 	"fmt"
 	"github.com/bytedance/sonic"
 	"github.com/gin-gonic/gin"
@@ -9,6 +10,7 @@ import (
 	"reflect"
 	"runtime"
 	"runtime/debug"
+	"strconv"
 	"strings"
 	"teamup/constant"
 	"teamup/db/mysql"
@@ -61,13 +63,42 @@ func getLogInfo(handler iface.HandlerFunc) model.LogInfo {
 }
 
 func NewTeamUpContext(c *gin.Context, opt model.APIOption) (*model.TeamUpContext, error) {
+
+	// 防止接口重放
+	timeStampStr := c.GetHeader("timestamp")
+	ts, err := strconv.ParseInt(timeStampStr, 10, 64)
+	if err != nil {
+		Logger.Printf("NewTeamUpContext get ts from header failed, err:%v", err)
+		return nil, err
+	}
+	randomStr := c.GetHeader("nonce")
+	if randomStr == "" {
+		Logger.Printf("NewTeamUpContext get nonce from header failed, err:%v", err)
+		return nil, errors.New("nonce missing")
+	}
+	antiReplayKey := fmt.Sprintf("server_antispam_timestamp_%d_nonce_%s", ts, randomStr)
+	res, err := RedisGet(antiReplayKey)
+	if err != nil && res != "" {
+		Logger.Printf("NewTeamUpContext req too frequent")
+		return nil, errors.New("too frequent")
+	}
+	_ = RedisSet(antiReplayKey, 1, time.Second*15)
+
 	ctx := &model.TeamUpContext{
 		Context: c,
 		AppInfo: &model.AppInfo{
 			AppID:  constant.AppID,
 			Secret: constant.AppSecret,
 		},
+		Timestamp: ts,
 	}
+	// 获取语言
+	lang := c.GetHeader("lang")
+	if lang == "" {
+		lang = "zh_CN"
+	}
+	ctx.Language = lang
+
 	// 生成随机种子
 	ran := rand.New(rand.NewSource(time.Now().UnixNano()))
 	ctx.ID = ran.Int63()
@@ -79,16 +110,12 @@ func NewTeamUpContext(c *gin.Context, opt model.APIOption) (*model.TeamUpContext
 	}
 	ctx.AccessToken = accessToken
 	if opt.NeedLoginStatus {
-		// 解密JWT，放入ctx
-		body := struct {
-			WechatToken string `json:"wechat_token"`
-		}{}
-		err := c.BindJSON(&body)
+		wechatToken := c.GetHeader("wechat_token")
 		if err != nil {
-			Logger.Printf("NewTeamUpContext c.BindJSON failed, err:%v", err)
+			Logger.Printf("NewTeamUpContext c.GetHeader failed, err:%v", err)
 			return nil, err
 		}
-		jwt, err := ParseJWTToken(body.WechatToken)
+		jwt, err := ParseJWTToken(wechatToken)
 		if err != nil {
 			Logger.Printf("NewTeamUpContext ParseJWTToken failed, err:%v", err)
 			return nil, err

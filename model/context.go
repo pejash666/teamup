@@ -11,4 +11,6 @@ type TeamUpContext struct {
 	BasicUser   *BasicUser `json:"basic_user"`
 	AccessToken string     `json:"access_token"`
 	ID          int64      `json:"id"`
+	Timestamp   int64      `json:"timestamp"`
+	Language    string     `json:"language"`
 }

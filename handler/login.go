@@ -3,6 +3,7 @@ package handler
 import (
 	"errors"
 	"gorm.io/gorm"
+	"teamup/constant"
 	"teamup/db/mysql"
 	"teamup/iface"
 	"teamup/model"
@@ -29,15 +30,36 @@ func UserLogin(c *model.TeamUpContext) (interface{}, error) {
 		return nil, iface.NewBackEndError(c2s.ErrCode, c2s.ErrMsg)
 	}
 	user := &mysql.WechatUserInfo{}
-	err = util.DB().Where("open_id = ?", c2s.OpenID).Take(user).Error
+
+	err = util.DB().Where("open_id = ? AND is_primary = ?", c2s.OpenID, 1).Take(user).Error
 	if err != nil {
-		// 如果没找到则需要插入一条新的
+		// 如果没找到主要记录则需要插入3条新的
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			user.OpenId = c2s.OpenID
-			user.SessionKey = c2s.SessionKey
-			user.UnionId = c2s.UnionID
-			err = util.DB().Create(user).Error
-			if err != nil {
+			users := []*mysql.WechatUserInfo{
+				{
+					OpenId:     c2s.OpenID,
+					SessionKey: c2s.SessionKey,
+					UnionId:    c2s.UnionID,
+					IsPrimary:  1,
+					SportType:  constant.SportTypePedal,
+				},
+				{
+					OpenId:    c2s.OpenID,
+					IsPrimary: 0,
+					SportType: constant.SportTypePedal,
+				},
+				{
+					OpenId:    c2s.OpenID,
+					IsPrimary: 0,
+					SportType: constant.SportTypeTennis,
+				},
+			}
+
+			//user.OpenId = c2s.OpenID
+			//user.SessionKey = c2s.SessionKey
+			//user.UnionId = c2s.UnionID
+			result := util.DB().Create(users)
+			if result.Error != nil {
 				util.Logger.Printf("[UserLogin] create user failed, err:%v", err)
 				return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
 			}
