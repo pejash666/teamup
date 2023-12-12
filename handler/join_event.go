@@ -31,19 +31,20 @@ func JoinEvent(c *model.TeamUpContext) (interface{}, error) {
 	}
 	// 先检查下是否已经参与了这个活动 && 活动是否可以参加
 	userEvent := &mysql.UserEvent{}
-	if err = util.DB().Where("user_id = ? AND event_id = ?", c.BasicUser.UserID, body.EventID).Take(userEvent).Error; !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err = util.DB().Where("open_id = ? AND event_id = ?", c.BasicUser.OpenID, body.EventID).Take(userEvent).Error; !errors.Is(err, gorm.ErrRecordNotFound) {
 		util.Logger.Printf("[JoinEvent] find user_event record in DB failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
 	}
-	util.Logger.Printf("[JoinEvent] userID:%d has not joined eventID:%d yet, check success", c.BasicUser.UserID, body.EventID)
+	util.Logger.Printf("[JoinEvent] openID:%s has not joined eventID:%d yet, check success", c.BasicUser.OpenID, body.EventID)
 	event := &mysql.EventMeta{}
 	if err = util.DB().Where("id = ? AND status = ? AND end_time > ?", body.EventID, constant.EventStatusCreated, time.Now().Unix()).Take(event).Error; err != nil {
 		util.Logger.Printf("[JoinEvent] get event from DB failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.InternalError, err.Error())
 	}
 	// 非公开活动只能通过邀请链接加入
-	if event.IsPublic == 1 {
-
+	if event.IsPublic == 0 && !body.IsInviting {
+		util.Logger.Printf("[JoinEvent] event:%d is private, can only join via invitinglink", body.EventID)
+		return nil, iface.NewBackEndError(iface.PrivateEventError, "private event")
 	}
 	util.Logger.Printf("[JoinEvent] eventID:%d can be joined", body.EventID)
 	// 开启事务
@@ -53,7 +54,6 @@ func JoinEvent(c *model.TeamUpContext) (interface{}, error) {
 		// 更新事件表（参与人数）
 		newUserEvent := &mysql.UserEvent{
 			EventID:   body.EventID,
-			UserID:    c.BasicUser.UserID,
 			SportType: event.SportType,
 			OpenID:    c.BasicUser.OpenID,
 		}
@@ -88,22 +88,22 @@ func JoinEvent(c *model.TeamUpContext) (interface{}, error) {
 			util.Logger.Printf("[JoinEvent] query user meta failed, err:%v", err)
 			return err
 		}
-		meta.CurrentPeopleNum += 1
-		if meta.CurrentPeopleNum == meta.MaxPeopleNum {
+		meta.CurrentPlayerNum += 1
+		if meta.CurrentPlayerNum == meta.MaxPlayerNum {
 			util.Logger.Printf("[JoinEvent] event:%d is full now", body.EventID)
 			meta.Status = constant.EventStatusFull
 		}
-		currentPeople := make([]uint, 0)
-		err = sonic.UnmarshalString(meta.CurrentPeople, &currentPeople)
+		currentPeople := make([]string, 0)
+		err = sonic.UnmarshalString(meta.CurrentPlayer, &currentPeople)
 		if err != nil {
 			return err
 		}
-		currentPeople = append(currentPeople, c.BasicUser.UserID)
+		currentPeople = append(currentPeople, c.BasicUser.OpenID)
 		currentPeopleStr, err := sonic.MarshalString(currentPeople)
 		if err != nil {
 			return err
 		}
-		meta.CurrentPeople = currentPeopleStr
+		meta.CurrentPlayer = currentPeopleStr
 		if err = tx.Save(meta).Error; err != nil {
 			util.Logger.Printf("[JoinEvent] save event meta failed, err:%v", err)
 			return err
@@ -112,6 +112,6 @@ func JoinEvent(c *model.TeamUpContext) (interface{}, error) {
 		return nil
 	})
 
-	util.Logger.Printf("[JoinEvent] user:%d join event:%d success", c.BasicUser.UserID, body.EventID)
+	util.Logger.Printf("[JoinEvent] user:%s join event:%d success", c.BasicUser.OpenID, body.EventID)
 	return nil, nil
 }

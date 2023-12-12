@@ -13,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"teamup/constant"
-	"teamup/db/mysql"
 	"teamup/iface"
 	"teamup/model"
 	"time"
@@ -30,6 +29,8 @@ func API(handler iface.HandlerFunc, opt model.APIOption) gin.HandlerFunc {
 				Logger.Printf("panic recover, err:%v, stack:%v", err, string(debug.Stack()))
 			}
 		}()
+		// 获取token
+
 		ctx, err := NewTeamUpContext(c, opt)
 		if err != nil {
 			Logger.Printf("API.NewTeamUpContext failed, err:%v", err)
@@ -111,24 +112,23 @@ func NewTeamUpContext(c *gin.Context, opt model.APIOption) (*model.TeamUpContext
 	ctx.AccessToken = accessToken
 	if opt.NeedLoginStatus {
 		wechatToken := c.GetHeader("wechat_token")
-		if err != nil {
+		if wechatToken == "" {
 			Logger.Printf("NewTeamUpContext c.GetHeader failed, err:%v", err)
-			return nil, err
+			return nil, iface.NewBackEndError(iface.ParamsError, "invalid wechat_token")
 		}
 		jwt, err := ParseJWTToken(wechatToken)
 		if err != nil {
 			Logger.Printf("NewTeamUpContext ParseJWTToken failed, err:%v", err)
 			return nil, err
 		}
-		// 还要去DB获取到自己维护的UserID
-		user := &mysql.WechatUserInfo{}
-		if err = DB().Where("open_id = ?", jwt.OpenID).Take(user).Error; err != nil {
-			Logger.Printf("NewTeamUpContext get user info from DB failed, err:%v", err)
-			return nil, err
-		}
+		//// 还要去DB获取到自己维护的UserID
+		//user := &mysql.WechatUserInfo{}
+		//if err = DB().Where("open_id = ?", jwt.OpenID).Take(user).Error; err != nil {
+		//	Logger.Printf("NewTeamUpContext get user info from DB failed, err:%v", err)
+		//	return nil, err
+		//}
 		ctx.BasicUser = &model.BasicUser{
 			OpenID:     jwt.OpenID,
-			UserID:     user.ID,
 			UnionID:    "",
 			SessionKey: jwt.SessionKey,
 		}

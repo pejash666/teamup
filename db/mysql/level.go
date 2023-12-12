@@ -2,6 +2,7 @@ package mysql
 
 import "gorm.io/gorm"
 
+// 似乎不需要
 type UserLevel struct {
 	gorm.Model
 	UserID     uint   `gorm:"column:user_id" json:"user_id"` // 参与的用户

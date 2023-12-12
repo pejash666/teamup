@@ -2,6 +2,7 @@ CREATE TABLE `event_info`
 (
     `id`            int(11) unsigned not null auto_increment comment '主键',
     `status`        varchar not null default '' comment 'game状态',
+    `is_host`       smallint not null default 0 comment '是否为场地创建活动',
     `creator`       varchar not null default '' comment '创建者',
     `sport_type`    varchar not null default '' comment '运动类型',
     `match_type`    varchar not null default '' comment '比赛类型',
@@ -17,13 +18,13 @@ CREATE TABLE `event_info`
     `start_time`    int(11) not null default 0  comment '开始的时间戳',
     `end_time`      int(11) not null default 0  comment '结束的时间戳',
     `field_name`    varchar not null default '' comment '场地名字',
-    `max_people_num`    smallint not null default 0 comment '最多几人',
-    `current_people_num` smallint not null default 0 comment '当前几人',
-    `current_people` varchar not null default '' comment '参与的用户id',
+    `max_player_num`    smallint not null default 0 comment '最多几人',
+    `current_player_num` smallint not null default 0 comment '当前几人',
+    `current_player` varchar not null default '' comment '参与的用户id',
     `price`         smallint not null default 0 comment '价格',
-    `created_at`  TIMESTAMP        NULL     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `updated_at`  TIMESTAMP        NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-    `deleted_at`  TIMESTAMP        NULL     ,
+    `created_at`  TIMESTAMP        NOT NULL     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at`  TIMESTAMP        NOT NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    `deleted_at`  TIMESTAMP        NOT NULL     ,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 1

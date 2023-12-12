@@ -9,6 +9,9 @@ const (
 	MysqlError = 1004
 
 	ParamsError = 1005
+
+	NotHostError      = 1006 // 非Host执行Host行为
+	PrivateEventError = 1007
 )
 
 type BackEndError struct {

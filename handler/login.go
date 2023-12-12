@@ -35,7 +35,7 @@ func UserLogin(c *model.TeamUpContext) (interface{}, error) {
 	if err != nil {
 		// 如果没找到主要记录则需要插入3条新的
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			users := []*mysql.WechatUserInfo{
+			var users = []mysql.WechatUserInfo{
 				{
 					OpenId:     c2s.OpenID,
 					SessionKey: c2s.SessionKey,
@@ -58,7 +58,7 @@ func UserLogin(c *model.TeamUpContext) (interface{}, error) {
 			//user.OpenId = c2s.OpenID
 			//user.SessionKey = c2s.SessionKey
 			//user.UnionId = c2s.UnionID
-			result := util.DB().Create(users)
+			result := util.DB().Create(&users)
 			if result.Error != nil {
 				util.Logger.Printf("[UserLogin] create user failed, err:%v", err)
 				return nil, iface.NewBackEndError(iface.MysqlError, err.Error())

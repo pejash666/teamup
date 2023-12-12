@@ -10,6 +10,8 @@ type StringSlice []string
 type WechatUserInfo struct {
 	gorm.Model            // embedded the basics
 	SportType      string `gorm:"column:sport_type" json:"sport_type"`           // 运动类型
+	IsCalibrated   int    `gorm:"column:is_calibrated" json:"is_calibrated"`     // 是否完成定级
+	Level          int    `gorm:"column:level" json:"level"`                     // 级别
 	UnionId        string `gorm:"column:union_id" json:"union_id"`               // 微信用户union_id
 	OpenId         string `gorm:"column:open_id" json:"open_id"`                 // 微信用户open_id
 	SessionKey     string `gorm:"session_key" json:"session_key"`                // 微信session_key 用于解密

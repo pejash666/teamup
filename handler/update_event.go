@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/bytedance/sonic"
 	"teamup/constant"
 	"teamup/db/mysql"
 	"teamup/iface"
@@ -12,14 +13,14 @@ import (
 func UpdateEvent(c *model.TeamUpContext) (interface{}, error) {
 	util.Logger.Printf("[UpdateEvent] starts")
 	// 从DB获取event
-	event := &mysql.EventMeta{}
+	event := &model.EventInfo{}
 	err := c.BindJSON(event)
 	if err != nil {
 		util.Logger.Printf("[UpdateEvent] bindJson failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.InternalError, err.Error())
 	}
 	meta := &mysql.EventMeta{}
-	err = util.DB().Where("id = ?", event.ID).Take(meta).Error
+	err = util.DB().Where("id = ?", event.Id).Take(meta).Error
 	if err != nil {
 		util.Logger.Printf("[UpdateEvent] find record in DB failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
@@ -30,8 +31,13 @@ func UpdateEvent(c *model.TeamUpContext) (interface{}, error) {
 		return nil, iface.NewBackEndError(iface.ParamsError, "cant edit")
 	}
 	meta.Price = event.Price
-	meta.MaxPeople = event.MaxPeople
+	meta.MaxPlayerNum = event.MaxPeople
 	meta.FieldName = event.FieldName
+	meta.FieldType = event.FieldType
+	meta.SportType = event.SportType
+	meta.GameType = event.GameType
+	meta.IsPublic = util.BoolToDB(event.IsPublic)
+	meta.IsBooked = util.BoolToDB(event.IsBooked)
 	meta.SportType = event.SportType
 	meta.Status = event.Status
 	meta.Date = time.Unix(event.StartTime, 0).Format("20060102")
@@ -40,16 +46,42 @@ func UpdateEvent(c *model.TeamUpContext) (interface{}, error) {
 	meta.EndTime = event.EndTime
 	meta.EndTimeStr = time.Unix(event.EndTime, 0).Format("20060102 15:04")
 	meta.Desc = event.Desc
-	meta.Title = event.Title
+	meta.Name = event.Name
 	meta.City = event.City
-
+	if event.IsCompetitive {
+		meta.MatchType = constant.EventMatchTypeCompetitive
+	} else {
+		meta.MatchType = constant.EventMatchTypeEntertainment
+	}
+	if event.IsDraft {
+		meta.Status = constant.EventStatusDraft
+	} else {
+		meta.Status = constant.EventStatusCreated
+	}
+	// 如果自己也加入，则直接在创建时添加进去
+	if event.SelfJoin {
+		meta.CurrentPlayerNum += 1
+		currentPeople := make([]string, 0)
+		err = sonic.UnmarshalString(meta.CurrentPlayer, &currentPeople)
+		if err != nil {
+			util.Logger.Printf("UnmarshalString failed")
+			return nil, err
+		}
+		currentPeople = append(currentPeople, c.BasicUser.OpenID)
+		currentPeopleStr, err := sonic.MarshalString(currentPeople)
+		if err != nil {
+			util.Logger.Printf("MarshalString failed")
+			return nil, err
+		}
+		meta.CurrentPlayer = currentPeopleStr
+	}
 	err = util.DB().Save(meta).Error
 	if err != nil {
 		util.Logger.Printf("[UpdateEvent] save updated event failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
 	}
 
-	util.Logger.Printf("[UpdateEvent] success, event_id:%d", event.ID)
+	util.Logger.Printf("[UpdateEvent] success, event_id:%d", event.Id)
 
-	return map[string]uint{"event_id": event.ID}, nil
+	return map[string]int64{"event_id": event.Id}, nil
 }
