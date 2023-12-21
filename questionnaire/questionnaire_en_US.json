@@ -1,0 +1,64 @@
+[
+  {
+    "q_id": 1,
+    "q_text":"At what level do you think you are?",
+    "options":{
+      "A":"Beginner: Player who has just started playing {sport_type}. Rallies and returns the ball and is learning to move around the court.",
+      "B":"Intermediate: Player who has to improve his technique and tactics, has been playing a couple of games a month for a year and may have received some classes, hits and returns the ball at low speeds.",
+      "C":"Intermediate High: Player with a wide variety of strokes becoming proficient in the execution in the different types of tray shots. Volleys aggressively, normally returns ballons and is beginning to bring the ball into his/her field for overhead smash and win points by sending the ball out of court/over the fence/ out by three or four.",
+      "D":"Advanced: Regular {sport_type} player. Hits the ball hard and true. Analyses rival’s weak points and varies match strategy and playing style in difficult situations. Regularly wins point by sending the ball out of court/over the fence/out by three or four. Has a good off the wall smash and can successfully execute ballons.",
+      "E":"Competition: Federated player(currently) who competes in federation tournaments and has points in the community ranking."
+    }
+  },
+  {
+    "q_id": 2,
+    "q_text":"How long have you been playing {sport_type} regularly?",
+    "options":{
+      "A":"No, never",
+      "B":"Less than a year",
+      "C":"Less than 2 years",
+      "D":"More than 2 years"
+    }
+  },
+  {
+    "q_id": 3,
+    "q_text":"Have you played other racquet sports in the past?",
+    "options":{
+      "A":"No, never",
+      "B":"Yes, less than two years",
+      "C":"Yes, more than two years",
+      "D":"Yes, more than five years"
+    }
+  },
+  {
+    "q_id": 4,
+    "q_text":"How many {sport_type} or other racquet sports matches have you played, on average, per week in the last 6 months?",
+    "options":{
+      "A":"0",
+      "B":"1",
+      "C":"2",
+      "D":"3 or more"
+    }
+  },
+  {
+    "q_id": 5,
+    "q_text":"What’s your fitness level?",
+    "options":{
+      "A":"Excellent",
+      "B":"Good",
+      "C":"Normal",
+      "D":"Low",
+      "E":"Very Low"
+    }
+  },
+  {
+    "q_id": 6,
+    "q_text":"Have ever played with level {level} player, if yes, what was your win ratio?",
+    "options":{
+      "A":"No",
+      "B":"Yes, win ratio > 50%",
+      "C":"Yes, win ratio around 50%",
+      "D":"Yes, win ratio less than 50%"
+    }
+  }
+]

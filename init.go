@@ -9,4 +9,6 @@ func Init() {
 	util.InitMySQL()
 	// 初始化Redis
 	util.InitRedis()
+	// load文件
+	util.LoadFile()
 }

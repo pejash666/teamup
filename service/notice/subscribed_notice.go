@@ -59,8 +59,14 @@ func InformUser(c *model.TeamUpContext, templateID string, data map[string]strin
 	baseResp := &model.WechatBase{}
 	err = sonic.Unmarshal(respBody, baseResp)
 	if err != nil {
-		util.Logger.Printf("[InformUser]")
+		util.Logger.Printf("[InformUser] unmarshal failed, err:%v", err)
+		return iface.NewBackEndError(iface.InternalError, err.Error())
 	}
+	if baseResp.ErrCode != 0 {
+		util.Logger.Printf("[InformUser] errCode is not zero, code:%v", baseResp.ErrCode)
+		return iface.NewBackEndError(iface.WechatError, baseResp.ErrMsg)
+	}
+	return nil
 }
 
 func toNoticeData(data map[string]string) NoticeData {
