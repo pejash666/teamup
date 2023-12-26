@@ -1,6 +1,11 @@
 package handler
 
 import (
+	"encoding/base64"
+	"github.com/bytedance/sonic"
+	"io"
+	"net/http"
+	"os"
 	"path"
 	"sort"
 	"strconv"
@@ -43,26 +48,37 @@ func GetScore(qid int, option string) float32 {
 }
 
 func Calibrate(c *model.TeamUpContext) (interface{}, error) {
-	body := &Body{}
-	err := c.BindJSON(body)
-	if err != nil {
-		util.Logger.Printf("[Calibrate] BindJSON failed, err:%v", err)
-		return nil, iface.NewBackEndError(iface.ParamsError, "invalid req")
-	}
-	if body.SportType != constant.SportTypePedal && body.SportType != constant.SportTypeTennis && body.SportType != constant.SportTypePickelBall {
+	sportType := c.PostForm("sport_type")
+	if sportType != constant.SportTypePedal && sportType != constant.SportTypeTennis && sportType != constant.SportTypePickelBall {
 		return nil, iface.NewBackEndError(iface.ParamsError, "invalid sport_type")
 	}
-	if len(body.Questionnaire) < 1 {
+	questionnaireParam := c.PostForm("questionnaire")
+	questionnaire := make([]*Question, 0)
+	err := sonic.UnmarshalString(questionnaireParam, &questionnaire)
+	if err != nil {
+		util.Logger.Printf("[Calibrate] unmarshal questionnaire failed, err:%v", err)
+		return nil, iface.NewBackEndError(iface.ParamsError, "invalid questionnaire")
+	}
+	//err := c.BindJSON(body)
+	//if err != nil {
+	//	util.Logger.Printf("[Calibrate] BindJSON failed, err:%v", err)
+	//	return nil, iface.NewBackEndError(iface.ParamsError, "invalid req")
+	//}
+	//if body.SportType != constant.SportTypePedal && body.SportType != constant.SportTypeTennis && body.SportType != constant.SportTypePickelBall {
+	//	return nil, iface.NewBackEndError(iface.ParamsError, "invalid sport_type")
+	//}
+	if len(questionnaire) < 1 {
 		return nil, iface.NewBackEndError(iface.ParamsError, "invalid questionnaire")
 	}
 	// 按照qid重新sort一下
-	sort.SliceStable(body.Questionnaire, func(i, j int) bool {
-		return body.Questionnaire[i].QID < body.Questionnaire[j].QID
+	sort.SliceStable(questionnaire, func(i, j int) bool {
+		return questionnaire[i].QID < questionnaire[j].QID
 	})
+	proofPath := ""
 	isPro := false
 	totalScore := float32(0)
 	maxScore := float32(0)
-	for _, q := range body.Questionnaire {
+	for _, q := range questionnaire {
 		// 特殊处理选择7.0的人,需要保存上传的文件
 		if q.QID == 1 {
 			maxScore = MaxScoreMap[q.Option]
@@ -79,13 +95,13 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 					return nil, iface.NewBackEndError(iface.ParamsError, "file too big")
 				}
 				fileName := strings.Split(file.Filename, ".")
-				if fileName[len(fileName)-1] != "png" || fileName[len(fileName)-1] != "jpeg" {
-					util.Logger.Printf("[Calibrate] invalid file, should either png or jpeg")
+				if fileName[len(fileName)-1] != "png" && fileName[len(fileName)-1] != "jpeg" {
+					util.Logger.Printf("[Calibrate] invalid file, should either png or jpeg, now:%v", fileName[len(fileName)-1])
 					return nil, iface.NewBackEndError(iface.ParamsError, "invalid filename")
 				}
-				dst := path.Join("./user_calibration_proof", c.BasicUser.OpenID+fileName[len(fileName)-1])
+				proofPath = path.Join("./user_calibration_proof", c.BasicUser.OpenID+"."+fileName[len(fileName)-1])
 				// todo: 是否要将这个存起来？
-				err = c.SaveUploadedFile(file, dst)
+				err = c.SaveUploadedFile(file, proofPath)
 				if err != nil {
 					util.Logger.Printf("[Calibrate] iSaveUploadedFile failed, err:%v", err)
 					return nil, iface.NewBackEndError(iface.ParamsError, "save file failed")
@@ -106,7 +122,7 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 
 	// 更新用户表
 	user := &mysql.WechatUserInfo{}
-	err = util.DB().Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, body.SportType).Take(user).Error
+	err = util.DB().Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, sportType).Take(user).Error
 	if err != nil {
 		util.Logger.Printf("[Calibrate] query record failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
@@ -122,7 +138,29 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 		util.Logger.Printf("[Calibrate] save user failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.InternalError, err.Error())
 	}
+	res := map[string]interface{}{
+		"sport_type": sportType,
+		"level":      totalScore,
+	}
+	baseImg := ""
+	// 如果是上传了图片，则返回一个base64的字符串
+	if proofPath != "" && isPro {
+		file, err := os.Open(proofPath)
+		if err != nil {
+			return nil, iface.NewBackEndError(iface.InternalError, "open proof_path failed")
+		}
+		defer file.Close()
+		imgByte, _ := io.ReadAll(file)
+		mimeType := http.DetectContentType(imgByte)
+		switch mimeType {
+		case "image/jpeg":
+			baseImg = "data:image/jpeg;base64," + base64.StdEncoding.EncodeToString(imgByte)
+		case "image/png":
+			baseImg = "data:image/png;base64," + base64.StdEncoding.EncodeToString(imgByte)
+		}
+		res["proof_image"] = baseImg
+	}
 
 	util.Logger.Printf("[Calibrate] success")
-	return nil, nil
+	return res, nil
 }

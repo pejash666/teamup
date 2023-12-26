@@ -9,36 +9,37 @@ import (
 	"teamup/util"
 )
 
-func GetPhoneNumber(c *model.TeamUpContext) (interface{}, error) {
-	util.Logger.Println("GetPhoneNumber started")
+// 前端获取加密的用户手机号，服务端进行解码
+func UpdateUserPhoneNumber(c *model.TeamUpContext) (interface{}, error) {
+	util.Logger.Println("UpdateUserPhoneNumber started")
 	body := &model.GeneralCodeBody{}
 	err := c.BindJSON(body)
 	if err != nil {
-		util.Logger.Printf("[GetPhoneNumber] BindJSON failed,err:%v", err)
+		util.Logger.Printf("[UpdateUserPhoneNumber] BindJSON failed,err:%v", err)
 		return nil, iface.NewBackEndError(iface.InternalError, err.Error())
 	}
 	phoneInfo, err := info.GetUserPhoneNumber(c, body)
 	if err != nil {
 		return nil, iface.NewBackEndError(iface.InternalError, err.Error())
 	}
-	if phoneInfo.ErrCode != 0 {
-		util.Logger.Printf("[GetPhoneNumber] wechat resp code is not 0")
+	if phoneInfo.WechatBase != nil && phoneInfo.WechatBase.ErrCode != 0 {
+		util.Logger.Printf("[UpdateUserPhoneNumber] wechat resp code is not 0")
 		return nil, iface.NewBackEndError(phoneInfo.ErrCode, phoneInfo.ErrMsg)
 	}
 	// 更新user表的手机号码
 	user := &mysql.WechatUserInfo{}
-	err = util.DB().Where("open_id = ?", c.BasicUser.OpenID).Take(user).Error
+	err = util.DB().Where("open_id = ? AND is_primary = 1", c.BasicUser.OpenID).Take(user).Error
 	if err != nil {
-		util.Logger.Printf("[GetPhoneNumber] get user from DB failed, err:%v", err)
+		util.Logger.Printf("[UpdateUserPhoneNumber] get user from DB failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
 	}
 	num, err := strconv.ParseUint(phoneInfo.PhoneInfo.PhoneNumber, 10, 64)
 	if err != nil {
-		util.Logger.Printf("[GetPhoneNumber] ParseUint for phoneNumber failed, err:%v", err)
+		util.Logger.Printf("[UpdateUserPhoneNumber] ParseUint for phoneNumber failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.InternalError, err.Error())
 	}
 	user.PhoneNumber = uint(num)
 	util.DB().Save(user)
-	util.Logger.Printf("[GetPhoneNumber] success")
-	return map[string]string{"code": body.Code}, nil
+	util.Logger.Printf("[UpdateUserPhoneNumber] success")
+	return nil, nil
 }

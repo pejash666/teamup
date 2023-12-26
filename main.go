@@ -30,7 +30,7 @@ func main() {
 	//userGroup := r.Group("/team_up/user")
 	//userGroup.POST("/login", API(handler.UserLogin, model.APIOption{
 	//	RequireMerchantUser: false}))
-	//userGroup.GET("/phone_number", API(handler.GetPhoneNumber, model.APIOption{
+	//userGroup.GET("/phone_number", API(handler.UpdateUserPhoneNumber, model.APIOption{
 	//	RequireMerchantUser: false,
 	//	NeedLoginStatus:     true,
 	//}))
@@ -56,18 +56,86 @@ func main() {
 
 func HttpHandler() *gin.Engine {
 	r := gin.Default()
-	// todo: 区分 r.Group()
-	userGroup := r.Group("/team_up/user")
-	userGroup.POST("/login", API(handler.UserLogin, model.APIOption{
-		RequireMerchantUser: false}))
-	userGroup.GET("/phone_number", API(handler.GetPhoneNumber, model.APIOption{
-		RequireMerchantUser: false,
-		NeedLoginStatus:     true,
-	}))
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
 		})
 	})
+	// 用户类接口
+	userGroup := r.Group("/team_up/user")
+	// 登录接口，用户进入小程序就要请求（通了）
+	userGroup.POST("/login", API(handler.UserLogin, model.APIOption{
+		NeedLoginStatus: false,
+	}))
+	// 前端获取密文手机号，服务端解码并存储
+	userGroup.POST("/update_phone_number", API(handler.UpdateUserPhoneNumber, model.APIOption{
+		NeedLoginStatus: true,
+	}))
+	// 更新用户信息（头像 & 昵称）
+	userGroup.POST("/update_user_info", API(handler.UpdateUserInfo, model.APIOption{
+		NeedLoginStatus: true,
+	}))
+	// 获取个人主页
+	userGroup.GET("/my_tab", API(handler.GetMyTab, model.APIOption{
+		NeedLoginStatus: false,
+	}))
+	// 获取定级问题
+	userGroup.POST("/get_calibration_questions", API(handler.GetCalibrationQuestions, model.APIOption{
+		NeedLoginStatus: true,
+	}))
+	// 定级
+	userGroup.POST("/calibrate", API(handler.Calibrate, model.APIOption{
+		NeedLoginStatus: true,
+	}))
+	// 获取用户组织相关信息
+	userGroup.GET("/host_info", API(handler.GetUserHostInfo, model.APIOption{
+		NeedLoginStatus: true,
+	}))
+	// 加入活动
+	userGroup.POST("/join_event", API(handler.JoinEvent, model.APIOption{
+		NeedLoginStatus: true,
+	}))
+	// 退出活动
+	userGroup.POST("/quit_event", API(handler.QuitEvent, model.APIOption{
+		NeedLoginStatus: true,
+	}))
+	// 上传比赛结果
+	userGroup.POST("/upload_event_result", API(handler.UploadEventResult, model.APIOption{
+		NeedLoginStatus: true,
+	}))
+
+	// 组织类接口
+	organizationGroup := r.Group("/team_up/organization")
+	// 创建组织
+	organizationGroup.POST("/create", API(handler.CreateOrganization, model.APIOption{
+		NeedLoginStatus: true,
+	}))
+
+	// 活动类接口
+	eventGroup := r.Group("/team_up/event")
+	// 活动页面
+	eventGroup.POST("/page", API(handler.GetEventTab, model.APIOption{
+		NeedLoginStatus: true,
+	}))
+	// 创建活动
+	eventGroup.POST("/create", API(handler.CreateEvent, model.APIOption{
+		NeedLoginStatus: true,
+	}))
+	// 更新活动信息
+	eventGroup.POST("/update", API(handler.UpdateEvent, model.APIOption{
+		NeedLoginStatus: true,
+	}))
+	// 获取活动结果
+	eventGroup.POST("/get_result", API(handler.GetEventResult, model.APIOption{
+		NeedLoginStatus: true,
+	}))
+
+	// 静态资源Group
+	imageGroup := r.Group("/team_up/static_image")
+	// 用户定级职业的证明
+	imageGroup.Static("/calibration_proof", "./user_calibration_proof")
+	// 用户创建组织的logo
+	imageGroup.Static("/organization_logo", "./organization_logos")
+
 	return r
 }

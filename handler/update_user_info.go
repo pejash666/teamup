@@ -4,7 +4,6 @@ import (
 	"teamup/db/mysql"
 	"teamup/iface"
 	"teamup/model"
-	"teamup/service/login"
 	"teamup/util"
 )
 
@@ -26,29 +25,13 @@ func UpdateUserInfo(c *model.TeamUpContext) (interface{}, error) {
 		util.Logger.Printf("[UpdateUserInfo] BindJSON failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.InternalError, "bindJson failed")
 	}
-	// 验签
-	isPass, err := login.CheckFrontEndSignature(c, body.Signature, c.BasicUser.SessionKey, body.RawData)
-	if err != nil {
-		util.Logger.Printf("[UpdateUserInfo] CheckFrontEndSignature failed, err:%v", err)
-		return nil, iface.NewBackEndError(iface.InternalError, "CheckFrontEndSignature failed")
-	}
-	if !isPass {
-		util.Logger.Printf("[UpdateUserInfo] signature not match")
-		return nil, iface.NewBackEndError(iface.ParamsError, "invalid signature")
-	}
 	// 从DB获取用户信息
 	user := &mysql.WechatUserInfo{}
-	err = util.DB().Where("open_id = ?", c.BasicUser.OpenID).Take(user).Error
+	err = util.DB().Where("open_id = ? AND is_primary = 1", c.BasicUser.OpenID).Take(user).Error
 	if err != nil {
 		util.Logger.Printf("[UpdateUserInfo] get record from db failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.MysqlError, "no record found")
 	}
-	//decryptedData, err := login.GetEncryptedData(c, c.BasicUser.SessionKey, body.EncryptedData, body.Iv)
-	//if err != nil {
-	//	util.Logger.Printf("[UpdateUserInfo] login.GetEncryptedData failed, err:%v", err)
-	//	return nil, iface.NewBackEndError(iface.InternalError, "GetEncryptedData failed")
-	//}
-	// todo：不确定decryptedData这里面都有啥
 	user.Avatar = body.AvatarUrl
 	user.Nickname = body.NickName
 	err = util.DB().Save(user).Error

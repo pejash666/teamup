@@ -25,7 +25,7 @@ func UserLogin(c *model.TeamUpContext) (interface{}, error) {
 		return nil, iface.NewBackEndError(iface.InternalError, err.Error())
 	}
 	// 判断错误码
-	if c2s.ErrCode != 0 {
+	if c2s.WechatBase != nil && c2s.WechatBase.ErrCode != 0 {
 		// todo: 塞进err表？
 		return nil, iface.NewBackEndError(c2s.ErrCode, c2s.ErrMsg)
 	}
@@ -46,7 +46,7 @@ func UserLogin(c *model.TeamUpContext) (interface{}, error) {
 				{
 					OpenId:    c2s.OpenID,
 					IsPrimary: 0,
-					SportType: constant.SportTypePedal,
+					SportType: constant.SportTypePickelBall,
 				},
 				{
 					OpenId:    c2s.OpenID,
@@ -55,9 +55,6 @@ func UserLogin(c *model.TeamUpContext) (interface{}, error) {
 				},
 			}
 
-			//user.OpenId = c2s.OpenID
-			//user.SessionKey = c2s.SessionKey
-			//user.UnionId = c2s.UnionID
 			result := util.DB().Create(&users)
 			if result.Error != nil {
 				util.Logger.Printf("[UserLogin] create user failed, err:%v", err)
@@ -69,7 +66,7 @@ func UserLogin(c *model.TeamUpContext) (interface{}, error) {
 		util.Logger.Printf("[UserLogin] query user record failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
 	}
-	// 应该只要更新session_key?
+	// 如果前端没有缓存的jwt token，但是服务端有数据，只需要更新session_key
 	user.SessionKey = c2s.SessionKey
 	err = util.DB().Save(user).Error
 	if err != nil {

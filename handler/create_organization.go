@@ -32,11 +32,11 @@ func CreateOrganization(c *model.TeamUpContext) (interface{}, error) {
 				return nil, iface.NewBackEndError(iface.ParamsError, "file too big")
 			}
 			fileName := strings.Split(file.Filename, ".")
-			if fileName[len(fileName)-1] != "png" || fileName[len(fileName)-1] != "jpeg" {
+			if fileName[len(fileName)-1] != "png" && fileName[len(fileName)-1] != "jpeg" {
 				util.Logger.Printf("[CreateOrganization] invalid file, should either png or jpeg")
 				return nil, iface.NewBackEndError(iface.ParamsError, "invalid filename")
 			}
-			dst := path.Join("./organization_logos", strconv.FormatInt(int64(organization.ID), 10)+fileName[len(fileName)-1])
+			dst := path.Join("./organization_logos", strconv.FormatInt(int64(organization.ID), 10)+"."+fileName[len(fileName)-1])
 			err = c.SaveUploadedFile(file, dst)
 			if err != nil {
 				util.Logger.Printf("[CreateOrganization] iSaveUploadedFile failed, err:%v", err)
@@ -47,7 +47,8 @@ func CreateOrganization(c *model.TeamUpContext) (interface{}, error) {
 			organization.City = c.PostForm("city")
 			organization.Address = c.PostForm("address")
 			organization.Contact = c.PostForm("contact")
-			organization.Logo = dst
+			// todo: 这里的链接需要替换为文件系统的（ip:port/static_image/organization_logos/strconv.FormatInt(int64(organization.ID), 10)+ "." + fileName[len(fileName)-1]）
+			organization.Logo = ""
 			result := util.DB().Create(organization)
 			if result.Error != nil {
 				util.Logger.Printf("[CreateOrganization] DB().Create failed, err:%v", result.Error)

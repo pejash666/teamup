@@ -36,6 +36,7 @@ func Code2Session(c *model.TeamUpContext, jsCode string) (*model.Code2Session, e
 		util.Logger.Printf("ioutil.ReadAll failed, err:%v", err)
 		return nil, err
 	}
+	util.Logger.Printf("body:%v", string(body))
 	c2s := &model.Code2Session{}
 	err = sonic.Unmarshal(body, c2s)
 	if err != nil {

@@ -29,9 +29,12 @@ func GetCalibrationQuestions(c *model.TeamUpContext) (interface{}, error) {
 		// 默认展示中文
 		questionnaire = util.QuestionnaireCn
 	}
-	// 根据入参的sport_type做问题的替换
+	// 根据入参的sport_type做问题和选项的替换
 	for _, question := range questionnaire {
 		question.Question = strings.Replace(question.Question, "{sport_type}", body.SportType, -1)
+		for k, option := range question.Options {
+			question.Options[k] = strings.Replace(option, "{sport_type}", body.SportType, -1)
+		}
 	}
 	util.Logger.Printf("[GetCalibrationQuestions] success, res:%+v", questionnaire)
 	return questionnaire, nil
