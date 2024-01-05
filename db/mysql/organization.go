@@ -15,4 +15,9 @@ type Organization struct {
 	Logo          string `gorm:"column:logo" json:"logo"`                       // 组织图标logo
 	TotalEventNum int    `gorm:"column:total_event_num" json:"total_event_num"` // 活动次数
 	IsApproved    int    `gorm:"column:is_approved" json:"is_approved"`         // 是否通过审批
+	Reviewer      string `gorm:"column:reviewer" json:"reviewer"`               // 审批人
+}
+
+func (o Organization) TableName() string {
+	return "organization_info"
 }

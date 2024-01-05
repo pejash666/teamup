@@ -1,11 +1,7 @@
 package handler
 
 import (
-	"encoding/base64"
 	"github.com/bytedance/sonic"
-	"io"
-	"net/http"
-	"os"
 	"path"
 	"sort"
 	"strconv"
@@ -99,14 +95,15 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 					util.Logger.Printf("[Calibrate] invalid file, should either png or jpeg, now:%v", fileName[len(fileName)-1])
 					return nil, iface.NewBackEndError(iface.ParamsError, "invalid filename")
 				}
-				proofPath = path.Join("./user_calibration_proof", c.BasicUser.OpenID+"."+fileName[len(fileName)-1])
+				filePath := path.Join("./user_calibration_proof", c.BasicUser.OpenID+"."+fileName[len(fileName)-1])
 				// todo: 是否要将这个存起来？
-				err = c.SaveUploadedFile(file, proofPath)
+				err = c.SaveUploadedFile(file, filePath)
 				if err != nil {
 					util.Logger.Printf("[Calibrate] iSaveUploadedFile failed, err:%v", err)
 					return nil, iface.NewBackEndError(iface.ParamsError, "save file failed")
 				}
 				isPro = true
+				proofPath = "/user_calibration_proof/" + c.BasicUser.OpenID + "." + fileName[len(fileName)-1]
 			}
 		}
 		totalScore += GetScore(q.QID, q.Option)
@@ -144,23 +141,26 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 	}
 	baseImg := ""
 	// 如果是上传了图片，则返回一个base64的字符串
+	//if proofPath != "" && isPro {
+	//	file, err := os.Open(proofPath)
+	//	if err != nil {
+	//		return nil, iface.NewBackEndError(iface.InternalError, "open proof_path failed")
+	//	}
+	//	defer file.Close()
+	//	imgByte, _ := io.ReadAll(file)
+	//	mimeType := http.DetectContentType(imgByte)
+	//	switch mimeType {
+	//	case "image/jpeg":
+	//		baseImg = "data:image/jpeg;base64," + base64.StdEncoding.EncodeToString(imgByte)
+	//	case "image/png":
+	//		baseImg = "data:image/png;base64," + base64.StdEncoding.EncodeToString(imgByte)
+	//	}
+	//	res["proof_image"] = baseImg
+	//}
 	if proofPath != "" && isPro {
-		file, err := os.Open(proofPath)
-		if err != nil {
-			return nil, iface.NewBackEndError(iface.InternalError, "open proof_path failed")
-		}
-		defer file.Close()
-		imgByte, _ := io.ReadAll(file)
-		mimeType := http.DetectContentType(imgByte)
-		switch mimeType {
-		case "image/jpeg":
-			baseImg = "data:image/jpeg;base64," + base64.StdEncoding.EncodeToString(imgByte)
-		case "image/png":
-			baseImg = "data:image/png;base64," + base64.StdEncoding.EncodeToString(imgByte)
-		}
+		baseImg = util.GetImageUrl(c, proofPath)
 		res["proof_image"] = baseImg
 	}
-
 	util.Logger.Printf("[Calibrate] success")
 	return res, nil
 }

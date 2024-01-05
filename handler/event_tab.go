@@ -10,76 +10,58 @@ import (
 )
 
 type EventTab struct {
-	IsHost           bool     `json:"is_host"`
-	SportType        string   `json:"sport_type"`
-	StartTime        int64    `json:"start_time"`
-	EndTime          int64    `json:"end_time"`
-	GameType         string   `json:"game_type"`
-	MatchType        string   `json:"match_type"`
-	IsPublic         bool     `json:"is_public"`
-	IsBooked         bool     `json:"is_booked"`
-	FieldName        string   `json:"field_name"`
-	FieldType        string   `json:"field_type"`
-	LowestLevel      int      `json:"lowest_level"`
-	HighestLevel     int      `json:"highest_level"`
-	Price            uint     `json:"price"`
-	MaxPlayerNum     uint     `json:"max_player_num"`
-	CurrentPlayerNum uint     `json:"current_player_num"`
-	Players          []Player `json:"players"`
-
-	OrganizationImage string `json:"organization_image"` // 只有is_host时才有
-}
-
-type Player struct {
-	NickName     string `json:"nick_name"`
-	Avatar       string `json:"avatar"`
-	IsCalibrated bool   `json:"is_calibrated"`
-	Level        int    `json:"level"`
+	EventInfo *model.EventInfo
+	Players   []*model.Player
 }
 
 func GetEventTab(c *model.TeamUpContext) (interface{}, error) {
-	type Req struct {
+	type Body struct {
 		EventID int64 `json:"event_id"`
 	}
-	req := &Req{}
-	err := c.BindJSON(req)
+	body := &Body{}
+	err := c.BindJSON(body)
 	if err != nil {
 		util.Logger.Printf("[GetEventTab] BindJSON failed, err:%v", err)
-		return nil, iface.NewBackEndError(iface.ParamsError, "invalid req")
+		return nil, iface.NewBackEndError(iface.ParamsError, "invalid body")
 	}
 	// 获取任务元信息, 能看到的都是发布后的，不能是草稿状态
 	eventMeta := &mysql.EventMeta{}
-	result := util.DB().Where("id = ? AND status <> ?", req.EventID, constant.EventStatusDraft).Take(eventMeta)
+	result := util.DB().Where("id = ? AND status <> ?", body.EventID, constant.EventStatusDraft).Take(eventMeta)
 	if result.Error != nil {
 		util.Logger.Printf("[GetEventTab] get event meta from DB failed, err:%v", result.Error)
 		return nil, iface.NewBackEndError(iface.MysqlError, "get record failed")
 	}
 	eventTab := &EventTab{}
-	eventTab.IsHost = eventMeta.IsHost == 1
-	if eventTab.IsHost {
+	eventInfo := &model.EventInfo{}
+	eventInfo.IsHost = eventMeta.IsHost == 1
+	if eventInfo.IsHost {
 		organization := &mysql.Organization{}
 		result := util.DB().Where("id = ?", eventMeta.OrganizationID).Take(organization)
 		if result.Error != nil {
 			util.Logger.Printf("[GetEventTab] get organization record from DB failed, err:%v", result.Error)
 			return nil, iface.NewBackEndError(iface.MysqlError, "get record failed")
 		}
-		eventTab.OrganizationImage = organization.Logo
+		eventInfo.OrganizationLogo = organization.Logo
 	}
-	eventTab.SportType = eventMeta.SportType
-	eventTab.StartTime = eventMeta.StartTime
-	eventTab.EndTime = eventMeta.EndTime
-	eventTab.GameType = eventMeta.GameType
-	eventTab.MatchType = eventMeta.MatchType
-	eventTab.IsPublic = eventMeta.IsPublic == 1
-	eventTab.IsBooked = eventMeta.IsBooked == 1
-	if eventTab.IsBooked {
-		eventTab.FieldName = eventMeta.FieldName
-		eventTab.FieldType = eventMeta.FieldType
+	eventInfo.SportType = eventMeta.SportType
+	eventInfo.Weekday = eventMeta.Weekday
+	eventInfo.StartTime = eventMeta.StartTime
+	eventInfo.EndTime = eventMeta.EndTime
+	eventInfo.GameType = eventMeta.GameType
+	eventInfo.IsCompetitive = eventMeta.MatchType == constant.EventMatchTypeCompetitive
+	eventInfo.IsPublic = eventMeta.IsPublic == 1
+	eventInfo.IsBooked = eventMeta.IsBooked == 1
+	if eventInfo.IsBooked {
+		eventInfo.FieldName = eventMeta.FieldName
+		eventInfo.FieldType = eventMeta.FieldType
 	}
-	eventTab.LowestLevel = eventMeta.LowestLevel
-	eventTab.HighestLevel = eventMeta.HighestLevel
-	eventTab.Price = eventMeta.Price
-	eventTab.MaxPlayerNum = eventMeta.MaxPlayerNum
+	eventInfo.LowestLevel = float32(eventMeta.LowestLevel / 100)
+	eventInfo.HighestLevel = float32(eventMeta.HighestLevel / 100)
+	eventInfo.Price = eventMeta.Price
+	eventInfo.MaxPeopleNum = eventMeta.MaxPlayerNum
+	// 给结果赋值
+	eventTab.EventInfo = eventInfo
+
 	// 已经有人加入，则需要展示已加入用户信息
 	if eventMeta.CurrentPlayerNum > 0 {
 		currentPeople := make([]string, 0)
@@ -98,20 +80,20 @@ func GetEventTab(c *model.TeamUpContext) (interface{}, error) {
 			util.Logger.Printf("[GetEventTab] unmatched currentplayer info")
 			return nil, iface.NewBackEndError(iface.InternalError, "unmatched player info")
 		}
-		players := make([]Player, 0)
+		players := make([]*model.Player, 0)
 		for _, user := range users {
-			player := Player{
+			player := &model.Player{
 				NickName:     user.Nickname,
 				Avatar:       user.Avatar,
 				IsCalibrated: user.IsCalibrated == 1,
-				Level:        user.Level,
+				Level:        float32(user.Level / 100),
 			}
 			players = append(players, player)
 		}
 		eventTab.Players = players
 	} else {
-		eventTab.Players = make([]Player, 0)
+		eventTab.Players = make([]*model.Player, 0)
 	}
-	util.Logger.Printf("[GetEventTab] success, res:%+v", eventTab)
-	return eventTab, nil
+	util.Logger.Printf("[GetEventTab] success, res:%+v", eventInfo)
+	return eventInfo, nil
 }

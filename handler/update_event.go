@@ -31,7 +31,7 @@ func UpdateEvent(c *model.TeamUpContext) (interface{}, error) {
 		return nil, iface.NewBackEndError(iface.ParamsError, "cant edit")
 	}
 	meta.Price = event.Price
-	meta.MaxPlayerNum = event.MaxPeople
+	meta.MaxPlayerNum = event.MaxPeopleNum
 	meta.FieldName = event.FieldName
 	meta.FieldType = event.FieldType
 	meta.SportType = event.SportType
@@ -41,10 +41,11 @@ func UpdateEvent(c *model.TeamUpContext) (interface{}, error) {
 	meta.SportType = event.SportType
 	meta.Status = event.Status
 	meta.Date = time.Unix(event.StartTime, 0).Format("20060102")
+	meta.Weekday = time.Unix(event.StartTime, 0).Weekday().String()
 	meta.StartTime = event.StartTime
-	meta.StartTimeStr = time.Unix(event.StartTime, 0).Format("20060102 15:04")
+	meta.StartTimeStr = time.Unix(event.StartTime, 0).Format("15:04")
 	meta.EndTime = event.EndTime
-	meta.EndTimeStr = time.Unix(event.EndTime, 0).Format("20060102 15:04")
+	meta.EndTimeStr = time.Unix(event.EndTime, 0).Format("15:04")
 	meta.Desc = event.Desc
 	meta.Name = event.Name
 	meta.City = event.City

@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/gin-gonic/gin"
+	"math/rand"
 )
 
 type TeamUpContext struct {
@@ -10,7 +11,8 @@ type TeamUpContext struct {
 	AppInfo     *AppInfo   `json:"app_info"`
 	BasicUser   *BasicUser `json:"basic_user"`
 	AccessToken string     `json:"access_token"`
-	ID          int64      `json:"id"`
+	ID          int        `json:"id"`
+	Rand        *rand.Rand `json:"rand"`
 	Timestamp   int64      `json:"timestamp"`
 	Language    string     `json:"language"`
 }

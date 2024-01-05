@@ -7,3 +7,12 @@ type BasicUser struct {
 	UnionID    string `json:"union_id"` // 同一个微信开放平台账号，一个用户的唯一标识
 	SessionKey string `json:"session_key"`
 }
+
+// Player 参与场次的用户
+type Player struct {
+	NickName     string  `json:"nick_name"`
+	Avatar       string  `json:"avatar"`
+	OpenID       string  `json:"open_id,omitempty"`
+	IsCalibrated bool    `json:"is_calibrated"`
+	Level        float32 `json:"level"`
+}

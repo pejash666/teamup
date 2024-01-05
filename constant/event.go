@@ -9,4 +9,7 @@ const (
 
 	EventMatchTypeEntertainment = "entertainment" // 休闲活动
 	EventMatchTypeCompetitive   = "competitive"
+
+	EventGameTypeDuo  = "duo"  // 双打
+	EventGameTypeSolo = "solo" // 单打
 )

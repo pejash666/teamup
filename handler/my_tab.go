@@ -98,15 +98,16 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 				EventNum: organization.TotalEventNum,
 			}
 		}
-		// 获取用户参与的event
-		joinedEvent := make([]uint, 0)
-		err = sonic.UnmarshalString(user.JoinedEvent, &joinedEvent)
-		if err != nil {
-			util.Logger.Printf("[GetMyTab] unmarshalString failed, err:%v", err)
-			return nil, iface.NewBackEndError(iface.InternalError, "unmarshal failed")
-		}
+
 		// 用户如果有参与的活动，则需要在这里展示
-		if len(joinedEvent) > 0 {
+		if user.JoinedEvent != "" {
+			// 获取用户参与的event
+			joinedEvent := make([]uint, 0)
+			err = sonic.UnmarshalString(user.JoinedEvent, &joinedEvent)
+			if err != nil {
+				util.Logger.Printf("[GetMyTab] unmarshalString failed, err:%v", err)
+				return nil, iface.NewBackEndError(iface.InternalError, "unmarshal failed")
+			}
 			var events []mysql.EventMeta
 			err = util.DB().Where("id IN ?", joinedEvent).Find(&events).Error
 			if err != nil {

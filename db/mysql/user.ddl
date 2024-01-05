@@ -5,6 +5,7 @@ CREATE TABLE `wechat_user_info`
     `sport_type`    varchar(64) not null default '' comment '运动类型',
     `is_calibrated` smallint  not null default 0 comment '是否完成定级',
     `level`         int not null default 0 comment '级别',
+    `reviewer`      varchar(64) not null default '' comment '审核人',
     `is_primary`    smallint not null default 0 comment '是否为主记录',
     `union_id`      varchar(64) null default '' comment 'unionID',
     `session_key`   varchar(255) not null default '' comment 'session_key',

@@ -1,7 +1,6 @@
 package util
 
 import (
-	"errors"
 	"fmt"
 	"github.com/bytedance/sonic"
 	"github.com/gin-gonic/gin"
@@ -72,18 +71,19 @@ func NewTeamUpContext(c *gin.Context, opt model.APIOption) (*model.TeamUpContext
 		Logger.Printf("NewTeamUpContext get ts from header failed, err:%v", err)
 		return nil, err
 	}
-	randomStr := c.GetHeader("nonce")
-	if randomStr == "" {
-		Logger.Printf("NewTeamUpContext get nonce from header failed, err:%v", err)
-		return nil, errors.New("nonce missing")
-	}
-	antiReplayKey := fmt.Sprintf("server_antispam_timestamp_%d_nonce_%s", ts, randomStr)
-	res, err := RedisGet(antiReplayKey)
-	if err != nil && res != "" {
-		Logger.Printf("NewTeamUpContext req too frequent")
-		return nil, errors.New("too frequent")
-	}
-	_ = RedisSet(antiReplayKey, 1, time.Second*15)
+	// （测试先注释掉）
+	//randomStr := c.GetHeader("nonce")
+	//if randomStr == "" {
+	//	Logger.Printf("NewTeamUpContext get nonce from header failed, err:%v", err)
+	//	return nil, errors.New("nonce missing")
+	//}
+	//antiReplayKey := fmt.Sprintf("server_antispam_timestamp_%d_nonce_%s", ts, randomStr)
+	//res, err := RedisGet(antiReplayKey)
+	//if err != nil && res != "" {
+	//	Logger.Printf("NewTeamUpContext req too frequent")
+	//	return nil, errors.New("too frequent")
+	//}
+	//_ = RedisSet(antiReplayKey, 1, time.Second*15)
 
 	ctx := &model.TeamUpContext{
 		Context: c,
@@ -102,7 +102,8 @@ func NewTeamUpContext(c *gin.Context, opt model.APIOption) (*model.TeamUpContext
 
 	// 生成随机种子
 	ran := rand.New(rand.NewSource(time.Now().UnixNano()))
-	ctx.ID = ran.Int63()
+	ctx.Rand = ran
+	ctx.ID = ran.Int()
 	// 获取access_token
 	accessToken, err := GetAccessToken(constant.AppID, constant.AppSecret)
 	if err != nil {

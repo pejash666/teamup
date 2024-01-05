@@ -67,23 +67,23 @@ func HttpHandler() *gin.Engine {
 	userGroup.POST("/login", API(handler.UserLogin, model.APIOption{
 		NeedLoginStatus: false,
 	}))
-	// 前端获取密文手机号，服务端解码并存储
+	// 前端获取密文手机号，服务端解码并存储(通了)
 	userGroup.POST("/update_phone_number", API(handler.UpdateUserPhoneNumber, model.APIOption{
 		NeedLoginStatus: true,
 	}))
-	// 更新用户信息（头像 & 昵称）
+	// 更新用户信息（头像 & 昵称）(通了)
 	userGroup.POST("/update_user_info", API(handler.UpdateUserInfo, model.APIOption{
 		NeedLoginStatus: true,
 	}))
 	// 获取个人主页
 	userGroup.GET("/my_tab", API(handler.GetMyTab, model.APIOption{
-		NeedLoginStatus: false,
+		NeedLoginStatus: true,
 	}))
-	// 获取定级问题
+	// 获取定级问题(通了)
 	userGroup.POST("/get_calibration_questions", API(handler.GetCalibrationQuestions, model.APIOption{
 		NeedLoginStatus: true,
 	}))
-	// 定级
+	// 定级（通了）
 	userGroup.POST("/calibrate", API(handler.Calibrate, model.APIOption{
 		NeedLoginStatus: true,
 	}))
@@ -100,13 +100,13 @@ func HttpHandler() *gin.Engine {
 		NeedLoginStatus: true,
 	}))
 	// 上传比赛结果
-	userGroup.POST("/upload_event_result", API(handler.UploadEventResult, model.APIOption{
+	userGroup.POST("/upload_event_result", API(handler.StartEvent, model.APIOption{
 		NeedLoginStatus: true,
 	}))
 
 	// 组织类接口
 	organizationGroup := r.Group("/team_up/organization")
-	// 创建组织
+	// 创建组织(通了)
 	organizationGroup.POST("/create", API(handler.CreateOrganization, model.APIOption{
 		NeedLoginStatus: true,
 	}))
@@ -130,10 +130,21 @@ func HttpHandler() *gin.Engine {
 		NeedLoginStatus: true,
 	}))
 
+	// 管理员接口
+	adminGroup := r.Group("/team_up/admin")
+	// 获取待审批事件
+	adminGroup.GET("/get_approval_items", API(handler.GetApprovalItems, model.APIOption{
+		NeedLoginStatus: true,
+	}))
+	// 审批
+	adminGroup.POST("/approve", API(handler.Approve, model.APIOption{
+		NeedLoginStatus: true,
+	}))
+
 	// 静态资源Group
 	imageGroup := r.Group("/team_up/static_image")
 	// 用户定级职业的证明
-	imageGroup.Static("/calibration_proof", "./user_calibration_proof")
+	imageGroup.Static("/user_calibration_proof", "./user_calibration_proof")
 	// 用户创建组织的logo
 	imageGroup.Static("/organization_logo", "./organization_logos")
 

@@ -33,10 +33,12 @@ func CreateEvent(c *model.TeamUpContext) (interface{}, error) {
 		}
 		event.OrganizationID = int64(user.OrganizationID)
 	}
-	if !paramsCheck(event) {
+	isPass, reason := paramsCheck(event)
+	if !isPass {
 		util.Logger.Printf("[CreateEvent] paramCheck failed")
-		return nil, iface.NewBackEndError(iface.ParamsError, "invalid params")
+		return nil, iface.NewBackEndError(iface.ParamsError, reason)
 	}
+
 	meta, err := EventMeta(c, event)
 	if err != nil {
 		util.Logger.Printf("[CreateEvent] EventMeta failed, err:%v", err)
@@ -99,32 +101,47 @@ func CreateEvent(c *model.TeamUpContext) (interface{}, error) {
 	return map[string]uint{"event_id": meta.ID}, nil
 }
 
-func paramsCheck(event *model.EventInfo) bool {
+func paramsCheck(event *model.EventInfo) (bool, string) {
 	if event == nil {
-		return false
+		return false, "empty params"
 	}
 	if event.Name == "" || event.City == "" ||
 		event.StartTime == 0 ||
 		event.EndTime == 0 ||
-		event.MaxPeople == 0 || event.SportType == "" ||
+		event.MaxPeopleNum == 0 || event.SportType == "" ||
 		event.Price == 0 || event.GameType == "" {
-		return false
+		return false, "invalid param"
 	}
 	// 判断时间是否符合预期
 	timeNow := time.Now()
 	startTime := time.Unix(event.StartTime, 0)
 	endTime := time.Unix(event.EndTime, 0)
 	if timeNow.After(endTime) {
-		return false
+		return false, "invalid time"
 	}
 	if startTime.After(endTime) {
-		return false
+		return false, "invalid time"
 	}
 	// 已经预定场地的需要检查场地名称和场地类型
 	if event.IsBooked && (event.FieldName == "" || event.FieldType == "") {
-		return false
+		return false, "invalid field"
 	}
-	return true
+	// pedal只允许双打 人数 >= 4 <= 8
+	if event.SportType == constant.SportTypePedal {
+		if event.GameType == constant.EventGameTypeSolo {
+			return false, "pedal only can duo"
+		}
+		if event.MaxPeopleNum < 4 || event.MaxPeopleNum > 8 {
+			return false, "invalid max_people_number"
+		}
+	}
+	// 匹克球的人数必须为偶数 且小于8人
+	if event.SportType == constant.SportTypePickelBall {
+		if event.MaxPeopleNum > 8 || event.MaxPeopleNum%2 != 0 {
+			return false, "invalid max_people_number"
+		}
+	}
+	return true, ""
 }
 
 func EventMeta(c *model.TeamUpContext, event *model.EventInfo) (*mysql.EventMeta, error) {
@@ -135,19 +152,20 @@ func EventMeta(c *model.TeamUpContext, event *model.EventInfo) (*mysql.EventMeta
 		IsBooked:       util.BoolToDB(event.IsBooked),
 		IsPublic:       util.BoolToDB(event.IsPublic),
 		IsHost:         util.BoolToDB(event.IsHost),
-		LowestLevel:    event.LowestLevel,
-		HighestLevel:   event.HighestLevel,
+		LowestLevel:    int(event.LowestLevel * 100),
+		HighestLevel:   int(event.HighestLevel * 100),
 		Date:           time.Unix(event.StartTime, 0).Format("20060102"),
+		Weekday:        time.Unix(event.StartTime, 0).Weekday().String(),
 		City:           event.City,
 		Name:           event.Name,
 		Desc:           event.Desc,
 		StartTime:      event.StartTime,
-		StartTimeStr:   time.Unix(event.StartTime, 0).Format("20060102 15:04"), // 分钟级别
+		StartTimeStr:   time.Unix(event.StartTime, 0).Format("15:04"), // 分钟级别
 		EndTime:        event.EndTime,
-		EndTimeStr:     time.Unix(event.EndTime, 0).Format("20060102 15:04"),
+		EndTimeStr:     time.Unix(event.EndTime, 0).Format("15:04"),
 		FieldName:      event.FieldName,
 		FieldType:      event.FieldType,
-		MaxPlayerNum:   event.MaxPeople,
+		MaxPlayerNum:   event.MaxPeopleNum,
 		Price:          event.Price,
 		OrganizationID: event.OrganizationID,
 	}
