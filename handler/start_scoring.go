@@ -1,11 +1,14 @@
 package handler
 
 import (
+	rand2 "math/rand"
+	"sort"
 	"teamup/constant"
 	"teamup/db/mysql"
 	"teamup/iface"
 	"teamup/model"
 	"teamup/util"
+	"time"
 )
 
 type MatchDetail struct {
@@ -24,6 +27,11 @@ type RoundInfo struct {
 
 type Settings struct {
 	ValidScorers []*model.Player `json:"valid_scorers"`
+}
+
+type Sortable struct {
+	*model.Player
+	Count int
 }
 
 // StartScoring 用户点击开始记分
@@ -108,7 +116,7 @@ func StartScoring(c *model.TeamUpContext) (interface{}, error) {
 			util.Logger.Printf("[StartScoring] unmatched pedal game and player")
 			return nil, iface.NewBackEndError(iface.ParamsError, "invalid gametype & player")
 		}
-		res.RoundInfo = dividePedal(event, players)
+		res.RoundInfo = dividePedal(c, event, players)
 	case constant.SportTypePickelBall:
 		// 进行人数校验
 		if (event.GameType == constant.EventGameTypeDuo && len(players)%2 != 0) || (event.GameType == constant.EventGameTypeSolo && len(players) != 2) {
@@ -125,13 +133,14 @@ func StartScoring(c *model.TeamUpContext) (interface{}, error) {
 		res.RoundInfo = divideTennis(c, event, players)
 	}
 
+	return res, nil
 }
 
 // dividePedal pedal分组
 func dividePedal(c *model.TeamUpContext, event *mysql.EventMeta, players []*model.Player) []*RoundInfo {
 	switch event.ScoreRule {
 	case constant.PedalScoreRuleAmericano:
-		return divideAmericano(event, players)
+		return divideAmericano(c, event, players)
 	case constant.PedalScoreRuleMexicano:
 		return divideMexicano(event, players)
 	case constant.PedalScoreRuleTennis:
@@ -146,7 +155,8 @@ func dividePedal(c *model.TeamUpContext, event *mysql.EventMeta, players []*mode
 // 每球得分制：一局定胜负
 func dividePickleBall(c *model.TeamUpContext, event *mysql.EventMeta, players []*model.Player) []*RoundInfo {
 	// 打散用户的顺序
-	ShufflePlayers(c, players)
+	ShufflePlayers(players)
+	res := make([]*RoundInfo, 0)
 	switch event.ScoreRule {
 	case constant.PickleBallScoreRuleEvery:
 		// 单打
@@ -163,16 +173,22 @@ func dividePickleBall(c *model.TeamUpContext, event *mysql.EventMeta, players []
 			}
 		}
 
-		res := make([]*RoundInfo, 0)
 		// 计算有几组运动员
 		// 比如有6人参与，3组 a,b,c
 		// a vs b; b vs c; a vs c
+
 		groupNum := len(players) / 2
+
 		for i := 1; i <= groupNum; i++ {
 			// 计算对局的group
 			vsGroup := i + 1
 			if vsGroup > groupNum {
-				vsGroup = 1
+				if groupNum > 2 {
+					vsGroup = 1
+				} else {
+					break
+				}
+
 			}
 			res = append(res, &RoundInfo{
 				Home:     players[(i-1)*2 : i*2],
@@ -216,7 +232,6 @@ func dividePickleBall(c *model.TeamUpContext, event *mysql.EventMeta, players []
 		}
 		// 双打, 三局两胜制需要一轮生成3个一样的对局
 		// 总共生成 对战组数 x 3 个对局
-		res := make([]*RoundInfo, 0)
 		groupNum := len(players) / 2
 		for i := 1; i <= groupNum; i++ {
 			// 计算对局的group
@@ -253,7 +268,12 @@ func dividePickleBall(c *model.TeamUpContext, event *mysql.EventMeta, players []
 
 			res = append(res, roundInfos...)
 		}
+	default:
+		util.Logger.Printf("[dividePickleBall] invalid scoreRule")
+		return nil
 	}
+	util.Logger.Printf("[dividePickball] success")
+	return res
 }
 
 // divideTennis tennis规则，适用与pedal的tennis记分规则，和tennis sport_type 分组
@@ -263,19 +283,20 @@ func divideTennis(c *model.TeamUpContext, event *mysql.EventMeta, players []*mod
 }
 
 // divideAmericano pedal的Americano规则
-func divideAmericano(event *mysql.EventMeta, players []*model.Player) []*RoundInfo {
+func divideAmericano(c *model.TeamUpContext, event *mysql.EventMeta, players []*model.Player) []*RoundInfo {
 	// adaptive算法
 	// 比如有abcd 4个人， 生成3场比赛
 	// Game1: ab vs cd    a:1, b:1, c:1, d:1
 	// Game2: ac vs bd    a:2, b:2, c:2, d:2
 	// Game3: ad vs bc    a:3, b:3, c:3, d:3
-	// 比如有abcde 5个人, 需要生成4场比赛
+	// 比如有abcde 5个人, 需要生成5场比赛
 	// Game1 : ab vs cd/ce/de  随机选择一个锚点用户 ab vs cd , a: 1, b: 1, c: 1, d:1, e:0
 	// Game2 : ac vs bd/bd/be  ac vs be , a:2, b:2, c:2, d:1, e:1
 	// Game3 : ad vs bc/be/ce  ad vs ce , a:3, b:2, c:3, d:2, e:2
 	// Game4 : ae vs bc/bd/cd  ae vs bd , a:4, b:3, c:3, d:3, e:3
+	// Game5 :                 bc vs de , a:4, b:4, c:4, d:4, e:4
 
-	// 比如有abcdef 6个人 需要生成5场比赛
+	// 比如有abcdef 6个人 需要生成6场比赛
 	// Game1: ab vs cd/ce/cf/de/df/ef 随机选择一个锚点用户 ab vs cd, a:1, b:1, c:1, d:1, e:0, f:0
 	// Game2: ac vs bd/be/bf/de/df/ef  ac vs ef      a:2, b:1, c:2, d:1, e:1, f:1
 	//                                 bf vs de      a:2, b:2, c:2, d:2, e:2, f:2
@@ -283,9 +304,16 @@ func divideAmericano(event *mysql.EventMeta, players []*model.Player) []*RoundIn
 	//                                 ae vs bf      a:4, b:4, c:3, d:3, e:3, f:3
 	//                                 ce vs df      a:4, b:4, c:4, d:4, e:4, f:4
 
-	// Game3: ad vs bc/be/bf/ce/cf/ef  ad vs be      a:3, b:2, c:2, d:2, e:2, f:1
-	// Game4: ae vs bc/bd/bf/cd/cf/df  ae vs bf      a:4, b:3, c:2, d:2, e:3, f:2
-	// Game5: af vs bc/bd/be/cd/ce/de  af vs de      a:5, b:3, c:3, d:3, e:4, f:3
+	// 比如有abcdefg 7个人
+	// ab vs cd  a:1, b:1, c:1, d:1, e:0, f:0, g:0
+	// fg vs ea  a:2, b:1, c:1, d:1, e:1, f:1, g:1
+	// eg vs fd  a:2, b:1, c:1, d:2, e:2, f:2, g:2
+	// bc vs ad  a:3, b:2, c:2, d:3, e:2, f:2, g:2
+	// bg vs cf  a:3, b:3, c:3, d:3, e:2, f:3, g:3
+	// ac vs eb  a:4, b:4, c:4, d:3, e:3, f:3, g:3
+	// dg vs ef  a:4, b:4, c:4, d:4, e:4, f:4, g:4
+
+	//ShufflePlayers(c, players)
 
 	// 记录每个用户参与的次数
 	countMap := make(map[string]int)
@@ -293,42 +321,210 @@ func divideAmericano(event *mysql.EventMeta, players []*model.Player) []*RoundIn
 	groupDedupMap := make(map[string]int)
 
 	// 初始化，就选在前4个用户
-	initGroup1 := players[0].OpenID + players[1].OpenID
-	initGroup2 := players[2].OpenID + players[3].OpenID
 	countMap[players[0].OpenID] += 1
 	countMap[players[1].OpenID] += 1
 	countMap[players[2].OpenID] += 1
 	countMap[players[3].OpenID] += 1
 
-	groupDedupMap[initGroup1] = 1
-	groupDedupMap[initGroup2] = 1
+	// ab 和 ba是一样的
+	groupDedupMap[players[0].OpenID+players[1].OpenID] = 1
+	groupDedupMap[players[1].OpenID+players[0].OpenID] = 1
+	groupDedupMap[players[2].OpenID+players[3].OpenID] = 1
+	groupDedupMap[players[3].OpenID+players[2].OpenID] = 1
+
+	// 初始化对局信息, 并将初始化的轮次放进去
+	roundInfos := make([]*RoundInfo, 0)
+	roundNum := int32(1)
+	roundInfos = append(roundInfos, &RoundInfo{
+		Home:     []*model.Player{players[0], players[1]},
+		HomeAvg:  GetPlayersAvgLevel([]*model.Player{players[0], players[1]}),
+		AwayAvg:  GetPlayersAvgLevel([]*model.Player{players[2], players[3]}),
+		Away:     []*model.Player{players[2], players[3]},
+		CourtNum: 1,
+		RoundNum: roundNum,
+	})
 
 	// 建立一个数学期望，分配完场次后，一个人参与的场次最多不会超过总人数数量
-	expectation := len(players)
-	// n个人 生成n-1场比赛，第一轮默认初始化生成，从第二轮开始
-	for i := 2; i <= len(players)-1; i++ {
-		// 遍历countMap，记录参与次数和expectation差距最大的用户，这些用户必须存在于下一轮的比赛中
-		// 如果不足4人，则回溯寻找差距第二大的用户，用来填满一轮需要的四位玩家，填满为止
-
-		for openID, times := range countMap {
-
+	//expectation := len(players)
+	// n个人 生成n场比赛，第一轮默认初始化生成，从第二轮开始
+	expectedRoundNum := len(players)
+	if len(players) == 4 {
+		expectedRoundNum = 3
+	}
+	for i := 2; i <= expectedRoundNum; i++ {
+		util.Logger.Printf("i:%d", i)
+		// sort一下map，按照count
+		sortable := make([]*Sortable, 0)
+		for _, player := range players {
+			sortable = append(sortable, &Sortable{
+				Player: player,
+				Count:  countMap[player.OpenID],
+			})
 		}
 
-		// 找到满足要求的4个玩家后，进行随机俩俩组合，遍历groupDedupMap，一组的用户必须是首次组队
-		// 记录找到的两个组合，构建roundInfo
+		// 根据用户的count降序排列
+		sort.Slice(sortable, func(i, j int) bool {
+			return sortable[i].Count < sortable[j].Count
+		})
+
+		// 对于count一样的sortable，需要进行随机取
+		// 获取最低的count，最低的count一定要放进去
+		lowest := 100
+		for _, s := range sortable {
+			if s.Count < lowest {
+				lowest = s.Count
+			}
+		}
+		startingIdx := 0
+		// 优先将lowest的放进来
+		candidates := make([]*Sortable, 0)
+		for idx, s := range sortable {
+			if s.Count == lowest {
+				startingIdx = idx + 1
+				candidates = append(candidates, s)
+			}
+		}
+
+	retry:
+		// 如果凑不够，再从后面取
+		if len(candidates) < 4 {
+			potential := make([]*Sortable, 0)
+			more := 4 - len(candidates) // 还差几个人
+			// 获取第二低的
+			secondLowest := 100
+			for _, s := range sortable[startingIdx:] {
+				if s.Count < secondLowest {
+					secondLowest = s.Count
+				}
+			}
+			for _, s := range sortable[startingIdx:] {
+				if s.Count == secondLowest {
+					potential = append(potential, s)
+				}
+			}
+			rand := rand2.New(rand2.NewSource(time.Now().UnixNano()))
+			startIdx := rand.Intn(len(potential))
+			// 超出范围
+			if startIdx+more > len(potential) {
+				candidates = append(candidates, potential[startIdx:]...)
+				candidates = append(candidates, potential[startIdx-(4-len(candidates)):startIdx]...)
+			} else {
+				candidates = append(candidates, potential[startIdx:startingIdx+more]...)
+			}
+			// 8个人的case，如果超过4个人了，那么需要进行随机
+		} else {
+			ShuffleCandidates(candidates)
+			candidates = candidates[:4]
+		}
+
+		//// 取出count最少的4个
+		//candidates := sortable[:4]
+
+		stopFlag := 0
+		for {
+			if stopFlag == 1 {
+				break
+			}
+			possibleGroups := getTwoGroupsFrom4People(candidates)
+			util.Logger.Printf("%d", len(possibleGroups))
+			// 如果组合存在
+			times := 1
+			for _, groups := range possibleGroups {
+				// 两组组合都没出现过
+				group1 := groups[0].Player.OpenID + groups[1].Player.OpenID
+				group2 := groups[2].Player.OpenID + groups[3].Player.OpenID
+				util.Logger.Printf("group1:%v, group2:%v", group1, group2)
+				// todo： 如果三次循环后还是不行，需要重新获取count最少的四个，否则会陷入无限循环
+				if checkGroupDedup(groups[0].Player, groups[1].Player, groupDedupMap) && checkGroupDedup(groups[2].Player, groups[3].Player, groupDedupMap) {
+
+					// 记录次数
+					countMap[groups[0].Player.OpenID] += 1
+					countMap[groups[1].Player.OpenID] += 1
+					countMap[groups[2].Player.OpenID] += 1
+					countMap[groups[3].Player.OpenID] += 1
+
+					groupDedupMap[groups[0].Player.OpenID+groups[1].Player.OpenID] = 1
+					groupDedupMap[groups[1].Player.OpenID+groups[0].Player.OpenID] = 1
+					groupDedupMap[groups[2].Player.OpenID+groups[3].Player.OpenID] = 1
+					groupDedupMap[groups[3].Player.OpenID+groups[2].Player.OpenID] = 1
+
+					// 生成对局信息
+					roundInfo := &RoundInfo{
+						Home: []*model.Player{
+							groups[0].Player,
+							groups[1].Player,
+						},
+						HomeAvg: GetPlayersAvgLevel([]*model.Player{
+							groups[0].Player,
+							groups[1].Player,
+						}),
+						Away: []*model.Player{
+							groups[2].Player,
+							groups[3].Player,
+						},
+						AwayAvg: GetPlayersAvgLevel([]*model.Player{
+							groups[2].Player,
+							groups[3].Player,
+						}),
+						CourtNum: 1,
+						RoundNum: roundNum,
+					}
+
+					// append进场次信息
+					roundInfos = append(roundInfos, roundInfo)
+					stopFlag = 1
+					break
+				}
+				// 如果3个组合都不满足要求，需要回归到
+				if times >= 3 {
+					goto retry
+				}
+				times += 1
+				util.Logger.Printf("cycle, times:%d", times)
+			}
+		}
 	}
+	return roundInfos
 
 }
+
+// 遍历countMap，记录参与次数和expectation差距最大的用户，这些用户必须存在于下一轮的比赛中
+// 如果不足4人，则回溯寻找差距第二大的用户，用来填满一轮需要的四位玩家，填满为止
+
+//tmp := make([]string, 0)
+//for openID, times := range countMap {
+//	if len(tmp) == 4 {
+//		// 检查当前4个选手的组合，如果不行，需要重新从countMap获取
+//		for _, t := range tmp {
+//
+//		}
+//	}
+//	tmp = append(tmp, openID)
+//}
+
+// 找到满足要求的4个玩家后，进行随机俩俩组合，遍历groupDedupMap，一组的用户必须是首次组队
+// 记录找到的两个组合，构建roundInfo
+//}
+
+//}
 
 // divideMexicano pedal的Mexicano规则
 func divideMexicano(event *mysql.EventMeta, players []*model.Player) []*RoundInfo {
-
+	return nil
 }
 
 // ShufflePlayers 对运动员进行随机打散顺序
-func ShufflePlayers(c *model.TeamUpContext, players []*model.Player) {
-	c.Rand.Shuffle(len(players), func(i, j int) {
+func ShufflePlayers(players []*model.Player) {
+	ran := rand2.New(rand2.NewSource(time.Now().UnixNano()))
+	ran.Shuffle(len(players), func(i, j int) {
 		players[i], players[j] = players[j], players[i]
+	})
+}
+
+func ShuffleCandidates(candidates []*Sortable) {
+	ran := rand2.New(rand2.NewSource(time.Now().UnixNano()))
+	ran.Shuffle(len(candidates), func(i, j int) {
+		candidates[i], candidates[j] = candidates[j], candidates[i]
 	})
 }
 
@@ -338,4 +534,73 @@ func GetPlayersAvgLevel(players []*model.Player) float32 {
 		res += player.Level
 	}
 	return res / float32(len(players))
+}
+
+// idx 0 & idx 1 VS idx 2 & idx 3
+func getTwoGroupsFrom4People(sortable []*Sortable) [][]*Sortable {
+	res := make([][]*Sortable, 3)
+	res[0] = []*Sortable{
+		{
+			Player: sortable[0].Player,
+			Count:  sortable[0].Count,
+		},
+		{
+			Player: sortable[1].Player,
+			Count:  sortable[1].Count,
+		},
+		{
+			Player: sortable[2].Player,
+			Count:  sortable[2].Count,
+		},
+		{
+			Player: sortable[3].Player,
+			Count:  sortable[3].Count,
+		},
+	}
+	res[1] = []*Sortable{
+		{
+			Player: sortable[0].Player,
+			Count:  sortable[0].Count,
+		},
+		{
+			Player: sortable[2].Player,
+			Count:  sortable[2].Count,
+		},
+		{
+			Player: sortable[1].Player,
+			Count:  sortable[1].Count,
+		},
+		{
+			Player: sortable[3].Player,
+			Count:  sortable[3].Count,
+		},
+	}
+
+	res[2] = []*Sortable{
+		{
+			Player: sortable[0].Player,
+			Count:  sortable[0].Count,
+		},
+		{
+			Player: sortable[3].Player,
+			Count:  sortable[3].Count,
+		},
+		{
+			Player: sortable[1].Player,
+			Count:  sortable[1].Count,
+		},
+		{
+			Player: sortable[2].Player,
+			Count:  sortable[2].Count,
+		},
+	}
+
+	return res
+}
+
+func checkGroupDedup(player1, player2 *model.Player, dedupMap map[string]int) bool {
+	if dedupMap[player1.OpenID+player2.OpenID] == 1 || dedupMap[player2.OpenID+player1.OpenID] == 1 {
+		return false
+	}
+	return true
 }

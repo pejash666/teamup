@@ -157,6 +157,6 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 		}
 		res.SportTypeInfos = append(res.SportTypeInfos, sportTypeInfo)
 	}
-	util.Logger.Printf("[GetMytTab] success, res:+v", res)
+	util.Logger.Printf("[GetMytTab] success, res:%+v", res)
 	return res, nil
 }
