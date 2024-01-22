@@ -104,7 +104,9 @@ func HttpHandler() *gin.Engine {
 		NeedLoginStatus: true,
 	}))
 	// 上传分数
-	userGroup.POST("/upload_score")
+	userGroup.POST("/upload_score", API(handler.UploadScore, model.APIOption{
+		NeedLoginStatus: true,
+	}))
 
 	// 组织类接口
 	organizationGroup := r.Group("/team_up/organization")
