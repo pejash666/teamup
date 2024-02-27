@@ -17,7 +17,7 @@ type ScoreBoard struct {
 
 var SportTypeScoreOptions = map[string]*model.ScoreOptions{
 	constant.SportTypePedal: {
-		AvailableScoreRule:   []string{constant.PedalScoreRuleAmericano, constant.PedalScoreRuleMexicano, constant.PedalScoreRuleTennis},
+		AvailableScoreRule:   []string{constant.PedalScoreRuleAmericano, constant.PedalScoreRuleTennis},
 		AvailableRoundTarget: []int{8, 16, 24, 32},
 		FieldNum:             1,
 	},
@@ -26,7 +26,11 @@ var SportTypeScoreOptions = map[string]*model.ScoreOptions{
 		AvailableRoundTarget: []int{11, 21},
 		FieldNum:             1,
 	},
-	// todo: 补充网球的
+	constant.SportTypeTennis: {
+		AvailableScoreRule:   []string{constant.PedalScoreRuleTennis},
+		AvailableRoundTarget: []int{6},
+		FieldNum:             1,
+	},
 }
 
 // GetScoreboard 记分板页面

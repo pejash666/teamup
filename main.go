@@ -99,14 +99,21 @@ func HttpHandler() *gin.Engine {
 	userGroup.POST("/quit_event", API(handler.QuitEvent, model.APIOption{
 		NeedLoginStatus: true,
 	}))
+	// 下发记分配置
+	userGroup.POST("/get_scoreboard", API(handler.GetScoreboard, model.APIOption{
+		NeedLoginStatus: true,
+	}))
 	// 开始比赛（下发对局信息）
 	userGroup.POST("/start_scoring", API(handler.StartScoring, model.APIOption{
 		NeedLoginStatus: true,
 	}))
-	// 上传分数
-	userGroup.POST("/upload_score", API(handler.UploadScore, model.APIOption{
+	// 获取比赛的结果分数
+	userGroup.POST("/get_score_result", API(handler.GetScoreResult, model.APIOption{
 		NeedLoginStatus: true,
 	}))
+	// 发布分数
+	userGroup.POST("/publish_score", API(handler.PublishScore, model.APIOption{
+		NeedLoginStatus: true}))
 
 	// 组织类接口
 	organizationGroup := r.Group("/team_up/organization")

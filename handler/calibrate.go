@@ -39,7 +39,7 @@ var CalculatingMap = map[string]map[string]float32{
 	"6": {"A": 0, "B": 0.5, "C": 0, "D": -0.5},
 }
 
-func GetScore(qid int, option string) float32 {
+func getCalibrationScore(qid int, option string) float32 {
 	return CalculatingMap[strconv.FormatInt(int64(qid), 10)][option]
 }
 
@@ -106,7 +106,7 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 				proofPath = "/user_calibration_proof/" + c.BasicUser.OpenID + "." + fileName[len(fileName)-1]
 			}
 		}
-		totalScore += GetScore(q.QID, q.Option)
+		totalScore += getCalibrationScore(q.QID, q.Option)
 		if isPro {
 			break
 		}

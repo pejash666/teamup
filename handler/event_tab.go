@@ -55,8 +55,8 @@ func GetEventTab(c *model.TeamUpContext) (interface{}, error) {
 		eventInfo.FieldName = eventMeta.FieldName
 		eventInfo.FieldType = eventMeta.FieldType
 	}
-	eventInfo.LowestLevel = float32(eventMeta.LowestLevel / 100)
-	eventInfo.HighestLevel = float32(eventMeta.HighestLevel / 100)
+	eventInfo.LowestLevel = float32(eventMeta.LowestLevel) / 100
+	eventInfo.HighestLevel = float32(eventMeta.HighestLevel) / 100
 	eventInfo.Price = eventMeta.Price
 	eventInfo.MaxPeopleNum = eventMeta.MaxPlayerNum
 	// 给结果赋值

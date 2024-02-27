@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"errors"
 	"github.com/bytedance/sonic"
+	"gorm.io/gorm"
 	"teamup/db/mysql"
 	"teamup/iface"
 	"teamup/model"
@@ -82,8 +84,7 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 		sportTypeInfo.LevelInfo = &LevelInfo{
 			IsCalibrated: user.IsCalibrated == 1,
 			CurrentLevel: float32(user.Level) / 100,
-			// todo: 获取分数变化信息
-			LevelDetail: nil,
+			LevelDetail:  GetRecentLevelChanges(user.OpenId, user.SportType, 10),
 		}
 		// 用户在这个sport_type里是host，获取organization信息
 		if user.IsHost == 1 {
@@ -159,4 +160,30 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 	}
 	util.Logger.Printf("[GetMytTab] success, res:%+v", res)
 	return res, nil
+}
+
+// GetRecentLevelChanges 获取最近 limit 场次内，分数的变化情况
+func GetRecentLevelChanges(openID, sportType string, limit int) []*LevelChange {
+	var records []mysql.UserEvent
+	err := util.DB().Where("open_id = ? AND sport_type = ?", openID, sportType).Order("created_at desc").Find(&records).Limit(limit).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			util.Logger.Printf("[GetRecentLevelChanges] no record for level_change")
+		}
+	}
+	res := make([]*LevelChange, 0)
+	for _, record := range records {
+		change := float32(record.LevelChange) / 100
+		// 这里会出现一天多次记录的情况，前端需要额外关注
+		date := record.CreatedAt.Format("20060102")
+		if record.IsIncrease == 0 {
+			change = change * (-1)
+		}
+		levelChange := &LevelChange{
+			Change: change,
+			Date:   date,
+		}
+		res = append(res, levelChange)
+	}
+	return res
 }

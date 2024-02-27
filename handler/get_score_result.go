@@ -44,11 +44,11 @@ type UploadRoundInfo struct {
 	AwayLevelChange float64         `json:"away_level_change"`
 }
 
-func UploadScore(c *model.TeamUpContext) (interface{}, error) {
+func GetScoreResult(c *model.TeamUpContext) (interface{}, error) {
 	body := &UploadRoundInfos{}
 	err := c.BindJSON(body)
 	if err != nil {
-		util.Logger.Printf("[UploadScore] bindJSON failed, err:%v", err)
+		util.Logger.Printf("[GetScoreResult] bindJSON failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.ParamsError, "bindJSON failed")
 	}
 	roundInfos := body.RoundInfo
@@ -57,7 +57,7 @@ func UploadScore(c *model.TeamUpContext) (interface{}, error) {
 	// 获取活动信息
 	err = util.DB().Where("id = ?", body.EventID).Take(event).Error
 	if err != nil {
-		util.Logger.Printf("[UploadScore] query event from DB failed, err:%v", err)
+		util.Logger.Printf("[GetScoreResult] query event from DB failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.MysqlError, "query record failed")
 	}
 	res := &MatchResult{
@@ -99,14 +99,14 @@ func UploadScore(c *model.TeamUpContext) (interface{}, error) {
 					ppl := &mysql.WechatUserInfo{}
 					err = util.DB().Where("open_id = ? AND sport_type = ?", player.OpenID, event.SportType).Take(ppl).Error
 					if err != nil {
-						util.Logger.Printf("[UploadScore] query player from DB failed, err:%v", err)
+						util.Logger.Printf("[GetScoreResult] query player from DB failed, err:%v", err)
 						return nil, iface.NewBackEndError(iface.MysqlError, "query player failed")
 					}
 					if ppl.JoinedTimes < 5 {
 						factor = 0.5
 					}
 				}
-				levelChange := GetLevelChange(roundTmp.Winner, roundTmp.HomeAvg, roundTmp.AwayAvg, factor)
+				levelChange := GetLevelChange("home", roundTmp.Winner, roundTmp.HomeAvg, roundTmp.AwayAvg, factor)
 				playerMap[player.OpenID].LevelChange = levelChange
 				if needTeamLevelChange {
 					roundTmp.HomeLevelChange = levelChange
@@ -136,14 +136,14 @@ func UploadScore(c *model.TeamUpContext) (interface{}, error) {
 					ppl := &mysql.WechatUserInfo{}
 					err = util.DB().Where("open_id = ? AND sport_type = ?", player.OpenID, event.SportType).Take(ppl).Error
 					if err != nil {
-						util.Logger.Printf("[UploadScore] query player from DB failed, err:%v", err)
+						util.Logger.Printf("[GetScoreResult] query player from DB failed, err:%v", err)
 						return nil, iface.NewBackEndError(iface.MysqlError, "query player failed")
 					}
 					if ppl.JoinedTimes < 5 {
 						factor = 0.5
 					}
 				}
-				levelChange := GetLevelChange(roundTmp.Winner, roundTmp.HomeAvg, roundTmp.AwayAvg, factor)
+				levelChange := GetLevelChange("away", roundTmp.Winner, roundTmp.HomeAvg, roundTmp.AwayAvg, factor)
 				playerMap[player.OpenID].LevelChange = levelChange
 				if needTeamLevelChange {
 					roundTmp.AwayLevelChange = levelChange
@@ -166,11 +166,11 @@ func UploadScore(c *model.TeamUpContext) (interface{}, error) {
 	res.RoundDetail = roundSlice
 	res.PlayersDetail = playerSlice
 
-	util.Logger.Printf("[UploadScore] success, res:%v", res)
+	util.Logger.Printf("[GetScoreResult] success, res:%v", res)
 	return res, nil
 }
 
-func GetLevelChange(winner string, homeAvg, awayAvg float32, factor float64) float64 {
+func GetLevelChange(team string, winner string, homeAvg, awayAvg float32, factor float64) float64 {
 	tmp := float64(0)
 	if winner == "home" {
 		tmp = math.Pow(float64(10), float64(1*(awayAvg-homeAvg)))
@@ -178,5 +178,10 @@ func GetLevelChange(winner string, homeAvg, awayAvg float32, factor float64) flo
 		tmp = math.Pow(float64(10), float64(1*(homeAvg-awayAvg)))
 	}
 	possibility := 1 / (1 + tmp)
-	return math.Trunc((1-possibility)*factor*math.Pow10(3)) / math.Pow10(3)
+	res := math.Trunc((1-possibility)*factor*math.Pow10(3)) / math.Pow10(3)
+	if team == winner {
+		return res
+	} else {
+		return -res
+	}
 }
