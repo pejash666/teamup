@@ -46,9 +46,9 @@ func CreateEvent(c *model.TeamUpContext) (interface{}, error) {
 	}
 
 	// todo: 开启DB事务, 要更新organization表对应组织的活动次数 和 用户自身参与次数
-	util.DB().Transaction(func(tx *gorm.DB) error {
+	err = util.DB().Transaction(func(tx *gorm.DB) error {
 		// 创建活动
-		err = util.DB().Create(meta).Error
+		err = tx.Create(meta).Error
 		if err != nil {
 			util.Logger.Printf("[CreateEvent] DB Create failed, err:%v", err)
 			return err
@@ -56,25 +56,27 @@ func CreateEvent(c *model.TeamUpContext) (interface{}, error) {
 		// 如果是以场馆身份创建的，则需要给场馆活动次数+1
 		if event.IsHost {
 			organization := &mysql.Organization{}
-			err = util.DB().Where("id = ?", meta.OrganizationID).Take(organization).Error
+			err = tx.Where("id = ?", meta.OrganizationID).Take(organization).Error
 			if err != nil {
 				util.Logger.Printf("[CreateEvent] query organization failed, err:%v", err)
 				return err
 			}
 			organization.TotalEventNum += 1
-			err = util.DB().Save(organization).Error
+			err = tx.Save(organization).Error
 			if err != nil {
 				return err
 			}
 		}
 		// 如果自己也加入，则需要给user参与次数，参与活动ID进行变更
 		if event.SelfJoin {
+			util.Logger.Printf("[CreateEvent] self join detected")
 			user := &mysql.WechatUserInfo{}
-			err = util.DB().Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, event.SportType).Take(user).Error
+			err = tx.Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, event.SportType).Take(user).Error
 			if err != nil {
 				util.Logger.Printf("[CreateEvent] query user failed, err:%v", err)
 				return err
 			}
+			util.Logger.Printf("[CreateEvent] user:%+v", user)
 			user.JoinedTimes += 1
 			joinedEvent := make([]uint, 0)
 			err = sonic.UnmarshalString(user.JoinedEvent, &joinedEvent)
@@ -87,8 +89,8 @@ func CreateEvent(c *model.TeamUpContext) (interface{}, error) {
 				return err
 			}
 			user.JoinedEvent = joinedEventStr
-			err = util.DB().Save(user).Error
-			if err != nil {
+			if err := tx.Save(user).Error; err != nil {
+				util.Logger.Printf("[CreateEvent] save failed, err:%v", err.Error())
 				return err
 			}
 		}
@@ -96,8 +98,12 @@ func CreateEvent(c *model.TeamUpContext) (interface{}, error) {
 		return nil
 	})
 
-	util.Logger.Printf("[CreateEvent] save record to DB success, eventID:%d", meta.ID)
-
+	if err != nil {
+		util.Logger.Printf("[CreateEvent] save record to DB failed, err:%v", err)
+		return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
+	} else {
+		util.Logger.Printf("[CreateEvent] save record to DB success, eventID:%d", meta.ID)
+	}
 	return map[string]uint{"event_id": meta.ID}, nil
 }
 

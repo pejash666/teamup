@@ -67,14 +67,14 @@ func QuitEvent(c *model.TeamUpContext) (interface{}, error) {
 		if event.CurrentPlayerNum < event.MaxPlayerNum {
 			event.Status = constant.EventStatusCreated
 		}
-		err = util.DB().Save(event).Error
+		err = tx.Save(event).Error
 		if err != nil {
 			util.Logger.Printf("[QuitEvent] Save failed, err:%v", err)
 			return err
 		}
 		// 更新用户信息
 		user := &mysql.WechatUserInfo{}
-		err = util.DB().Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, event.SportType).Take(user).Error
+		err = tx.Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, event.SportType).Take(user).Error
 		if err != nil {
 			util.Logger.Printf("[QuitEvent] query user failed, err:%v", err)
 			return err
@@ -99,20 +99,20 @@ func QuitEvent(c *model.TeamUpContext) (interface{}, error) {
 			return err
 		}
 		user.JoinedEvent = newJoinedEventStr
-		err = util.DB().Save(user).Error
+		err = tx.Save(user).Error
 		if err != nil {
 			util.Logger.Printf("[QuitEvent] Save failed, err:%v", err)
 			return err
 		}
 		// 更新user_event表
 		userEvent := &mysql.UserEvent{}
-		err = util.DB().Where("event_id = ?", event.ID).Take(userEvent).Error
+		err = tx.Where("event_id = ?", event.ID).Take(userEvent).Error
 		if err != nil {
 			util.Logger.Printf("[QuitEvent] get record failed, err:%v", err)
 			return err
 		}
 		userEvent.IsQuit = 1
-		err = util.DB().Save(userEvent).Error
+		err = tx.Save(userEvent).Error
 		if err != nil {
 			util.Logger.Printf("[QuitEvent] save user_event failed, err:%v", err)
 			return err

@@ -87,7 +87,7 @@ func HttpHandler() *gin.Engine {
 	userGroup.POST("/calibrate", API(handler.Calibrate, model.APIOption{
 		NeedLoginStatus: true,
 	}))
-	// 获取用户组织相关信息
+	// 获取用户组织相关信息（通了）
 	userGroup.GET("/host_info", API(handler.GetUserHostInfo, model.APIOption{
 		NeedLoginStatus: true,
 	}))
@@ -128,7 +128,7 @@ func HttpHandler() *gin.Engine {
 	eventGroup.POST("/page", API(handler.GetEventTab, model.APIOption{
 		NeedLoginStatus: true,
 	}))
-	// 创建活动
+	// 创建活动（通了）
 	eventGroup.POST("/create", API(handler.CreateEvent, model.APIOption{
 		NeedLoginStatus: true,
 	}))

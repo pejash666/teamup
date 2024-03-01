@@ -24,12 +24,12 @@ type WechatUserInfo struct {
 	Gender         int8   `gorm:"column:gender" json:"gender"`                   // 性别
 	PhoneNumber    uint   `gorm:"column:phone_number" json:"phone_number"`       // 用户手机号
 	JoinedTimes    uint   `gorm:"column:joined_times" json:"joined_times"`       // 参与次数
-	JoinedEvent    string `gorm:"serializer:json;type:varchar(255),column:joined_event" json:"joined_event"`
+	JoinedEvent    string `gorm:"column:joined_event" json:"joined_event"`       // 参与的活动
 	//Preference  StringSlice `gorm:"serializer:json;type:varchar(255),column:"prefer" json:"preference"` // 偏好
 	//Tags        StringSlice `gorm:"serializer:json;type:varchar(255)" json:"tags"`       // 用户标签
 	Preference  string `gorm:"column:preference" json:"preference"`
 	Tags        string `gorm:"column:tags" json:"tags"`
-	JoinedGroup string `gorm:"joined_group" json:"joined_group"` // 参加的组织
+	JoinedGroup string `gorm:"column:joined_group" json:"joined_group"` // 参加的组织
 }
 
 func (u WechatUserInfo) TableName() string {

@@ -12,3 +12,7 @@ type UserEvent struct {
 	IsIncrease  uint   `gorm:"column:is_increase" json:"is_increase"` // 是否上分
 	LevelChange int    `gorm:"level_change" json:"level_change"`      // 这场活动的level变化
 }
+
+func (u UserEvent) TableName() string {
+	return "user_event"
+}

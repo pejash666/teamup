@@ -35,5 +35,5 @@ type EventMeta struct {
 }
 
 func (e EventMeta) TableName() string {
-	return "event_meta"
+	return "event_info"
 }

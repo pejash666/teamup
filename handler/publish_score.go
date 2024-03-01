@@ -30,7 +30,7 @@ func PublishScore(c *model.TeamUpContext) (interface{}, error) {
 	// 更新每个用户的分数记录，增加一条分数变化记录，更新活动的状态
 	util.DB().Transaction(func(tx *gorm.DB) error {
 		for _, player := range body.PlayersDetail {
-			err = util.DB().Model(&mysql.WechatUserInfo{}).Where("open_id = ? AND sport_type = ?", player.OpenID, event.SportType).Update("level", int(player.LevelChange*100)).Error
+			err = tx.Model(&mysql.WechatUserInfo{}).Where("open_id = ? AND sport_type = ?", player.OpenID, event.SportType).Update("level", int(player.LevelChange*100)).Error
 			if err != nil {
 				return err
 			}
@@ -49,7 +49,7 @@ func PublishScore(c *model.TeamUpContext) (interface{}, error) {
 		}
 		// 更新活动的状态
 		event.Status = constant.EventStatusFinished
-		err = util.DB().Save(event).Error
+		err = tx.Save(event).Error
 		if err != nil {
 			return err
 		}

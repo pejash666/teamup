@@ -30,24 +30,24 @@ func Approve(c *model.TeamUpContext) (interface{}, error) {
 		// 开启事务，更新组织状态 + 更新用户host信息
 		util.DB().Transaction(func(tx *gorm.DB) error {
 			orga := &mysql.Organization{}
-			err = util.DB().Where("id = ?", body.OrganizationID).Take(orga).Error
+			err = tx.Where("id = ?", body.OrganizationID).Take(orga).Error
 			if err != nil {
 				return err
 			}
 			orga.IsApproved = 1
 			orga.Reviewer = c.BasicUser.OpenID
-			err = util.DB().Save(orga).Error
+			err = tx.Save(orga).Error
 			if err != nil {
 				return err
 			}
 			user := &mysql.WechatUserInfo{}
-			err = util.DB().Where("open_id = ? AND sport_type = ?", orga.HostOpenID, orga.SportType).Take(user).Error
+			err = tx.Where("open_id = ? AND sport_type = ?", orga.HostOpenID, orga.SportType).Take(user).Error
 			if err != nil {
 				return err
 			}
 			user.OrganizationID = int(orga.ID)
 			user.IsHost = 1
-			err = util.DB().Save(user).Error
+			err = tx.Save(user).Error
 			if err != nil {
 				return err
 			}

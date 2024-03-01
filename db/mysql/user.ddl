@@ -21,6 +21,7 @@ CREATE TABLE `wechat_user_info`
     `preference`    varchar(64) not null default '' comment '偏好',
     `tags`          varchar(64) not null default '' comment '标签',
     `joined_group`  varchar(64) not null default '' comment '参与的组织',
+    `reviewer`      varchar(64) not null default '' comment '审批人',
     `created_at`  TIMESTAMP        NOT NULL     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at`  TIMESTAMP        NOT NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     `deleted_at`  TIMESTAMP        NULL     ,

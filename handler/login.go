@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"github.com/bytedance/sonic"
 	"gorm.io/gorm"
 	"teamup/constant"
 	"teamup/db/mysql"
@@ -33,25 +34,45 @@ func UserLogin(c *model.TeamUpContext) (interface{}, error) {
 
 	err = util.DB().Where("open_id = ? AND is_primary = ?", c2s.OpenID, 1).Take(user).Error
 	if err != nil {
+		joinedEvent := make([]uint, 0)
+		jes, _ := sonic.MarshalString(joinedEvent)
+		joinedGroup := make([]string, 0)
+		jgs, _ := sonic.MarshalString(joinedGroup)
+		preference := make([]string, 0)
+		ps, _ := sonic.MarshalString(preference)
+		tags := make([]string, 0)
+		ts, _ := sonic.MarshalString(tags)
 		// 如果没找到主要记录则需要插入3条新的
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			var users = []mysql.WechatUserInfo{
 				{
-					OpenId:     c2s.OpenID,
-					SessionKey: c2s.SessionKey,
-					UnionId:    c2s.UnionID,
-					IsPrimary:  1,
-					SportType:  constant.SportTypePedal,
+					OpenId:      c2s.OpenID,
+					SessionKey:  c2s.SessionKey,
+					UnionId:     c2s.UnionID,
+					IsPrimary:   1,
+					SportType:   constant.SportTypePedal,
+					JoinedEvent: jes,
+					JoinedGroup: jgs,
+					Preference:  ps,
+					Tags:        ts,
 				},
 				{
-					OpenId:    c2s.OpenID,
-					IsPrimary: 0,
-					SportType: constant.SportTypePickelBall,
+					OpenId:      c2s.OpenID,
+					IsPrimary:   0,
+					SportType:   constant.SportTypePickelBall,
+					JoinedEvent: jes,
+					JoinedGroup: jgs,
+					Preference:  ps,
+					Tags:        ts,
 				},
 				{
-					OpenId:    c2s.OpenID,
-					IsPrimary: 0,
-					SportType: constant.SportTypeTennis,
+					OpenId:      c2s.OpenID,
+					IsPrimary:   0,
+					SportType:   constant.SportTypeTennis,
+					JoinedEvent: jes,
+					JoinedGroup: jgs,
+					Preference:  ps,
+					Tags:        ts,
 				},
 			}
 
