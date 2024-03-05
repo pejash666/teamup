@@ -17,19 +17,26 @@ type ScoreBoard struct {
 
 var SportTypeScoreOptions = map[string]*model.ScoreOptions{
 	constant.SportTypePedal: {
-		AvailableScoreRule:   []string{constant.PedalScoreRuleAmericano, constant.PedalScoreRuleTennis},
-		AvailableRoundTarget: []int{8, 16, 24, 32},
-		FieldNum:             1,
+		AvailableScoreRule: []string{constant.PedalScoreRuleAmericano, constant.PedalScoreRuleTennis},
+		AvailableRoundTarget: map[string][]int{
+			constant.PedalScoreRuleAmericano: {8, 16, 24, 32},
+			constant.PedalScoreRuleTennis:    {6},
+		},
+		FieldNum: 1,
 	},
 	constant.SportTypePickelBall: {
-		AvailableScoreRule:   []string{constant.PickleBallScoreRuleServe, constant.PickleBallScoreRuleEvery},
-		AvailableRoundTarget: []int{11, 21},
-		FieldNum:             1,
+		AvailableScoreRule: []string{constant.PickleBallScoreRuleServe, constant.PickleBallScoreRuleEvery},
+		AvailableRoundTarget: map[string][]int{
+			constant.SportTypePickelBall: {11, 21},
+		},
+		FieldNum: 1,
 	},
 	constant.SportTypeTennis: {
-		AvailableScoreRule:   []string{constant.PedalScoreRuleTennis},
-		AvailableRoundTarget: []int{6},
-		FieldNum:             1,
+		AvailableScoreRule: []string{constant.PedalScoreRuleTennis},
+		AvailableRoundTarget: map[string][]int{
+			constant.SportTypeTennis: {6},
+		},
+		FieldNum: 1,
 	},
 }
 
@@ -78,20 +85,39 @@ func GetScoreboard(c *model.TeamUpContext) (interface{}, error) {
 			}
 		}
 	}
-
+	// 获取创建者信息
+	creator := &mysql.WechatUserInfo{}
+	err = util.DB().Where("open_id = ? AND sport_type = ?", event.Creator, event.SportType).Error
+	if err != nil {
+		return nil, iface.NewBackEndError(iface.MysqlError, "creator not found")
+	}
 	scoreBoard := &ScoreBoard{}
 	// 组装EventInfo
 	eventInfo := &model.EventInfo{
-		Name:          event.Name,
-		SportType:     event.SportType,
-		StartTimeStr:  event.StartTimeStr,
-		EndTimeStr:    event.EndTimeStr,
-		IsBooked:      event.IsBooked == 1,
-		FieldName:     event.FieldName,
-		IsCompetitive: event.MatchType == constant.EventMatchTypeCompetitive,
-		LowestLevel:   float32(event.LowestLevel / 100),
-		HighestLevel:  float32(event.HighestLevel / 100),
-		Weekday:       event.Weekday,
+		Id:              int64(event.ID),
+		Status:          event.Status,
+		Date:            event.Date,
+		City:            event.City,
+		Name:            event.Name,
+		CreatorNickname: creator.Nickname,
+		CreatorAvatar:   creator.Avatar,
+		Price:           event.Price,
+		Desc:            event.Desc,
+		SportType:       event.SportType,
+		StartTime:       event.StartTime,
+		StartTimeStr:    event.StartTimeStr,
+		EndTime:         event.EndTime,
+		EndTimeStr:      event.EndTimeStr,
+		IsBooked:        event.IsBooked == 1,
+		IsPublic:        event.IsPublic == 1,
+		FieldName:       event.FieldName,
+		IsCompetitive:   event.MatchType == constant.EventMatchTypeCompetitive,
+		GameType:        event.GameType,
+		LowestLevel:     float32(event.LowestLevel / 1000),
+		HighestLevel:    float32(event.HighestLevel / 1000),
+		Weekday:         event.Weekday,
+		MaxPeopleNum:    event.MaxPlayerNum,
+		CurrentPeople:   event.CurrentPlayerNum,
 	}
 	scoreBoard.EventInfo = eventInfo
 
@@ -118,7 +144,7 @@ func GetScoreboard(c *model.TeamUpContext) (interface{}, error) {
 			NickName:     user.Nickname,
 			Avatar:       user.Avatar,
 			IsCalibrated: user.IsCalibrated == 1,
-			Level:        float32(user.Level / 100),
+			Level:        float32(user.Level) / 1000,
 		}
 		players = append(players, player)
 	}

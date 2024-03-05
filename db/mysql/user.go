@@ -27,9 +27,10 @@ type WechatUserInfo struct {
 	JoinedEvent    string `gorm:"column:joined_event" json:"joined_event"`       // 参与的活动
 	//Preference  StringSlice `gorm:"serializer:json;type:varchar(255),column:"prefer" json:"preference"` // 偏好
 	//Tags        StringSlice `gorm:"serializer:json;type:varchar(255)" json:"tags"`       // 用户标签
-	Preference  string `gorm:"column:preference" json:"preference"`
-	Tags        string `gorm:"column:tags" json:"tags"`
-	JoinedGroup string `gorm:"column:joined_group" json:"joined_group"` // 参加的组织
+	Preference       string `gorm:"column:preference" json:"preference"`
+	Tags             string `gorm:"column:tags" json:"tags"`
+	JoinedGroup      string `gorm:"column:joined_group" json:"joined_group"`           // 参加的组织
+	CalibrationProof string `gorm:"column:calibration_proof" json:"calibration_proof"` // 自称是pro的（定级7.0的人）需要额外提供图片
 }
 
 func (u WechatUserInfo) TableName() string {

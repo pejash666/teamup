@@ -28,7 +28,7 @@ func Approve(c *model.TeamUpContext) (interface{}, error) {
 			return nil, iface.NewBackEndError(iface.ParamsError, "invalid body")
 		}
 		// 开启事务，更新组织状态 + 更新用户host信息
-		util.DB().Transaction(func(tx *gorm.DB) error {
+		err = util.DB().Transaction(func(tx *gorm.DB) error {
 			orga := &mysql.Organization{}
 			err = tx.Where("id = ?", body.OrganizationID).Take(orga).Error
 			if err != nil {
@@ -53,7 +53,11 @@ func Approve(c *model.TeamUpContext) (interface{}, error) {
 			}
 			return nil
 		})
-		util.Logger.Printf("[Approve] organization approve success")
+		if err != nil {
+			return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
+		} else {
+			util.Logger.Printf("[Approve] organization approve finished")
+		}
 	case ApproveTypeCalibrationProof:
 		type Body struct {
 			OpenID    string `json:"open_id"`
@@ -78,6 +82,8 @@ func Approve(c *model.TeamUpContext) (interface{}, error) {
 			return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
 		}
 		util.Logger.Printf("[Approve] calibration_proof approve success")
+	default:
+		return nil, iface.NewBackEndError(iface.ParamsError, "invalid approve type")
 	}
 	return nil, nil
 }

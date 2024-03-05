@@ -2,6 +2,7 @@ package handler
 
 import (
 	"gorm.io/gorm"
+	"strconv"
 	"teamup/constant"
 	"teamup/db/mysql"
 	"teamup/iface"
@@ -30,18 +31,27 @@ func PublishScore(c *model.TeamUpContext) (interface{}, error) {
 	// 更新每个用户的分数记录，增加一条分数变化记录，更新活动的状态
 	util.DB().Transaction(func(tx *gorm.DB) error {
 		for _, player := range body.PlayersDetail {
-			err = tx.Model(&mysql.WechatUserInfo{}).Where("open_id = ? AND sport_type = ?", player.OpenID, event.SportType).Update("level", int(player.LevelChange*100)).Error
+			lc, err := strconv.ParseFloat(player.LevelChangeStr, 32)
 			if err != nil {
 				return err
 			}
-			userEvent := &mysql.UserEvent{
-				EventID:     event.ID,
-				OpenID:      player.OpenID,
-				SportType:   event.SportType,
-				IsQuit:      0,
-				IsIncrease:  uint(util.BoolToDB(player.LevelChange > 0)),
-				LevelChange: int(player.LevelChange * 100),
+			user := &mysql.WechatUserInfo{}
+			err = tx.Where("open_id = ? AND sport_type = ?", player.OpenID, event.SportType).Take(user).Error
+			if err != nil {
+				return err
 			}
+			user.Level += int(lc * 1000)
+			err = tx.Save(user).Error
+			if err != nil {
+				return err
+			}
+			userEvent := &mysql.UserEvent{}
+			err = tx.Where("open_id = ? AND sport_type = ? AND event_id = ? AND is_quit = 0", player.OpenID, event.SportType, event.ID).Take(userEvent).Error
+			if err != nil {
+				return err
+			}
+			userEvent.IsIncrease = uint(util.BoolToDB(player.LevelChangeStr > "0"))
+			userEvent.LevelChange = int(lc * 1000)
 			err = util.DB().Save(userEvent).Error
 			if err != nil {
 				return err

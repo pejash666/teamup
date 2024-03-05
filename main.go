@@ -91,27 +91,27 @@ func HttpHandler() *gin.Engine {
 	userGroup.GET("/host_info", API(handler.GetUserHostInfo, model.APIOption{
 		NeedLoginStatus: true,
 	}))
-	// 加入活动
+	// 加入活动(通了)
 	userGroup.POST("/join_event", API(handler.JoinEvent, model.APIOption{
 		NeedLoginStatus: true,
 	}))
-	// 退出活动
+	// 退出活动(通了)
 	userGroup.POST("/quit_event", API(handler.QuitEvent, model.APIOption{
 		NeedLoginStatus: true,
 	}))
-	// 下发记分配置
+	// 下发记分配置(通了)
 	userGroup.POST("/get_scoreboard", API(handler.GetScoreboard, model.APIOption{
 		NeedLoginStatus: true,
 	}))
-	// 开始比赛（下发对局信息）
+	// 开始比赛（下发对局信息）(通了)
 	userGroup.POST("/start_scoring", API(handler.StartScoring, model.APIOption{
 		NeedLoginStatus: true,
 	}))
-	// 获取比赛的结果分数
+	// 获取比赛的结果分数（通了）
 	userGroup.POST("/get_score_result", API(handler.GetScoreResult, model.APIOption{
 		NeedLoginStatus: true,
 	}))
-	// 发布分数
+	// 发布分数(通了)
 	userGroup.POST("/publish_score", API(handler.PublishScore, model.APIOption{
 		NeedLoginStatus: true}))
 
@@ -124,7 +124,7 @@ func HttpHandler() *gin.Engine {
 
 	// 活动类接口
 	eventGroup := r.Group("/team_up/event")
-	// 活动页面
+	// 活动页面(通了)
 	eventGroup.POST("/page", API(handler.GetEventTab, model.APIOption{
 		NeedLoginStatus: true,
 	}))
@@ -132,24 +132,26 @@ func HttpHandler() *gin.Engine {
 	eventGroup.POST("/create", API(handler.CreateEvent, model.APIOption{
 		NeedLoginStatus: true,
 	}))
-	// 更新活动信息
+	// 更新活动信息（通了）
 	eventGroup.POST("/update", API(handler.UpdateEvent, model.APIOption{
 		NeedLoginStatus: true,
 	}))
-	// 获取活动结果
-	eventGroup.POST("/get_result", API(handler.GetEventResult, model.APIOption{
-		NeedLoginStatus: true,
-	}))
+	//// 获取活动结果
+	//eventGroup.POST("/get_result", API(handler.GetEventResult, model.APIOption{
+	//	NeedLoginStatus: true,
+	//}))
 
 	// 管理员接口
 	adminGroup := r.Group("/team_up/admin")
-	// 获取待审批事件
+	// 获取待审批事件 (通了)
 	adminGroup.GET("/get_approval_items", API(handler.GetApprovalItems, model.APIOption{
-		NeedLoginStatus: true,
+		NeedLoginStatus:    true,
+		NeedAdminClearance: true,
 	}))
-	// 审批
+	// 审批 （通了）
 	adminGroup.POST("/approve", API(handler.Approve, model.APIOption{
-		NeedLoginStatus: true,
+		NeedLoginStatus:    true,
+		NeedAdminClearance: true,
 	}))
 
 	// 静态资源Group

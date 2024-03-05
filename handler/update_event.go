@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/bytedance/sonic"
+	"gorm.io/gorm"
 	"teamup/constant"
 	"teamup/db/mysql"
 	"teamup/iface"
@@ -59,29 +61,141 @@ func UpdateEvent(c *model.TeamUpContext) (interface{}, error) {
 	} else {
 		meta.Status = constant.EventStatusCreated
 	}
-	// 如果自己也加入，则直接在创建时添加进去
-	if event.SelfJoin {
-		meta.CurrentPlayerNum += 1
-		currentPeople := make([]string, 0)
-		err = sonic.UnmarshalString(meta.CurrentPlayer, &currentPeople)
-		if err != nil {
-			util.Logger.Printf("UnmarshalString failed")
-			return nil, err
-		}
-		currentPeople = append(currentPeople, c.BasicUser.OpenID)
-		currentPeopleStr, err := sonic.MarshalString(currentPeople)
-		if err != nil {
-			util.Logger.Printf("MarshalString failed")
-			return nil, err
-		}
-		meta.CurrentPlayer = currentPeopleStr
-	}
-	err = util.DB().Save(meta).Error
+	currentPlayers := make([]string, 0)
+	err = sonic.UnmarshalString(meta.CurrentPlayer, &currentPlayers)
 	if err != nil {
-		util.Logger.Printf("[UpdateEvent] save updated event failed, err:%v", err)
-		return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
+		util.Logger.Printf("UnmarshalString failed")
+		return nil, err
 	}
+	selfIn := false
+	for _, player := range currentPlayers {
+		if player == c.BasicUser.OpenID {
+			selfIn = true
+			break
+		}
+	}
+	// 当前数据库有，但是要改成自己不加入
+	if selfIn && !event.SelfJoin {
+		util.DB().Transaction(func(tx *gorm.DB) error {
+			meta.CurrentPlayerNum -= 1
+			newPlayers := make([]string, 0)
+			for _, player := range currentPlayers {
+				if player == c.BasicUser.OpenID {
+					continue
+				}
+				newPlayers = append(newPlayers, player)
+			}
+			newPlayerStr, err := sonic.MarshalString(newPlayers)
+			if err != nil {
+				return err
+			}
+			meta.CurrentPlayer = newPlayerStr
+			// 更改事件
+			err = tx.Save(meta).Error
+			if err != nil {
+				return err
+			}
+			// 更改用户
+			user := &mysql.WechatUserInfo{}
+			err = tx.Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, meta.SportType).Take(user).Error
+			if err != nil {
+				return err
+			}
+			joinedEvents := make([]uint, 0)
+			err = sonic.UnmarshalString(user.JoinedEvent, &joinedEvents)
+			if err != nil {
+				return err
+			}
+			newJoinedEvent := make([]uint, 0)
+			for _, joinedEvent := range joinedEvents {
+				if joinedEvent == meta.ID {
+					continue
+				}
+				newJoinedEvent = append(newJoinedEvent, joinedEvent)
+			}
+			newJoinedEventStr, err := sonic.MarshalString(newJoinedEvent)
+			if err != nil {
+				return err
+			}
+			user.JoinedEvent = newJoinedEventStr
+			user.JoinedTimes -= 1
+			err = tx.Save(user).Error
+			if err != nil {
+				return err
+			}
+			return nil
+		})
 
+		// 当前数据库没有，改成自己加入
+	} else if !selfIn && event.SelfJoin {
+		util.DB().Transaction(func(tx *gorm.DB) error {
+			meta.CurrentPlayerNum += 1
+			currentPlayers = append(currentPlayers, c.BasicUser.OpenID)
+			currentPeopleStr, err := sonic.MarshalString(currentPlayers)
+			if err != nil {
+				util.Logger.Printf("MarshalString failed")
+				return err
+			}
+			meta.CurrentPlayer = currentPeopleStr
+			// 更改事件
+			err = tx.Save(meta).Error
+			if err != nil {
+				return err
+			}
+			// 更改用户
+			user := &mysql.WechatUserInfo{}
+			err = tx.Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, meta.SportType).Take(user).Error
+			if err != nil {
+				return err
+			}
+			joinedEvents := make([]uint, 0)
+			err = sonic.UnmarshalString(user.JoinedEvent, &joinedEvents)
+			if err != nil {
+				return err
+			}
+			joinedEvents = append(joinedEvents, meta.ID)
+			JoinedEventStr, err := sonic.MarshalString(joinedEvents)
+			if err != nil {
+				return err
+			}
+			user.JoinedEvent = JoinedEventStr
+			user.JoinedTimes += 1
+			err = tx.Save(user).Error
+			if err != nil {
+				return err
+			}
+			return nil
+		})
+	}
+	fmt.Println(meta.IsHost)
+	fmt.Println(event.IsHost)
+	// 之前是组织创建的活动，现在改成个人创建
+	if meta.IsHost == 1 && !event.IsHost {
+		meta.IsHost = 0
+		meta.OrganizationID = 0
+		err = util.DB().Save(meta).Error
+		if err != nil {
+			return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
+		}
+	} else if meta.IsHost == 0 && event.IsHost {
+		fmt.Println("here")
+		// 检查此用户是不是此运动类型的host
+		user := &mysql.WechatUserInfo{}
+		err = util.DB().Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, event.SportType).Take(user).Error
+		if err != nil {
+			return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
+		}
+		if user.IsHost == 0 {
+			util.Logger.Printf("[CreateEvent] user not host")
+			return nil, iface.NewBackEndError(iface.NotHostError, "not host")
+		}
+		meta.IsHost = 1
+		meta.OrganizationID = int64(user.OrganizationID)
+		err = util.DB().Save(meta).Error
+		if err != nil {
+			return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
+		}
+	}
 	util.Logger.Printf("[UpdateEvent] success, event_id:%d", event.Id)
 
 	return map[string]int64{"event_id": event.Id}, nil

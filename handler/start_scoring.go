@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"fmt"
+	"github.com/bytedance/sonic"
+	"github.com/jmoiron/sqlx"
 	rand2 "math/rand"
 	"sort"
 	"teamup/constant"
@@ -12,8 +15,9 @@ import (
 )
 
 type MatchDetail struct {
-	RoundInfo []*RoundInfo `json:"round_info"`
-	Settings  *Settings    `json:"settings"`
+	RoundInfo        []*RoundInfo `json:"round_info"`
+	Settings         *Settings    `json:"settings"`
+	RoundTargetScore int32        `json:"round_target_score"` // 目标得分
 }
 
 type RoundInfo struct {
@@ -48,10 +52,10 @@ type Sortable struct {
 
 func StartScoring(c *model.TeamUpContext) (interface{}, error) {
 	type Body struct {
-		ScoreRule   string `json:"score_rule"`
-		RoundTarget int    `json:"round_target"`
-		FieldNum    int    `json:"field_num"` // 现在都是1，多块场地需要多个活动
-		EventID     int    `json:"event_id"`
+		ScoreRule        string `json:"score_rule"`
+		RoundTargetScore int32  `json:"round_target_score"`
+		FieldNum         int    `json:"field_num"` // 现在都是1，多块场地需要多个活动
+		EventID          int    `json:"event_id"`
 	}
 	body := &Body{}
 	err := c.BindJSON(body)
@@ -59,12 +63,13 @@ func StartScoring(c *model.TeamUpContext) (interface{}, error) {
 		util.Logger.Printf("[StartScoring] bindJson failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.ParamsError, "invalid record")
 	}
-	if body.ScoreRule == "" || body.EventID < 1 || body.RoundTarget < 1 {
+	if body.ScoreRule == "" || body.EventID < 1 || body.RoundTargetScore < 1 {
 		util.Logger.Printf("[StartScoring] invalid params")
 		return nil, iface.NewBackEndError(iface.ParamsError, "invalid params")
 	}
 
 	res := &MatchDetail{}
+	res.RoundTargetScore = body.RoundTargetScore
 
 	event := &mysql.EventMeta{}
 	err = util.DB().Where("id = ?", body.EventID).Take(event).Error
@@ -74,8 +79,8 @@ func StartScoring(c *model.TeamUpContext) (interface{}, error) {
 	}
 	event.ScoreRule = body.ScoreRule
 	// 获取全部用户
-	currentPlayers := make([]string, 0)
-	players := make([]*model.Player, 0)
+	var currentPlayers []string
+	err = sonic.UnmarshalString(event.CurrentPlayer, &currentPlayers)
 	if err != nil {
 		util.Logger.Printf("[StartScoring] unmarshal currentPlayer failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.InternalError, "unmarshal failed")
@@ -83,9 +88,18 @@ func StartScoring(c *model.TeamUpContext) (interface{}, error) {
 	if len(currentPlayers) < 1 {
 		return nil, iface.NewBackEndError(iface.ParamsError, "invalid player number")
 	}
+	querySql := "SELECT * FROM wechat_user_info WHERE sport_type = ? AND open_id IN (?)"
+	params := []interface{}{event.SportType, currentPlayers}
+	querySql, params, err = sqlx.In(querySql, params...)
+	util.Logger.Printf(fmt.Sprintf("StartScoring - querySql: %+v, params: %+v\n", querySql, params))
+	if err != nil {
+		return nil, iface.NewBackEndError(iface.InternalError, err.Error())
+	}
+	players := make([]*model.Player, 0)
 	// 从mysql获取参赛人员数据
 	var users []mysql.WechatUserInfo
-	err = util.DB().Where("sport_type = ? AND open_id IN ?", event.SportType, currentPlayers).Find(users).Error
+	// 对于切片类型的IN条件，需要用sqlx进行打散传入
+	err = util.DB().Where("sport_type = ? AND open_id IN ?", params[0], params[1:]).Find(&users).Error
 	if err != nil {
 		util.Logger.Printf("[StartScoring] query user failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.MysqlError, "query record failed")
@@ -96,7 +110,7 @@ func StartScoring(c *model.TeamUpContext) (interface{}, error) {
 			Avatar:       user.Avatar,
 			OpenID:       user.OpenId,
 			IsCalibrated: user.IsCalibrated == 1,
-			Level:        float32(user.Level / 100),
+			Level:        float32(user.Level) / 1000,
 		}
 		players = append(players, player)
 	}
@@ -200,7 +214,7 @@ func dividePickleBall(c *model.TeamUpContext, event *mysql.EventMeta, players []
 			})
 		}
 
-	case constant.PickleBallScoreRuleServe:
+	case constant.PickleBallScoreRuleServe, constant.PedalScoreRuleTennis:
 		// 单打
 		if event.GameType == constant.EventGameTypeSolo {
 			return []*RoundInfo{

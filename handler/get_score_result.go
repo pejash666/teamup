@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"math"
 	"sort"
 	"teamup/constant"
@@ -12,12 +13,13 @@ import (
 
 type PlayerAfterMatch struct {
 	*model.Player
-	LevelChange float64 `json:"level_change"` // 等级的变化
-	TotalScore  int32   `json:"total_score"`  // 总得分
-	Rank        int32   `json:"rank"`         // 排名
-	WinRound    int32   `json:"win_round"`
-	TieRound    int32   `json:"tie_round"`
-	LoseRound   int32   `json:"lose_round"`
+	LevelChange    float64 `json:"level_change,omitempty"` // 等级的变化,不对外返回
+	LevelChangeStr string  `json:"level_change_str"`       // 对外返回的等级变化
+	TotalScore     int32   `json:"total_score"`            // 总得分
+	Rank           int32   `json:"rank"`                   // 排名
+	WinRound       int32   `json:"win_round"`
+	TieRound       int32   `json:"tie_round"`
+	LoseRound      int32   `json:"lose_round"`
 }
 
 type MatchResult struct {
@@ -52,7 +54,9 @@ func GetScoreResult(c *model.TeamUpContext) (interface{}, error) {
 		return nil, iface.NewBackEndError(iface.ParamsError, "bindJSON failed")
 	}
 	roundInfos := body.RoundInfo
-
+	if len(roundInfos) < 1 {
+		return nil, iface.NewBackEndError(iface.ParamsError, "params error, please check")
+	}
 	event := &mysql.EventMeta{}
 	// 获取活动信息
 	err = util.DB().Where("id = ?", body.EventID).Take(event).Error
@@ -68,14 +72,14 @@ func GetScoreResult(c *model.TeamUpContext) (interface{}, error) {
 	playerMap := make(map[string]*PlayerAfterMatch)
 	playerSlice := make([]*PlayerAfterMatch, 0)
 	roundSlice := make([]*UploadRoundInfo, 0)
-	isCompetitive := event.MatchType == "competition"
+	isCompetitive := event.MatchType == "competitive"
 
 	// 第一次遍历首先将player都填充好
 	for _, round := range roundInfos {
 		roundTmp := *round
 		for _, player := range roundTmp.Home {
 			// map中不存在 则放入map
-			if playerMap[player.OpenID] == nil {
+			if _, ok := playerMap[player.OpenID]; !ok {
 				tmp := &PlayerAfterMatch{
 					Player: player,
 				}
@@ -107,15 +111,14 @@ func GetScoreResult(c *model.TeamUpContext) (interface{}, error) {
 					}
 				}
 				levelChange := GetLevelChange("home", roundTmp.Winner, roundTmp.HomeAvg, roundTmp.AwayAvg, factor)
-				playerMap[player.OpenID].LevelChange = levelChange
+				playerMap[player.OpenID].LevelChange += levelChange
 				if needTeamLevelChange {
 					roundTmp.HomeLevelChange = levelChange
 				}
 			}
-			playerSlice = append(playerSlice, playerMap[player.OpenID])
 		}
 		for _, player := range roundTmp.Away {
-			if playerMap[player.OpenID] == nil {
+			if _, ok := playerMap[player.OpenID]; !ok {
 				tmp := &PlayerAfterMatch{
 					Player: player,
 				}
@@ -144,14 +147,18 @@ func GetScoreResult(c *model.TeamUpContext) (interface{}, error) {
 					}
 				}
 				levelChange := GetLevelChange("away", roundTmp.Winner, roundTmp.HomeAvg, roundTmp.AwayAvg, factor)
-				playerMap[player.OpenID].LevelChange = levelChange
+				playerMap[player.OpenID].LevelChange += levelChange
 				if needTeamLevelChange {
 					roundTmp.AwayLevelChange = levelChange
 				}
 			}
 		}
-
 		roundSlice = append(roundSlice, &roundTmp)
+	}
+	for _, player := range playerMap {
+		player.LevelChangeStr = fmt.Sprintf("%.3f", player.LevelChange)
+		player.LevelChange = 0 // 精度问题不返回
+		playerSlice = append(playerSlice, player)
 	}
 	// 对player进行排序, 排名越高的越往上
 	sort.Slice(playerSlice, func(i, j int) bool {

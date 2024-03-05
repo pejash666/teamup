@@ -28,7 +28,7 @@ func QuitEvent(c *model.TeamUpContext) (interface{}, error) {
 	}
 	event := &mysql.EventMeta{}
 	// 只有被创建 和 full状态的活动才可以退出
-	err = util.DB().Where("event_id = ? AND status IN ?", body.EventID, []string{constant.EventStatusFull, constant.EventStatusCreated}).Take(event).Error
+	err = util.DB().Where("id = ? AND status IN ?", body.EventID, []string{constant.EventStatusFull, constant.EventStatusCreated}).Take(event).Error
 	if err != nil {
 		util.Logger.Printf("[[QuitEvent] query eventMeta failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.MysqlError, "query failed")
@@ -106,7 +106,7 @@ func QuitEvent(c *model.TeamUpContext) (interface{}, error) {
 		}
 		// 更新user_event表
 		userEvent := &mysql.UserEvent{}
-		err = tx.Where("event_id = ?", event.ID).Take(userEvent).Error
+		err = tx.Where("open_id = ? AND sport_type = ? AND event_id = ?", c.BasicUser.OpenID, event.SportType, event.ID).Take(userEvent).Error
 		if err != nil {
 			util.Logger.Printf("[QuitEvent] get record failed, err:%v", err)
 			return err

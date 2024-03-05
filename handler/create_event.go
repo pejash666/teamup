@@ -152,28 +152,27 @@ func paramsCheck(event *model.EventInfo) (bool, string) {
 
 func EventMeta(c *model.TeamUpContext, event *model.EventInfo) (*mysql.EventMeta, error) {
 	meta := &mysql.EventMeta{
-		Creator:        c.BasicUser.OpenID,
-		SportType:      event.SportType,
-		GameType:       event.GameType,
-		IsBooked:       util.BoolToDB(event.IsBooked),
-		IsPublic:       util.BoolToDB(event.IsPublic),
-		IsHost:         util.BoolToDB(event.IsHost),
-		LowestLevel:    int(event.LowestLevel * 100),
-		HighestLevel:   int(event.HighestLevel * 100),
-		Date:           time.Unix(event.StartTime, 0).Format("20060102"),
-		Weekday:        time.Unix(event.StartTime, 0).Weekday().String(),
-		City:           event.City,
-		Name:           event.Name,
-		Desc:           event.Desc,
-		StartTime:      event.StartTime,
-		StartTimeStr:   time.Unix(event.StartTime, 0).Format("15:04"), // 分钟级别
-		EndTime:        event.EndTime,
-		EndTimeStr:     time.Unix(event.EndTime, 0).Format("15:04"),
-		FieldName:      event.FieldName,
-		FieldType:      event.FieldType,
-		MaxPlayerNum:   event.MaxPeopleNum,
-		Price:          event.Price,
-		OrganizationID: event.OrganizationID,
+		Creator:      c.BasicUser.OpenID,
+		SportType:    event.SportType,
+		GameType:     event.GameType,
+		IsBooked:     util.BoolToDB(event.IsBooked),
+		IsPublic:     util.BoolToDB(event.IsPublic),
+		IsHost:       util.BoolToDB(event.IsHost),
+		LowestLevel:  int(event.LowestLevel * 1000),
+		HighestLevel: int(event.HighestLevel * 1000),
+		Date:         time.Unix(event.StartTime, 0).Format("20060102"),
+		Weekday:      time.Unix(event.StartTime, 0).Weekday().String(),
+		City:         event.City,
+		Name:         event.Name,
+		Desc:         event.Desc,
+		StartTime:    event.StartTime,
+		StartTimeStr: time.Unix(event.StartTime, 0).Format("15:04"), // 分钟级别
+		EndTime:      event.EndTime,
+		EndTimeStr:   time.Unix(event.EndTime, 0).Format("15:04"),
+		FieldName:    event.FieldName,
+		FieldType:    event.FieldType,
+		MaxPlayerNum: event.MaxPeopleNum,
+		Price:        event.Price,
 	}
 
 	if event.IsCompetitive {
@@ -186,8 +185,8 @@ func EventMeta(c *model.TeamUpContext, event *model.EventInfo) (*mysql.EventMeta
 	} else {
 		meta.Status = constant.EventStatusCreated
 	}
-	// 如果自己也加入，则直接在创建时添加进去（只有个人创建的才可以）
-	if !event.IsHost && event.SelfJoin {
+	// 如果自己也加入，则直接在创建时添加进去
+	if event.SelfJoin {
 		meta.CurrentPlayerNum = 1
 		currentPeople := make([]string, 0)
 		currentPeople = append(currentPeople, c.BasicUser.OpenID)
@@ -197,6 +196,9 @@ func EventMeta(c *model.TeamUpContext, event *model.EventInfo) (*mysql.EventMeta
 			return nil, err
 		}
 		meta.CurrentPlayer = currentPeopleStr
+	}
+	if event.IsHost {
+		meta.OrganizationID = event.OrganizationID
 	}
 	util.Logger.Printf("[CreateEvent] eventMeta:%+v", meta)
 	return meta, nil

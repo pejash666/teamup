@@ -76,8 +76,8 @@ func UserLogin(c *model.TeamUpContext) (interface{}, error) {
 				},
 			}
 
-			result := util.DB().Create(&users)
-			if result.Error != nil {
+			err = util.DB().Create(&users).Error
+			if err != nil {
 				util.Logger.Printf("[UserLogin] create user failed, err:%v", err)
 				return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
 			}

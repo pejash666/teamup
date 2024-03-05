@@ -9,7 +9,7 @@ type EventMeta struct {
 	IsHost           int    `gorm:"column:is_host" json:"is_host"`                 // 是否为组织发布
 	OrganizationID   int64  `gorm:"column:organization_id" json:"organization_id"` // 组织ID
 	SportType        string `gorm:"column:sport_type" json:"sport_type"`           // 运动类型，pedal，tennis
-	MatchType        string `gorm:"column:match_type" json:"match_type"`           // 比赛类型，competition，entertainment，这两种类型都可以记分，但是competition会影响个人的level
+	MatchType        string `gorm:"column:match_type" json:"match_type"`           // 比赛类型，competitive，entertainment，这两种类型都可以记分，但是competition会影响个人的level
 	GameType         string `gorm:"column:game_type" json:"game_type"`             // 对局类型，单打/双打(pedal只能双打)
 	ScoreRule        string `gorm:"column:score_rule" json:"score_rule"`           // 记分规则，只有用户上传分数后才会记录
 	Scorers          string `gorm:"column:scorers" json:"scorers"`                 // 记分员，记分时需要用户指定，如果为空，则所有参与用户均可都可以

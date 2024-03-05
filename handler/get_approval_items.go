@@ -46,5 +46,5 @@ func GetApprovalItems(c *model.TeamUpContext) (interface{}, error) {
 	}
 
 	util.Logger.Printf("[GetApprovalItems] success")
-	return nil, nil
+	return res, nil
 }

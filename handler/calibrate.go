@@ -124,11 +124,13 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 		util.Logger.Printf("[Calibrate] query record failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
 	}
-	// level保存的时候 是 x 100的整数
-	user.Level = int(totalScore * 100)
+	// level保存的时候 是 x 1000的整数
+	user.Level = int(totalScore * 1000)
 	// 非pro直接更新calibration状态，pro需要等待人工审批
 	if !isPro {
 		user.IsCalibrated = 1
+	} else {
+		user.CalibrationProof = util.GetImageUrl(c, proofPath)
 	}
 	err = util.DB().Save(user).Error
 	if err != nil {

@@ -10,8 +10,8 @@ import (
 )
 
 type EventTab struct {
-	EventInfo *model.EventInfo
-	Players   []*model.Player
+	EventInfo *model.EventInfo `json:"event_info"`
+	Players   []*model.Player  `json:"players"`
 }
 
 func GetEventTab(c *model.TeamUpContext) (interface{}, error) {
@@ -41,12 +41,21 @@ func GetEventTab(c *model.TeamUpContext) (interface{}, error) {
 			util.Logger.Printf("[GetEventTab] get organization record from DB failed, err:%v", result.Error)
 			return nil, iface.NewBackEndError(iface.MysqlError, "get record failed")
 		}
+		eventInfo.OrganizationID = int64(organization.ID)
 		eventInfo.OrganizationLogo = organization.Logo
 	}
+	eventInfo.Id = int64(eventMeta.ID)
+	eventInfo.Desc = eventMeta.Desc
+	eventInfo.Name = eventMeta.Name
 	eventInfo.SportType = eventMeta.SportType
+	eventInfo.Status = eventMeta.Status
 	eventInfo.Weekday = eventMeta.Weekday
+	eventInfo.City = eventMeta.City
 	eventInfo.StartTime = eventMeta.StartTime
+	eventInfo.StartTimeStr = eventMeta.StartTimeStr
 	eventInfo.EndTime = eventMeta.EndTime
+	eventInfo.EndTimeStr = eventMeta.EndTimeStr
+	eventInfo.Date = eventMeta.Date
 	eventInfo.GameType = eventMeta.GameType
 	eventInfo.IsCompetitive = eventMeta.MatchType == constant.EventMatchTypeCompetitive
 	eventInfo.IsPublic = eventMeta.IsPublic == 1
@@ -55,10 +64,19 @@ func GetEventTab(c *model.TeamUpContext) (interface{}, error) {
 		eventInfo.FieldName = eventMeta.FieldName
 		eventInfo.FieldType = eventMeta.FieldType
 	}
-	eventInfo.LowestLevel = float32(eventMeta.LowestLevel) / 100
-	eventInfo.HighestLevel = float32(eventMeta.HighestLevel) / 100
+	eventInfo.LowestLevel = float32(eventMeta.LowestLevel) / 1000
+	eventInfo.HighestLevel = float32(eventMeta.HighestLevel) / 1000
 	eventInfo.Price = eventMeta.Price
 	eventInfo.MaxPeopleNum = eventMeta.MaxPlayerNum
+	// 获取creator的头像，名字
+	creator := &mysql.WechatUserInfo{}
+	err = util.DB().Where("open_id = ? AND sport_type = ?", eventMeta.Creator, eventMeta.SportType).Take(creator).Error
+	if err != nil {
+		util.Logger.Printf("[GetEventTab] query creator failed, err:%v", err)
+		return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
+	}
+	eventInfo.CreatorNickname = creator.Nickname
+	eventInfo.CreatorAvatar = creator.Avatar
 	// 给结果赋值
 	eventTab.EventInfo = eventInfo
 
@@ -86,7 +104,7 @@ func GetEventTab(c *model.TeamUpContext) (interface{}, error) {
 				NickName:     user.Nickname,
 				Avatar:       user.Avatar,
 				IsCalibrated: user.IsCalibrated == 1,
-				Level:        float32(user.Level / 100),
+				Level:        float32(user.Level) / 1000,
 			}
 			players = append(players, player)
 		}
@@ -95,5 +113,5 @@ func GetEventTab(c *model.TeamUpContext) (interface{}, error) {
 		eventTab.Players = make([]*model.Player, 0)
 	}
 	util.Logger.Printf("[GetEventTab] success, res:%+v", eventInfo)
-	return eventInfo, nil
+	return eventTab, nil
 }

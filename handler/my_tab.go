@@ -83,7 +83,7 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 		sportTypeInfo.SportType = user.SportType
 		sportTypeInfo.LevelInfo = &LevelInfo{
 			IsCalibrated: user.IsCalibrated == 1,
-			CurrentLevel: float32(user.Level) / 100,
+			CurrentLevel: float32(user.Level) / 1000,
 			LevelDetail:  GetRecentLevelChanges(user.OpenId, user.SportType, 10),
 		}
 		// 用户在这个sport_type里是host，获取organization信息

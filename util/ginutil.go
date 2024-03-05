@@ -21,6 +21,10 @@ const (
 	Success = 0
 )
 
+var AdminList = []string{
+	"oLI--62QB5L0bVJrFTFMTQj-lcGw",
+}
+
 func API(handler iface.HandlerFunc, opt model.APIOption) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
@@ -69,7 +73,7 @@ func NewTeamUpContext(c *gin.Context, opt model.APIOption) (*model.TeamUpContext
 	ts, err := strconv.ParseInt(timeStampStr, 10, 64)
 	if err != nil {
 		Logger.Printf("NewTeamUpContext get ts from header failed, err:%v", err)
-		return nil, err
+		return nil, iface.NewBackEndError(iface.ParamsError, "missing timestamp")
 	}
 	// （测试先注释掉）
 	//randomStr := c.GetHeader("nonce")
@@ -108,7 +112,7 @@ func NewTeamUpContext(c *gin.Context, opt model.APIOption) (*model.TeamUpContext
 	accessToken, err := GetAccessToken(constant.AppID, constant.AppSecret)
 	if err != nil {
 		Logger.Printf("NewTeamUpContext GetAccessToken failed, err:%v", err)
-		return nil, err
+		return nil, iface.NewBackEndError(iface.WechatError, err.Error())
 	}
 	ctx.AccessToken = accessToken
 	if opt.NeedLoginStatus {
@@ -120,7 +124,7 @@ func NewTeamUpContext(c *gin.Context, opt model.APIOption) (*model.TeamUpContext
 		jwt, err := ParseJWTToken(wechatToken)
 		if err != nil {
 			Logger.Printf("NewTeamUpContext ParseJWTToken failed, err:%v", err)
-			return nil, err
+			return nil, iface.NewBackEndError(iface.InternalError, err.Error())
 		}
 		//// 还要去DB获取到自己维护的UserID
 		//user := &mysql.WechatUserInfo{}
@@ -132,6 +136,15 @@ func NewTeamUpContext(c *gin.Context, opt model.APIOption) (*model.TeamUpContext
 			OpenID:     jwt.OpenID,
 			UnionID:    "",
 			SessionKey: jwt.SessionKey,
+		}
+	}
+	// 检查管理员权限
+	if opt.NeedAdminClearance {
+		if !opt.NeedLoginStatus {
+			return nil, iface.NewBackEndError(iface.ParamsError, "admin need to login")
+		}
+		if !IsAdmin(ctx.BasicUser.OpenID) {
+			return nil, iface.NewBackEndError(iface.ParamsError, "user not admin")
 		}
 	}
 
@@ -151,4 +164,14 @@ func makeUpRespData(data interface{}, err error) *model.BackEndResp {
 		ErrTips: errTips,
 		Data:    data,
 	}
+}
+
+func IsAdmin(openID string) bool {
+	// 只有几个人的openid有这个权限
+	for _, admin := range AdminList {
+		if admin == openID {
+			return true
+		}
+	}
+	return false
 }
