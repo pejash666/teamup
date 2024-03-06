@@ -9,7 +9,15 @@ import (
 	"teamup/util"
 )
 
-// 前端获取加密的用户手机号，服务端进行解码
+// UpdateUserPhoneNumber godoc
+// @Summary      获取用户手机号
+// @Description  前端获取加密的用户手机号，服务端进行解码，存储
+// @Tags         /teamup/user
+// @Accept       json
+// @Produce      json
+// @Param        code  body     string  true  "微信Code"
+// @Success      200  {object}  model.BackEndResp
+// @Router       /teamup/user/update_phone_number [post]
 func UpdateUserPhoneNumber(c *model.TeamUpContext) (interface{}, error) {
 	util.Logger.Println("UpdateUserPhoneNumber started")
 	body := &model.GeneralCodeBody{}

@@ -3,14 +3,17 @@ package main
 import (
 	"fmt"
 	"github.com/fvbock/endless"
+	"github.com/gin-gonic/gin"
+	"github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
 	"log"
 	"net/http"
 	"syscall"
+	_ "teamup/docs"
 	"teamup/handler"
 	"teamup/model"
 	"teamup/util"
-
-	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -161,5 +164,7 @@ func HttpHandler() *gin.Engine {
 	// 用户创建组织的logo
 	imageGroup.Static("/organization_logo", "./organization_logos")
 
+	// swagger
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return r
 }

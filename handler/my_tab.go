@@ -57,6 +57,20 @@ type Organization struct {
 	EventNum int    `json:"event_num"`
 }
 
+type GetMyTabResp struct {
+	ErrNo   int32  `json:"err_no"`
+	ErrTips string `json:"err_tips"`
+	Data    *MyTab `json:"data"`
+}
+
+// GetMyTab godoc
+// @Summary      我的页面
+// @Description  包含用户信息，级别信息和参与的活动
+// @Tags         /teamup/user
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  GetMyTabResp
+// @Router       /teamup/user/my_tab [get]
 func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 	res := &MyTab{}
 	// 未登录返回空

@@ -8,6 +8,21 @@ import (
 	"teamup/util"
 )
 
+type GetCalibrationQuestionsResp struct {
+	ErrNo   int32                `json:"err_no"`
+	ErrTips string               `json:"err_tips"`
+	Data    *model.Questionnaire `json:"data"`
+}
+
+// GetCalibrationQuestions godoc
+// @Summary      获取定级问题
+// @Description  获取定级问题详情
+// @Tags         /teamup/user
+// @Accept       json
+// @Produce      json
+// @Param        sport_type  body    string  true  "运动类型"
+// @Success      200  {object}  GetCalibrationQuestionsResp
+// @Router       /teamup/user/get_calibration_questions [post]
 func GetCalibrationQuestions(c *model.TeamUpContext) (interface{}, error) {
 	type Body struct {
 		SportType string `json:"sport_type"`
