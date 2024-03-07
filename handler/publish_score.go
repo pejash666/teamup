@@ -10,6 +10,9 @@ import (
 	"teamup/util"
 )
 
+// PublishScoreBody model info
+//
+//	@Description	发布分数
 type PublishScoreBody struct {
 	EventID       int                 `json:"event_id"`
 	PlayersDetail []*PlayerAfterMatch `json:"players_detail"`
@@ -22,7 +25,8 @@ type PublishScoreBody struct {
 //	@Tags			/teamup/user
 //	@Accept			json
 //	@Produce		json
-//	@Param			publish_score	body		{object}	PublishScoreBody	true	"比赛结果"
+//	@Param			event_id		body		int		true	"活动ID"
+//	@Param			player_detail	body		string	true	"用户详情, 参考PublishScoreBody"
 //	@Success		200				{object}	model.BackEndResp
 //	@Router			/teamup/user/publish_score [post]
 func PublishScore(c *model.TeamUpContext) (interface{}, error) {

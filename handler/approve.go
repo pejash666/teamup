@@ -29,10 +29,11 @@ type CalibrationProofApprovalBody struct {
 //	@Tags			/teamup/admin
 //	@Accept			json
 //	@Produce		json
-//	@Param			approve	query		string		true							"审批事件类型：organization 或者 calibration_proof"
-//	@Param			approve	body		{object}	OrganizationApprovalBody		false	"组织审批入参"
-//	@Param			approve	body		{object}	CalibrationProofApprovalBody	false	"Pro审批入参"
-//	@Success		200		{object}	model.BackEndResp
+//	@Param			approve_type	query		string	true	"审批事件类型：organization 或者 calibration_proof"
+//	@Param			organization_id	body		int		false	"组织ID"
+//	@Param			open_id			body		string	false	"用户open_id"
+//	@Param			sport_type		body		string	false	"用户运动类型"
+//	@Success		200				{object}	model.BackEndResp
 //	@Router			/teamup/admin/get_approval_items [get]
 func Approve(c *model.TeamUpContext) (interface{}, error) {
 	//  todo: 这里也需要增加前端页面

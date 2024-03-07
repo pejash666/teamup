@@ -25,7 +25,7 @@ type GetCalibrationQuestionsBody struct {
 //	@Tags			/teamup/user
 //	@Accept			json
 //	@Produce		json
-//	@Param			sport_type	body		{object}	GetCalibrationQuestionsBody	true	"获取定级问题入参"
+//	@Param			sport_type	body		string	true	"获取定级问题入参"
 //	@Success		200			{object}	GetCalibrationQuestionsResp
 //	@Router			/teamup/user/get_calibration_questions [post]
 func GetCalibrationQuestions(c *model.TeamUpContext) (interface{}, error) {

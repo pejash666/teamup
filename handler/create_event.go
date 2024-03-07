@@ -28,7 +28,7 @@ type CreateEventID struct {
 //	@Tags			/teamup/event
 //	@Accept			json
 //	@Produce		json
-//	@Param			create_event	body		{object}	model.EventInfo	true	"创建活动入参"
+//	@Param			create_event	body		string	true	"参考EventInfo Model"
 //	@Success		200				{object}	CreateEventResp
 //	@Router			/teamup/event/create [post]
 func CreateEvent(c *model.TeamUpContext) (interface{}, error) {

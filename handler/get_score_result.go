@@ -27,6 +27,8 @@ type MatchResult struct {
 	RoundDetail   []*UploadRoundInfo  `json:"round_detail"`
 }
 
+// UploadRoundInfos model info
+// @Description 上传轮次信息
 type UploadRoundInfos struct {
 	EventID   int                `json:"event_id"` // 活动ID
 	RoundInfo []*UploadRoundInfo `json:"upload_round_info"`
@@ -59,7 +61,7 @@ type GetScoreResultResp struct {
 //	@Tags			/teamup/user
 //	@Accept			json
 //	@Produce		json
-//	@Param			get_score_result	body		{object}	UploadRoundInfos	true	"记分结果"
+//	@Param			get_score_result	body		string	true	"参考UploadRoundInfos"
 //	@Success		200					{object}	GetScoreResultResp
 //	@Router			/teamup/user/get_score_result [post]
 func GetScoreResult(c *model.TeamUpContext) (interface{}, error) {

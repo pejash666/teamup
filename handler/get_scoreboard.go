@@ -57,8 +57,8 @@ type GetScoreboardResp struct {
 //	@Tags			/teamup/user
 //	@Accept			json
 //	@Produce		json
-//	@Param			get_scoreboard	body		{object}	GetScoreboardBody	true	"获取记分板页面入参"
-//	@Success		200				{object}	GetScoreboardResp
+//	@Param			event_id	body		int	true	"活动ID"
+//	@Success		200			{object}	GetScoreboardResp
 //	@Router			/teamup/user/get_scoreboard [post]
 func GetScoreboard(c *model.TeamUpContext) (interface{}, error) {
 	body := &GetScoreboardBody{}

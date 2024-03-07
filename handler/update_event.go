@@ -19,7 +19,7 @@ import (
 //	@Tags			/teamup/event
 //	@Accept			json
 //	@Produce		json
-//	@Param			update_event	body		{object}	model.EventInfo	true	"更新活动入参"
+//	@Param			update_event	body		string	true	"更新活动入参,参考EventInfo"
 //	@Success		200				{object}	CreateEventResp
 //	@Router			/teamup/event/update [post]
 func UpdateEvent(c *model.TeamUpContext) (interface{}, error) {

@@ -58,8 +58,8 @@ type CalibrateRes struct {
 //	@Tags			/teamup/user
 //	@Accept			json
 //	@Produce		json
-//	@Param			sport_type		formData	string		true				"运动类型"
-//	@Param			questionnaire	formData	{object}	model.Questionnaire	true	"问卷"
+//	@Param			sport_type		formData	string	true	"运动类型"
+//	@Param			questionnaire	formData	string	true	"问卷结构体"
 //	@Success		200				{object}	GetCalibrationQuestionsResp
 //	@Router			/teamup/user/calibrate [post]
 func Calibrate(c *model.TeamUpContext) (interface{}, error) {

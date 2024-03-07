@@ -26,7 +26,7 @@ type QuitEventBody struct {
 //	@Tags			/teamup/user
 //	@Accept			json
 //	@Produce		json
-//	@Param			quit_event	body		{object}	QuitEventBody	true	"退出活动场次入参"
+//	@Param			event_id	body		int	true	"活动ID"
 //	@Success		200			{object}	model.BackEndResp
 //	@Router			/teamup/user/quit_event [post]
 func QuitEvent(c *model.TeamUpContext) (interface{}, error) {

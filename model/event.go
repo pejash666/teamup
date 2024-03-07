@@ -1,5 +1,7 @@
 package model
 
+// EventInfo model info
+// @Description 活动元信息
 type EventInfo struct {
 	Id               int64   `json:"id"`                        // 数据库主键
 	IsHost           bool    `json:"is_host"`                   // 是否是组织创建

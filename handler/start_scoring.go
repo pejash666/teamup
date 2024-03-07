@@ -38,6 +38,8 @@ type Sortable struct {
 	Count int
 }
 
+// StartScoringBody model info
+// @Description 开始记分
 type StartScoringBody struct {
 	ScoreRule        string `json:"score_rule"`
 	RoundTargetScore int32  `json:"round_target_score"`
@@ -70,7 +72,7 @@ type StartScoringResp struct {
 //	@Tags			/teamup/user
 //	@Accept			json
 //	@Produce		json
-//	@Param			start_scoring	body		{object}	StartScoringBody	true	"用户选择的记分规则"
+//	@Param			start_scoring	body		string	true	"用户选择的记分规则，参考StartScoringBody"
 //	@Success		200				{object}	StartScoringResp
 //	@Router			/teamup/user/start_scoring [post]
 func StartScoring(c *model.TeamUpContext) (interface{}, error) {

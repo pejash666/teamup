@@ -25,7 +25,7 @@ type EventPageBody struct {
 //	@Tags			/teamup/event
 //	@Accept			json
 //	@Produce		json
-//	@Param			get_event_tab	body		{object}	EventPageBody	true	"详情页入参"
+//	@Param			event_id	body int	true	"活动ID"
 //	@Success		200				{object}	EventTab
 //	@Router			/teamup/event/page [post]
 func EventPage(c *model.TeamUpContext) (interface{}, error) {
