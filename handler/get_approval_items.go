@@ -21,13 +21,14 @@ type GetApprovalItemsResult struct {
 }
 
 // GetApprovalItems godoc
-// @Summary      获取待审批的事件信息
-// @Description  包含创建组织的申请与Pro级别的认证事件
-// @Tags         /teamup/admin
-// @Accept       json
-// @Produce      json
-// @Success      200  {object}  GetApprovalItemsResp
-// @Router       /teamup/admin/get_approval_items [get]
+//
+//	@Summary		获取待审批的事件信息
+//	@Description	包含创建组织的申请与Pro级别的认证事件
+//	@Tags			/teamup/admin
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	GetApprovalItemsResp
+//	@Router			/teamup/admin/get_approval_items [get]
 func GetApprovalItems(c *model.TeamUpContext) (interface{}, error) {
 	// 获取待审批事件
 	res := &GetApprovalItemsResult{}

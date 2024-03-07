@@ -19,14 +19,15 @@ type EventPageBody struct {
 }
 
 // EventPage godoc
-// @Summary      获取活动详情页
-// @Description  活动详情页，包含活动元信息和参与的用户信息
-// @Tags         /teamup/event
-// @Accept       json
-// @Produce      json
-// @Param        get_event_tab  body  {object} EventPageBody  true  "详情页入参"
-// @Success      200  {object}  EventTab
-// @Router       /teamup/event/page [post]
+//
+//	@Summary		获取活动详情页
+//	@Description	活动详情页，包含活动元信息和参与的用户信息
+//	@Tags			/teamup/event
+//	@Accept			json
+//	@Produce		json
+//	@Param			get_event_tab	body		{object}	EventPageBody	true	"详情页入参"
+//	@Success		200				{object}	EventTab
+//	@Router			/teamup/event/page [post]
 func EventPage(c *model.TeamUpContext) (interface{}, error) {
 	body := &EventPageBody{}
 	err := c.BindJSON(body)

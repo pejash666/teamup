@@ -22,14 +22,15 @@ type CreateEventID struct {
 }
 
 // CreateEvent godoc
-// @Summary      创建活动
-// @Description  个人或者组织创建活动
-// @Tags         /teamup/event
-// @Accept       json
-// @Produce      json
-// @Param        create_event  body  {object} model.EventInfo  true  "创建活动入参"
-// @Success      200  {object}  CreateEventResp
-// @Router       /teamup/event/create [post]
+//
+//	@Summary		创建活动
+//	@Description	个人或者组织创建活动
+//	@Tags			/teamup/event
+//	@Accept			json
+//	@Produce		json
+//	@Param			create_event	body		{object}	model.EventInfo	true	"创建活动入参"
+//	@Success		200				{object}	CreateEventResp
+//	@Router			/teamup/event/create [post]
 func CreateEvent(c *model.TeamUpContext) (interface{}, error) {
 	util.Logger.Println("[CreateEvent] starts")
 	event := &model.EventInfo{}

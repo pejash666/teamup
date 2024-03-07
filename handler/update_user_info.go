@@ -18,14 +18,15 @@ type UpdateUserInfoReq struct {
 }
 
 // UpdateUserInfo godoc
-// @Summary      前端调用getUserProfile后调用，更新后端用户信息表
-// @Description  前端获取加密的用户手机号，服务端进行解码，存储
-// @Tags         /teamup/user
-// @Accept       json
-// @Produce      json
-// @Param        code  body     UpdateUserInfoReq  true  "请求"
-// @Success      200  {object}  model.BackEndResp
-// @Router       /teamup/user/update_user_info [post]
+//
+//	@Summary		前端调用getUserProfile后调用，更新后端用户信息表
+//	@Description	前端获取加密的用户手机号，服务端进行解码，存储
+//	@Tags			/teamup/user
+//	@Accept			json
+//	@Produce		json
+//	@Param			code	body		UpdateUserInfoReq	true	"请求"
+//	@Success		200		{object}	model.BackEndResp
+//	@Router			/teamup/user/update_user_info [post]
 func UpdateUserInfo(c *model.TeamUpContext) (interface{}, error) {
 	body := &UpdateUserInfoReq{}
 	err := c.BindJSON(body)

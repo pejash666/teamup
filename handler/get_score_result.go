@@ -53,14 +53,15 @@ type GetScoreResultResp struct {
 }
 
 // GetScoreResult godoc
-// @Summary      获取记分结果
-// @Description  用户上传分数信息，服务端计算用户等级变化
-// @Tags         /teamup/user
-// @Accept       json
-// @Produce      json
-// @Param        get_score_result  body  {object} UploadRoundInfos  true  "记分结果"
-// @Success      200  {object}  GetScoreResultResp
-// @Router       /teamup/user/get_score_result [post]
+//
+//	@Summary		获取记分结果
+//	@Description	用户上传分数信息，服务端计算用户等级变化
+//	@Tags			/teamup/user
+//	@Accept			json
+//	@Produce		json
+//	@Param			get_score_result	body		{object}	UploadRoundInfos	true	"记分结果"
+//	@Success		200					{object}	GetScoreResultResp
+//	@Router			/teamup/user/get_score_result [post]
 func GetScoreResult(c *model.TeamUpContext) (interface{}, error) {
 	body := &UploadRoundInfos{}
 	err := c.BindJSON(body)

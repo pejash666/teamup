@@ -23,16 +23,17 @@ type CalibrationProofApprovalBody struct {
 }
 
 // Approve godoc
-// @Summary      管理员审批
-// @Description  管理员审批：包含创建组织的申请与Pro级别的认证事件
-// @Tags         /teamup/admin
-// @Accept       json
-// @Produce      json
-// @Param        approve  query  string approve_type  true  "审批事件类型：organization 或者 calibration_proof"
-// @Param        approve  body  {object} OrganizationApprovalBody  false  "组织审批入参"
-// @Param        approve  body  {object} CalibrationProofApprovalBody  false  "Pro审批入参"
-// @Success      200  {object} model.BackEndResp
-// @Router       /teamup/admin/get_approval_items [get]
+//
+//	@Summary		管理员审批
+//	@Description	管理员审批：包含创建组织的申请与Pro级别的认证事件
+//	@Tags			/teamup/admin
+//	@Accept			json
+//	@Produce		json
+//	@Param			approve	query		string		true							"审批事件类型：organization 或者 calibration_proof"
+//	@Param			approve	body		{object}	OrganizationApprovalBody		false	"组织审批入参"
+//	@Param			approve	body		{object}	CalibrationProofApprovalBody	false	"Pro审批入参"
+//	@Success		200		{object}	model.BackEndResp
+//	@Router			/teamup/admin/get_approval_items [get]
 func Approve(c *model.TeamUpContext) (interface{}, error) {
 	//  todo: 这里也需要增加前端页面
 	approveType := c.Query("approve_type")

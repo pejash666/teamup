@@ -18,14 +18,15 @@ type JoinEventBody struct {
 }
 
 // JoinEvent godoc
-// @Summary      加入活动场次
-// @Description  加入活动场次
-// @Tags         /teamup/user
-// @Accept       json
-// @Produce      json
-// @Param        join_event  body  {object} JoinEventBody  true  "加入活动场次入参"
-// @Success      200  {object}  model.BackEndResp
-// @Router       /teamup/user/join_event [post]
+//
+//	@Summary		加入活动场次
+//	@Description	加入活动场次
+//	@Tags			/teamup/user
+//	@Accept			json
+//	@Produce		json
+//	@Param			join_event	body		{object}	JoinEventBody	true	"加入活动场次入参"
+//	@Success		200			{object}	model.BackEndResp
+//	@Router			/teamup/user/join_event [post]
 func JoinEvent(c *model.TeamUpContext) (interface{}, error) {
 	util.Logger.Printf("[JoinEvent] starts")
 	body := &JoinEventBody{}

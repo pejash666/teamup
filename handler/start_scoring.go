@@ -64,14 +64,15 @@ type StartScoringResp struct {
 // 1. ？？？
 
 // StartScoring godoc
-// @Summary      记分详细规则
-// @Description  根据用户选择的规则下发对应的详细对局信息
-// @Tags         /teamup/user
-// @Accept       json
-// @Produce      json
-// @Param        start_scoring  body  {object} StartScoringBody  true  "用户选择的记分规则"
-// @Success      200  {object}  StartScoringResp
-// @Router       /teamup/user/start_scoring [post]
+//
+//	@Summary		记分详细规则
+//	@Description	根据用户选择的规则下发对应的详细对局信息
+//	@Tags			/teamup/user
+//	@Accept			json
+//	@Produce		json
+//	@Param			start_scoring	body		{object}	StartScoringBody	true	"用户选择的记分规则"
+//	@Success		200				{object}	StartScoringResp
+//	@Router			/teamup/user/start_scoring [post]
 func StartScoring(c *model.TeamUpContext) (interface{}, error) {
 	body := &StartScoringBody{}
 	err := c.BindJSON(body)

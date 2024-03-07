@@ -13,14 +13,15 @@ import (
 )
 
 // UpdateEvent godoc
-// @Summary      更新活动元信息
-// @Description  个人或者组织更新活动元信息
-// @Tags         /teamup/event
-// @Accept       json
-// @Produce      json
-// @Param        update_event  body  {object} model.EventInfo  true  "更新活动入参"
-// @Success      200  {object}  CreateEventResp
-// @Router       /teamup/event/update [post]
+//
+//	@Summary		更新活动元信息
+//	@Description	个人或者组织更新活动元信息
+//	@Tags			/teamup/event
+//	@Accept			json
+//	@Produce		json
+//	@Param			update_event	body		{object}	model.EventInfo	true	"更新活动入参"
+//	@Success		200				{object}	CreateEventResp
+//	@Router			/teamup/event/update [post]
 func UpdateEvent(c *model.TeamUpContext) (interface{}, error) {
 	util.Logger.Printf("[UpdateEvent] starts")
 	// 从DB获取event

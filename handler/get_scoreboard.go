@@ -51,14 +51,15 @@ type GetScoreboardResp struct {
 }
 
 // GetScoreboard godoc
-// @Summary      记分板页面
-// @Description  记分板页面，包含用户可选规则项
-// @Tags         /teamup/user
-// @Accept       json
-// @Produce      json
-// @Param        get_scoreboard  body  {object} GetScoreboardBody  true  "获取记分板页面入参"
-// @Success      200  {object}  GetScoreboardResp
-// @Router       /teamup/user/get_scoreboard [post]
+//
+//	@Summary		记分板页面
+//	@Description	记分板页面，包含用户可选规则项
+//	@Tags			/teamup/user
+//	@Accept			json
+//	@Produce		json
+//	@Param			get_scoreboard	body		{object}	GetScoreboardBody	true	"获取记分板页面入参"
+//	@Success		200				{object}	GetScoreboardResp
+//	@Router			/teamup/user/get_scoreboard [post]
 func GetScoreboard(c *model.TeamUpContext) (interface{}, error) {
 	body := &GetScoreboardBody{}
 	err := c.BindJSON(body)
