@@ -14,20 +14,21 @@ type GetCalibrationQuestionsResp struct {
 	Data    *model.Questionnaire `json:"data"`
 }
 
+type GetCalibrationQuestionsBody struct {
+	SportType string `json:"sport_type"`
+}
+
 // GetCalibrationQuestions godoc
 // @Summary      获取定级问题
 // @Description  获取定级问题详情
 // @Tags         /teamup/user
 // @Accept       json
 // @Produce      json
-// @Param        sport_type  body    string  true  "运动类型"
+// @Param        sport_type  body  {object}  GetCalibrationQuestionsBody true  "获取定级问题入参"
 // @Success      200  {object}  GetCalibrationQuestionsResp
 // @Router       /teamup/user/get_calibration_questions [post]
 func GetCalibrationQuestions(c *model.TeamUpContext) (interface{}, error) {
-	type Body struct {
-		SportType string `json:"sport_type"`
-	}
-	body := &Body{}
+	body := &GetCalibrationQuestionsBody{}
 	err := c.BindJSON(body)
 	if err != nil {
 		util.Logger.Printf("[GetCalibrationQuestions] BindJSON failed, err:%v", err)

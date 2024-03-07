@@ -28,10 +28,7 @@ type EventPageBody struct {
 // @Success      200  {object}  EventTab
 // @Router       /teamup/event/page [post]
 func EventPage(c *model.TeamUpContext) (interface{}, error) {
-	type Body struct {
-		EventID int64 `json:"event_id"`
-	}
-	body := &Body{}
+	body := &EventPageBody{}
 	err := c.BindJSON(body)
 	if err != nil {
 		util.Logger.Printf("[EventPage] BindJSON failed, err:%v", err)

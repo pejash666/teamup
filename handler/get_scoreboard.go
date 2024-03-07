@@ -60,10 +60,7 @@ type GetScoreboardResp struct {
 // @Success      200  {object}  GetScoreboardResp
 // @Router       /teamup/user/get_scoreboard [post]
 func GetScoreboard(c *model.TeamUpContext) (interface{}, error) {
-	type Body struct {
-		EventID int `json:"event_id"`
-	}
-	body := &Body{}
+	body := &GetScoreboardBody{}
 	err := c.BindJSON(body)
 	if err != nil {
 		util.Logger.Printf("[GetScoreBoard] bindJson failed, err:%v", err)
