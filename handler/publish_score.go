@@ -10,12 +10,22 @@ import (
 	"teamup/util"
 )
 
+type PublishScoreBody struct {
+	EventID       int                 `json:"event_id"`
+	PlayersDetail []*PlayerAfterMatch `json:"players_detail"`
+}
+
+// PublishScore godoc
+// @Summary      发布比赛结果
+// @Description  根据计算出的等级变化，服务端更新场次，用户的信息
+// @Tags         /teamup/user
+// @Accept       json
+// @Produce      json
+// @Param        publish_score  body  {object} PublishScoreBody  true  "比赛结果"
+// @Success      200  {object}  model.BackEndResp
+// @Router       /teamup/user/publish_score [post]
 func PublishScore(c *model.TeamUpContext) (interface{}, error) {
-	type Body struct {
-		EventID       int                 `json:"event_id"`
-		PlayersDetail []*PlayerAfterMatch `json:"players_detail"`
-	}
-	body := &Body{}
+	body := &PublishScoreBody{}
 	err := c.BindJSON(body)
 	if err != nil {
 		util.Logger.Printf("[PublishScore] bindJSON failed, err:%v", err)

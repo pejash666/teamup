@@ -17,10 +17,6 @@ type Question struct {
 	QID    int    `json:"q_id"`
 	Option string `json:"option"`
 }
-type Body struct {
-	SportType     string      `json:"sport_type"`
-	Questionnaire []*Question `json:"questionnaire"`
-}
 
 var MaxScoreMap = map[string]float32{
 	"A": 1.5,
@@ -43,15 +39,28 @@ func getCalibrationScore(qid int, option string) float32 {
 	return CalculatingMap[strconv.FormatInt(int64(qid), 10)][option]
 }
 
+type CalibrateResp struct {
+	ErrNo   int32         `json:"err_no"`
+	ErrTips string        `json:"err_tips"`
+	Data    *CalibrateRes `json:"data"`
+}
+
+type CalibrateRes struct {
+	SportType  string  `json:"sport_type"`
+	Level      float32 `json:"level"`
+	ProofImage string  `json:"proof_image"` // 只有定位Pro的人才需要
+}
+
 // Calibrate godoc
 // @Summary      用户定级
 // @Description  获取定级问题详情
 // @Tags         /teamup/user
 // @Accept       json
 // @Produce      json
-// @Param        sport_type  body    string  true  "运动类型"
+// @Param        sport_type  formData    string  true  "运动类型"
+// @Param        questionnaire  formData   {object} model.Questionnaire true  "问卷"
 // @Success      200  {object}  GetCalibrationQuestionsResp
-// @Router       /teamup/user/get_calibration_questions [post]
+// @Router       /teamup/user/calibrate [post]
 func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 	sportType := c.PostForm("sport_type")
 	if sportType != constant.SportTypePedal && sportType != constant.SportTypeTennis && sportType != constant.SportTypePickelBall {
@@ -146,9 +155,9 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 		util.Logger.Printf("[Calibrate] save user failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.InternalError, err.Error())
 	}
-	res := map[string]interface{}{
-		"sport_type": sportType,
-		"level":      totalScore,
+	res := &CalibrateRes{
+		SportType: sportType,
+		Level:     totalScore,
 	}
 	baseImg := ""
 	// 如果是上传了图片，则返回一个base64的字符串
@@ -170,7 +179,7 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 	//}
 	if proofPath != "" && isPro {
 		baseImg = util.GetImageUrl(c, proofPath)
-		res["proof_image"] = baseImg
+		res.ProofImage = baseImg
 	}
 	util.Logger.Printf("[Calibrate] success")
 	return res, nil

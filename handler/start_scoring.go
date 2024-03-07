@@ -38,6 +38,19 @@ type Sortable struct {
 	Count int
 }
 
+type StartScoringBody struct {
+	ScoreRule        string `json:"score_rule"`
+	RoundTargetScore int32  `json:"round_target_score"`
+	FieldNum         int    `json:"field_num"` // 现在都是1，多块场地需要多个活动
+	EventID          int    `json:"event_id"`
+}
+
+type StartScoringResp struct {
+	ErrNo   int32        `json:"err_no"`
+	ErrTips string       `json:"err_tips"`
+	Data    *MatchDetail `json:"data"`
+}
+
 // StartScoring 用户点击开始记分
 // 对于pedal运动：
 // 1. Americano记分模式，有N个用户参加，则生成N-1场对局，俩俩搭配；
@@ -50,14 +63,17 @@ type Sortable struct {
 // 对于pickelball运动
 // 1. ？？？
 
+// StartScoring godoc
+// @Summary      记分详细规则
+// @Description  根据用户选择的规则下发对应的详细对局信息
+// @Tags         /teamup/user
+// @Accept       json
+// @Produce      json
+// @Param        start_scoring  body  {object} StartScoringBody  true  "用户选择的记分规则"
+// @Success      200  {object}  StartScoringResp
+// @Router       /teamup/user/start_scoring [post]
 func StartScoring(c *model.TeamUpContext) (interface{}, error) {
-	type Body struct {
-		ScoreRule        string `json:"score_rule"`
-		RoundTargetScore int32  `json:"round_target_score"`
-		FieldNum         int    `json:"field_num"` // 现在都是1，多块场地需要多个活动
-		EventID          int    `json:"event_id"`
-	}
-	body := &Body{}
+	body := &StartScoringBody{}
 	err := c.BindJSON(body)
 	if err != nil {
 		util.Logger.Printf("[StartScoring] bindJson failed, err:%v", err)

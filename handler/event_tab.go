@@ -14,21 +14,34 @@ type EventTab struct {
 	Players   []*model.Player  `json:"players"`
 }
 
-func GetEventTab(c *model.TeamUpContext) (interface{}, error) {
+type EventPageBody struct {
+	EventID int64 `json:"event_id"`
+}
+
+// EventPage godoc
+// @Summary      获取活动详情页
+// @Description  活动详情页，包含活动元信息和参与的用户信息
+// @Tags         /teamup/event
+// @Accept       json
+// @Produce      json
+// @Param        get_event_tab  body  {object} EventPageBody  true  "详情页入参"
+// @Success      200  {object}  EventTab
+// @Router       /teamup/event/page [post]
+func EventPage(c *model.TeamUpContext) (interface{}, error) {
 	type Body struct {
 		EventID int64 `json:"event_id"`
 	}
 	body := &Body{}
 	err := c.BindJSON(body)
 	if err != nil {
-		util.Logger.Printf("[GetEventTab] BindJSON failed, err:%v", err)
+		util.Logger.Printf("[EventPage] BindJSON failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.ParamsError, "invalid body")
 	}
 	// 获取任务元信息, 能看到的都是发布后的，不能是草稿状态
 	eventMeta := &mysql.EventMeta{}
 	result := util.DB().Where("id = ? AND status <> ?", body.EventID, constant.EventStatusDraft).Take(eventMeta)
 	if result.Error != nil {
-		util.Logger.Printf("[GetEventTab] get event meta from DB failed, err:%v", result.Error)
+		util.Logger.Printf("[EventPage] get event meta from DB failed, err:%v", result.Error)
 		return nil, iface.NewBackEndError(iface.MysqlError, "get record failed")
 	}
 	eventTab := &EventTab{}
@@ -38,7 +51,7 @@ func GetEventTab(c *model.TeamUpContext) (interface{}, error) {
 		organization := &mysql.Organization{}
 		result := util.DB().Where("id = ?", eventMeta.OrganizationID).Take(organization)
 		if result.Error != nil {
-			util.Logger.Printf("[GetEventTab] get organization record from DB failed, err:%v", result.Error)
+			util.Logger.Printf("[EventPage] get organization record from DB failed, err:%v", result.Error)
 			return nil, iface.NewBackEndError(iface.MysqlError, "get record failed")
 		}
 		eventInfo.OrganizationID = int64(organization.ID)
@@ -72,7 +85,7 @@ func GetEventTab(c *model.TeamUpContext) (interface{}, error) {
 	creator := &mysql.WechatUserInfo{}
 	err = util.DB().Where("open_id = ? AND sport_type = ?", eventMeta.Creator, eventMeta.SportType).Take(creator).Error
 	if err != nil {
-		util.Logger.Printf("[GetEventTab] query creator failed, err:%v", err)
+		util.Logger.Printf("[EventPage] query creator failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
 	}
 	eventInfo.CreatorNickname = creator.Nickname
@@ -85,17 +98,17 @@ func GetEventTab(c *model.TeamUpContext) (interface{}, error) {
 		currentPeople := make([]string, 0)
 		err = sonic.UnmarshalString(eventMeta.CurrentPlayer, &currentPeople)
 		if err != nil {
-			util.Logger.Printf("[GetEventTab] Unmarshal currentPeople from DB failed, err:%v", err)
+			util.Logger.Printf("[EventPage] Unmarshal currentPeople from DB failed, err:%v", err)
 			return nil, iface.NewBackEndError(iface.InternalError, "unmarshall error")
 		}
 		var users []mysql.WechatUserInfo
 		result := util.DB().Where("open_id IN ? AND sport_type = ?", currentPeople, eventMeta.SportType).Find(&users)
 		if result.Error != nil {
-			util.Logger.Printf("[GetEventTab] find player in DB failed, err:%v", err)
+			util.Logger.Printf("[EventPage] find player in DB failed, err:%v", err)
 			return nil, iface.NewBackEndError(iface.MysqlError, "get record failed")
 		}
 		if len(users) != int(eventMeta.CurrentPlayerNum) {
-			util.Logger.Printf("[GetEventTab] unmatched currentplayer info")
+			util.Logger.Printf("[EventPage] unmatched currentplayer info")
 			return nil, iface.NewBackEndError(iface.InternalError, "unmatched player info")
 		}
 		players := make([]*model.Player, 0)
@@ -112,6 +125,6 @@ func GetEventTab(c *model.TeamUpContext) (interface{}, error) {
 	} else {
 		eventTab.Players = make([]*model.Player, 0)
 	}
-	util.Logger.Printf("[GetEventTab] success, res:%+v", eventInfo)
+	util.Logger.Printf("[EventPage] success, res:%+v", eventInfo)
 	return eventTab, nil
 }

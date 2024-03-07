@@ -46,6 +46,21 @@ type UploadRoundInfo struct {
 	AwayLevelChange float64         `json:"away_level_change"`
 }
 
+type GetScoreResultResp struct {
+	ErrNo   int32        `json:"err_no"`
+	ErrTips string       `json:"err_tips"`
+	Data    *MatchResult `json:"data"`
+}
+
+// GetScoreResult godoc
+// @Summary      获取记分结果
+// @Description  用户上传分数信息，服务端计算用户等级变化
+// @Tags         /teamup/user
+// @Accept       json
+// @Produce      json
+// @Param        get_score_result  body  {object} UploadRoundInfos  true  "记分结果"
+// @Success      200  {object}  GetScoreResultResp
+// @Router       /teamup/user/get_score_result [post]
 func GetScoreResult(c *model.TeamUpContext) (interface{}, error) {
 	body := &UploadRoundInfos{}
 	err := c.BindJSON(body)

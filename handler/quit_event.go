@@ -15,12 +15,22 @@ const (
 	ThreeHoursSeconds = 10800
 )
 
+type QuitEventBody struct {
+	EventID int64 `json:"event_id"`
+}
+
+// QuitEvent godoc
+// @Summary      退出活动场次
+// @Description  退出活动场次
+// @Tags         /teamup/user
+// @Accept       json
+// @Produce      json
+// @Param        quit_event  body  {object} QuitEventBody  true  "退出活动场次入参"
+// @Success      200  {object}  model.BackEndResp
+// @Router       /teamup/user/quit_event [post]
 func QuitEvent(c *model.TeamUpContext) (interface{}, error) {
 	// 获取当前活动信息
-
-	body := &struct {
-		EventID int64 `json:"event_id"`
-	}{}
+	body := &QuitEventBody{}
 	err := c.BindJSON(body)
 	if err != nil {
 		util.Logger.Printf("[QuitEvent] bindJSON failed, err:%v", err)

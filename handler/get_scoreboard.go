@@ -40,7 +40,25 @@ var SportTypeScoreOptions = map[string]*model.ScoreOptions{
 	},
 }
 
-// GetScoreboard 记分板页面
+type GetScoreboardBody struct {
+	EventID int64 `json:"event_id"`
+}
+
+type GetScoreboardResp struct {
+	ErrNo   int32       `json:"err_no"`
+	ErrTips string      `json:"err_tips"`
+	Data    *ScoreBoard `json:"data"`
+}
+
+// GetScoreboard godoc
+// @Summary      记分板页面
+// @Description  记分板页面，包含用户可选规则项
+// @Tags         /teamup/user
+// @Accept       json
+// @Produce      json
+// @Param        get_scoreboard  body  {object} GetScoreboardBody  true  "获取记分板页面入参"
+// @Success      200  {object}  GetScoreboardResp
+// @Router       /teamup/user/get_scoreboard [post]
 func GetScoreboard(c *model.TeamUpContext) (interface{}, error) {
 	type Body struct {
 		EventID int `json:"event_id"`

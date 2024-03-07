@@ -8,7 +8,26 @@ import (
 	"teamup/util"
 )
 
-func GetUserHostInfo(c *model.TeamUpContext) (interface{}, error) {
+type GetHostInfoResp struct {
+	ErrNo   int32            `json:"err_no"`
+	ErrTips string           `json:"err_tips"`
+	Data    map[string]*Info `json:"data"`
+}
+
+type Info struct {
+	IsHost         bool  `json:"is_host"`
+	OrganizationID int64 `json:"organization_id"`
+}
+
+// GetHostInfo godoc
+// @Summary      用户组织信息
+// @Description  用户在不同运动类型下是否为“组织”身份
+// @Tags         /teamup/user
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  GetHostInfoResp
+// @Router       /teamup/user/get_host_info [get]
+func GetHostInfo(c *model.TeamUpContext) (interface{}, error) {
 	var users []*mysql.WechatUserInfo
 	result := util.DB().Where("open_id = ? AND sport_type IN ?", c.BasicUser.OpenID, []string{constant.SportTypePedal, constant.SportTypeTennis, constant.SportTypePickelBall}).Find(&users)
 	if result.Error != nil {

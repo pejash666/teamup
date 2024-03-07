@@ -91,7 +91,7 @@ func HttpHandler() *gin.Engine {
 		NeedLoginStatus: true,
 	}))
 	// 获取用户组织相关信息（通了）
-	userGroup.GET("/host_info", API(handler.GetUserHostInfo, model.APIOption{
+	userGroup.GET("/get_host_info", API(handler.GetHostInfo, model.APIOption{
 		NeedLoginStatus: true,
 	}))
 	// 加入活动(通了)
@@ -128,7 +128,7 @@ func HttpHandler() *gin.Engine {
 	// 活动类接口
 	eventGroup := r.Group("/team_up/event")
 	// 活动页面(通了)
-	eventGroup.POST("/page", API(handler.GetEventTab, model.APIOption{
+	eventGroup.POST("/page", API(handler.EventPage, model.APIOption{
 		NeedLoginStatus: true,
 	}))
 	// 创建活动（通了）

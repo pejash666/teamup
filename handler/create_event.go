@@ -11,6 +11,25 @@ import (
 	"time"
 )
 
+type CreateEventResp struct {
+	ErrNo   int32         `json:"err_no"`
+	ErrTips string        `json:"err_tips"`
+	Data    CreateEventID `json:"data"`
+}
+
+type CreateEventID struct {
+	EventID int64 `json:"event_id"`
+}
+
+// CreateEvent godoc
+// @Summary      创建活动
+// @Description  个人或者组织创建活动
+// @Tags         /teamup/event
+// @Accept       json
+// @Produce      json
+// @Param        create_event  body  {object} model.EventInfo  true  "创建活动入参"
+// @Success      200  {object}  CreateEventResp
+// @Router       /teamup/event/create [post]
 func CreateEvent(c *model.TeamUpContext) (interface{}, error) {
 	util.Logger.Println("[CreateEvent] starts")
 	event := &model.EventInfo{}
@@ -104,7 +123,7 @@ func CreateEvent(c *model.TeamUpContext) (interface{}, error) {
 	} else {
 		util.Logger.Printf("[CreateEvent] save record to DB success, eventID:%d", meta.ID)
 	}
-	return map[string]uint{"event_id": meta.ID}, nil
+	return &CreateEventID{EventID: int64(meta.ID)}, nil
 }
 
 func paramsCheck(event *model.EventInfo) (bool, string) {
