@@ -7,7 +7,6 @@ CREATE TABLE `event_info`
     `creator`       varchar(64) not null default '' comment '创建者',
     `sport_type`    varchar(64) not null default '' comment '运动类型',
     `match_type`    varchar(64) not null default '' comment '比赛类型',
-    `score_rule`    varchar(64) not null default '' comment '记分规则',
     `scorers`       varchar(256) not null default '' comment '记分员',
     `game_type`     varchar(64) not null default '' comment '对局类型',
     `score_rule`    varchar(64) not null default '' comment '记分规则',
