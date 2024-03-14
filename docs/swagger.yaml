@@ -470,7 +470,7 @@ definitions:
 info:
   contact: {}
 paths:
-  /teamup/admin/get_approval_items:
+  /team_up/admin/get_approval_items:
     get:
       consumes:
       - application/json
@@ -505,8 +505,8 @@ paths:
             $ref: '#/definitions/model.BackEndResp'
       summary: 管理员审批
       tags:
-      - /teamup/admin
-  /teamup/event/create:
+      - /team_up/admin
+  /team_up/event/create:
     post:
       consumes:
       - application/json
@@ -527,8 +527,8 @@ paths:
             $ref: '#/definitions/handler.CreateEventResp'
       summary: 创建活动
       tags:
-      - /teamup/event
-  /teamup/event/page:
+      - /team_up/event
+  /team_up/event/page:
     post:
       consumes:
       - application/json
@@ -549,8 +549,8 @@ paths:
             $ref: '#/definitions/handler.EventTab'
       summary: 获取活动详情页
       tags:
-      - /teamup/event
-  /teamup/event/update:
+      - /team_up/event
+  /team_up/event/update:
     post:
       consumes:
       - application/json
@@ -571,8 +571,8 @@ paths:
             $ref: '#/definitions/handler.CreateEventResp'
       summary: 更新活动元信息
       tags:
-      - /teamup/event
-  /teamup/organization/create:
+      - /team_up/event
+  /team_up/organization/create:
     post:
       consumes:
       - application/json
@@ -586,8 +586,8 @@ paths:
             $ref: '#/definitions/model.BackEndResp'
       summary: 创建组织
       tags:
-      - /teamup/organization
-  /teamup/user/calibrate:
+      - /team_up/organization
+  /team_up/user/calibrate:
     post:
       consumes:
       - application/json
@@ -612,8 +612,8 @@ paths:
             $ref: '#/definitions/handler.GetCalibrationQuestionsResp'
       summary: 用户定级
       tags:
-      - /teamup/user
-  /teamup/user/get_calibration_questions:
+      - /team_up/user
+  /team_up/user/get_calibration_questions:
     post:
       consumes:
       - application/json
@@ -634,8 +634,8 @@ paths:
             $ref: '#/definitions/handler.GetCalibrationQuestionsResp'
       summary: 获取定级问题
       tags:
-      - /teamup/user
-  /teamup/user/get_host_info:
+      - /team_up/user
+  /team_up/user/get_host_info:
     get:
       consumes:
       - application/json
@@ -649,8 +649,8 @@ paths:
             $ref: '#/definitions/handler.GetHostInfoResp'
       summary: 用户组织信息
       tags:
-      - /teamup/user
-  /teamup/user/get_score_result:
+      - /team_up/user
+  /team_up/user/get_score_result:
     post:
       consumes:
       - application/json
@@ -671,8 +671,8 @@ paths:
             $ref: '#/definitions/handler.GetScoreResultResp'
       summary: 获取记分结果
       tags:
-      - /teamup/user
-  /teamup/user/get_scoreboard:
+      - /team_up/user
+  /team_up/user/get_scoreboard:
     post:
       consumes:
       - application/json
@@ -693,8 +693,8 @@ paths:
             $ref: '#/definitions/handler.GetScoreboardResp'
       summary: 记分板页面
       tags:
-      - /teamup/user
-  /teamup/user/join_event:
+      - /team_up/user
+  /team_up/user/join_event:
     post:
       consumes:
       - application/json
@@ -721,8 +721,8 @@ paths:
             $ref: '#/definitions/model.BackEndResp'
       summary: 加入活动场次
       tags:
-      - /teamup/user
-  /teamup/user/login:
+      - /team_up/user
+  /team_up/user/login:
     post:
       consumes:
       - application/json
@@ -743,8 +743,8 @@ paths:
             $ref: '#/definitions/handler.UserLoginResp'
       summary: 用户登录
       tags:
-      - /teamup/user
-  /teamup/user/my_tab:
+      - /team_up/user
+  /team_up/user/my_tab:
     get:
       consumes:
       - application/json
@@ -758,8 +758,8 @@ paths:
             $ref: '#/definitions/handler.GetMyTabResp'
       summary: 我的页面
       tags:
-      - /teamup/user
-  /teamup/user/publish_score:
+      - /team_up/user
+  /team_up/user/publish_score:
     post:
       consumes:
       - application/json
@@ -786,8 +786,8 @@ paths:
             $ref: '#/definitions/model.BackEndResp'
       summary: 发布比赛结果
       tags:
-      - /teamup/user
-  /teamup/user/quit_event:
+      - /team_up/user
+  /team_up/user/quit_event:
     post:
       consumes:
       - application/json
@@ -808,8 +808,8 @@ paths:
             $ref: '#/definitions/model.BackEndResp'
       summary: 退出活动场次
       tags:
-      - /teamup/user
-  /teamup/user/start_scoring:
+      - /team_up/user
+  /team_up/user/start_scoring:
     post:
       consumes:
       - application/json
@@ -830,8 +830,8 @@ paths:
             $ref: '#/definitions/handler.StartScoringResp'
       summary: 记分详细规则
       tags:
-      - /teamup/user
-  /teamup/user/update_phone_number:
+      - /team_up/user
+  /team_up/user/update_phone_number:
     post:
       consumes:
       - application/json
@@ -852,8 +852,8 @@ paths:
             $ref: '#/definitions/model.BackEndResp'
       summary: 获取用户手机号
       tags:
-      - /teamup/user
-  /teamup/user/update_user_info:
+      - /team_up/user
+  /team_up/user/update_user_info:
     post:
       consumes:
       - application/json
@@ -874,5 +874,5 @@ paths:
             $ref: '#/definitions/model.BackEndResp'
       summary: 前端调用getUserProfile后调用，更新后端用户信息表
       tags:
-      - /teamup/user
+      - /team_up/user
 swagger: "2.0"

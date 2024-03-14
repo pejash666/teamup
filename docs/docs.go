@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/teamup/admin/get_approval_items": {
+        "/team_up/admin/get_approval_items": {
             "get": {
                 "description": "管理员审批：包含创建组织的申请与Pro级别的认证事件",
                 "consumes": [
@@ -25,7 +25,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "/teamup/admin"
+                    "/team_up/admin"
                 ],
                 "summary": "管理员审批",
                 "parameters": [
@@ -71,7 +71,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/teamup/event/create": {
+        "/team_up/event/create": {
             "post": {
                 "description": "个人或者组织创建活动",
                 "consumes": [
@@ -81,7 +81,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "/teamup/event"
+                    "/team_up/event"
                 ],
                 "summary": "创建活动",
                 "parameters": [
@@ -105,7 +105,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/teamup/event/page": {
+        "/team_up/event/page": {
             "post": {
                 "description": "活动详情页，包含活动元信息和参与的用户信息",
                 "consumes": [
@@ -115,7 +115,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "/teamup/event"
+                    "/team_up/event"
                 ],
                 "summary": "获取活动详情页",
                 "parameters": [
@@ -139,7 +139,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/teamup/event/update": {
+        "/team_up/event/update": {
             "post": {
                 "description": "个人或者组织更新活动元信息",
                 "consumes": [
@@ -149,7 +149,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "/teamup/event"
+                    "/team_up/event"
                 ],
                 "summary": "更新活动元信息",
                 "parameters": [
@@ -173,7 +173,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/teamup/organization/create": {
+        "/team_up/organization/create": {
             "post": {
                 "description": "用户上传组织信息",
                 "consumes": [
@@ -183,7 +183,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "/teamup/organization"
+                    "/team_up/organization"
                 ],
                 "summary": "创建组织",
                 "responses": {
@@ -196,7 +196,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/teamup/user/calibrate": {
+        "/team_up/user/calibrate": {
             "post": {
                 "description": "获取定级问题详情",
                 "consumes": [
@@ -206,7 +206,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "/teamup/user"
+                    "/team_up/user"
                 ],
                 "summary": "用户定级",
                 "parameters": [
@@ -235,7 +235,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/teamup/user/get_calibration_questions": {
+        "/team_up/user/get_calibration_questions": {
             "post": {
                 "description": "获取定级问题详情",
                 "consumes": [
@@ -245,7 +245,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "/teamup/user"
+                    "/team_up/user"
                 ],
                 "summary": "获取定级问题",
                 "parameters": [
@@ -269,7 +269,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/teamup/user/get_host_info": {
+        "/team_up/user/get_host_info": {
             "get": {
                 "description": "用户在不同运动类型下是否为“组织”身份",
                 "consumes": [
@@ -279,7 +279,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "/teamup/user"
+                    "/team_up/user"
                 ],
                 "summary": "用户组织信息",
                 "responses": {
@@ -292,7 +292,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/teamup/user/get_score_result": {
+        "/team_up/user/get_score_result": {
             "post": {
                 "description": "用户上传分数信息，服务端计算用户等级变化",
                 "consumes": [
@@ -302,7 +302,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "/teamup/user"
+                    "/team_up/user"
                 ],
                 "summary": "获取记分结果",
                 "parameters": [
@@ -326,7 +326,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/teamup/user/get_scoreboard": {
+        "/team_up/user/get_scoreboard": {
             "post": {
                 "description": "记分板页面，包含用户可选规则项",
                 "consumes": [
@@ -336,7 +336,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "/teamup/user"
+                    "/team_up/user"
                 ],
                 "summary": "记分板页面",
                 "parameters": [
@@ -360,7 +360,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/teamup/user/join_event": {
+        "/team_up/user/join_event": {
             "post": {
                 "description": "加入活动场次",
                 "consumes": [
@@ -370,7 +370,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "/teamup/user"
+                    "/team_up/user"
                 ],
                 "summary": "加入活动场次",
                 "parameters": [
@@ -403,7 +403,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/teamup/user/login": {
+        "/team_up/user/login": {
             "post": {
                 "description": "前端使用微信code请求服务端登录",
                 "consumes": [
@@ -413,7 +413,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "/teamup/user"
+                    "/team_up/user"
                 ],
                 "summary": "用户登录",
                 "parameters": [
@@ -437,7 +437,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/teamup/user/my_tab": {
+        "/team_up/user/my_tab": {
             "get": {
                 "description": "包含用户信息，级别信息和参与的活动",
                 "consumes": [
@@ -447,7 +447,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "/teamup/user"
+                    "/team_up/user"
                 ],
                 "summary": "我的页面",
                 "responses": {
@@ -460,7 +460,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/teamup/user/publish_score": {
+        "/team_up/user/publish_score": {
             "post": {
                 "description": "根据计算出的等级变化，服务端更新场次，用户的信息",
                 "consumes": [
@@ -470,7 +470,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "/teamup/user"
+                    "/team_up/user"
                 ],
                 "summary": "发布比赛结果",
                 "parameters": [
@@ -503,7 +503,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/teamup/user/quit_event": {
+        "/team_up/user/quit_event": {
             "post": {
                 "description": "退出活动场次",
                 "consumes": [
@@ -513,7 +513,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "/teamup/user"
+                    "/team_up/user"
                 ],
                 "summary": "退出活动场次",
                 "parameters": [
@@ -537,7 +537,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/teamup/user/start_scoring": {
+        "/team_up/user/start_scoring": {
             "post": {
                 "description": "根据用户选择的规则下发对应的详细对局信息",
                 "consumes": [
@@ -547,7 +547,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "/teamup/user"
+                    "/team_up/user"
                 ],
                 "summary": "记分详细规则",
                 "parameters": [
@@ -571,7 +571,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/teamup/user/update_phone_number": {
+        "/team_up/user/update_phone_number": {
             "post": {
                 "description": "前端获取加密的用户手机号，服务端进行解码，存储",
                 "consumes": [
@@ -581,7 +581,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "/teamup/user"
+                    "/team_up/user"
                 ],
                 "summary": "获取用户手机号",
                 "parameters": [
@@ -605,7 +605,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/teamup/user/update_user_info": {
+        "/team_up/user/update_user_info": {
             "post": {
                 "description": "前端获取加密的用户手机号，服务端进行解码，存储",
                 "consumes": [
@@ -615,7 +615,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "/teamup/user"
+                    "/team_up/user"
                 ],
                 "summary": "前端调用getUserProfile后调用，更新后端用户信息表",
                 "parameters": [
