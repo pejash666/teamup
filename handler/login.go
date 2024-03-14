@@ -22,12 +22,12 @@ type UserLoginResp struct {
 //
 //	@Summary		用户登录
 //	@Description	前端使用微信code请求服务端登录
-//	@Tags			/teamup/user
+//	@Tags			/team_up/user
 //	@Accept			json
 //	@Produce		json
 //	@Param			code	body		string	true	"微信Code"
 //	@Success		200		{object}	UserLoginResp
-//	@Router			/teamup/user/login [post]
+//	@Router			/team_up/user/login [post]
 func UserLogin(c *model.TeamUpContext) (interface{}, error) {
 	util.Logger.Println("UserLogin started")
 	body := &model.GeneralCodeBody{}

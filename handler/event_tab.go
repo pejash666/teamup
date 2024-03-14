@@ -22,12 +22,12 @@ type EventPageBody struct {
 //
 //	@Summary		获取活动详情页
 //	@Description	活动详情页，包含活动元信息和参与的用户信息
-//	@Tags			/teamup/event
+//	@Tags			/team_up/event
 //	@Accept			json
 //	@Produce		json
 //	@Param			event_id	body int	true	"活动ID"
 //	@Success		200				{object}	EventTab
-//	@Router			/teamup/event/page [post]
+//	@Router			/team_up/event/page [post]
 func EventPage(c *model.TeamUpContext) (interface{}, error) {
 	body := &EventPageBody{}
 	err := c.BindJSON(body)

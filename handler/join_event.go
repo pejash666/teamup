@@ -21,13 +21,13 @@ type JoinEventBody struct {
 //
 //	@Summary		加入活动场次
 //	@Description	加入活动场次
-//	@Tags			/teamup/user
+//	@Tags			/team_up/user
 //	@Accept			json
 //	@Produce		json
 //	@Param			event_id	body		int		true	"加入活动场次入参"
 //	@Param			is_inviting	body		bool	true	"是否通过邀请链接加入"
 //	@Success		200			{object}	model.BackEndResp
-//	@Router			/teamup/user/join_event [post]
+//	@Router			/team_up/user/join_event [post]
 func JoinEvent(c *model.TeamUpContext) (interface{}, error) {
 	util.Logger.Printf("[JoinEvent] starts")
 	body := &JoinEventBody{}

@@ -28,6 +28,7 @@ var AdminList = []string{
 func API(handler iface.HandlerFunc, opt model.APIOption) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
+
 			if err := recover(); err != nil {
 				Logger.Printf("panic recover, err:%v, stack:%v", err, string(debug.Stack()))
 			}
@@ -37,6 +38,9 @@ func API(handler iface.HandlerFunc, opt model.APIOption) gin.HandlerFunc {
 		ctx, err := NewTeamUpContext(c, opt)
 		if err != nil {
 			Logger.Printf("API.NewTeamUpContext failed, err:%v", err)
+			respData := makeUpRespData(nil, err)
+			resp, _ := sonic.Marshal(respData)
+			c.Data(http.StatusOK, "application/json; charset=utf-8", resp)
 			return
 		}
 		data, err := handler(ctx)

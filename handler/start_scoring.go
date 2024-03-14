@@ -69,12 +69,12 @@ type StartScoringResp struct {
 //
 //	@Summary		记分详细规则
 //	@Description	根据用户选择的规则下发对应的详细对局信息
-//	@Tags			/teamup/user
+//	@Tags			/team_up/user
 //	@Accept			json
 //	@Produce		json
 //	@Param			start_scoring	body		string	true	"用户选择的记分规则，参考StartScoringBody"
 //	@Success		200				{object}	StartScoringResp
-//	@Router			/teamup/user/start_scoring [post]
+//	@Router			/team_up/user/start_scoring [post]
 func StartScoring(c *model.TeamUpContext) (interface{}, error) {
 	body := &StartScoringBody{}
 	err := c.BindJSON(body)

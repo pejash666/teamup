@@ -22,13 +22,13 @@ type PublishScoreBody struct {
 //
 //	@Summary		发布比赛结果
 //	@Description	根据计算出的等级变化，服务端更新场次，用户的信息
-//	@Tags			/teamup/user
+//	@Tags			/team_up/user
 //	@Accept			json
 //	@Produce		json
 //	@Param			event_id		body		int		true	"活动ID"
 //	@Param			player_detail	body		string	true	"用户详情, 参考PublishScoreBody"
 //	@Success		200				{object}	model.BackEndResp
-//	@Router			/teamup/user/publish_score [post]
+//	@Router			/team_up/user/publish_score [post]
 func PublishScore(c *model.TeamUpContext) (interface{}, error) {
 	body := &PublishScoreBody{}
 	err := c.BindJSON(body)

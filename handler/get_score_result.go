@@ -58,12 +58,12 @@ type GetScoreResultResp struct {
 //
 //	@Summary		获取记分结果
 //	@Description	用户上传分数信息，服务端计算用户等级变化
-//	@Tags			/teamup/user
+//	@Tags			/team_up/user
 //	@Accept			json
 //	@Produce		json
 //	@Param			get_score_result	body		string	true	"参考UploadRoundInfos"
 //	@Success		200					{object}	GetScoreResultResp
-//	@Router			/teamup/user/get_score_result [post]
+//	@Router			/team_up/user/get_score_result [post]
 func GetScoreResult(c *model.TeamUpContext) (interface{}, error) {
 	body := &UploadRoundInfos{}
 	err := c.BindJSON(body)

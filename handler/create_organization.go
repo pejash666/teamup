@@ -16,11 +16,11 @@ import (
 //
 //	@Summary		创建组织
 //	@Description	用户上传组织信息
-//	@Tags			/teamup/organization
+//	@Tags			/team_up/organization
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{object}	model.BackEndResp
-//	@Router			/teamup/organization/create [post]
+//	@Router			/team_up/organization/create [post]
 func CreateOrganization(c *model.TeamUpContext) (interface{}, error) {
 	util.Logger.Printf("[CreateOrganization] starts")
 	// 一个open_id在一个sport_type下只能有一个organization

@@ -25,12 +25,12 @@ type CreateEventID struct {
 //
 //	@Summary		创建活动
 //	@Description	个人或者组织创建活动
-//	@Tags			/teamup/event
+//	@Tags			/team_up/event
 //	@Accept			json
 //	@Produce		json
 //	@Param			create_event	body		string	true	"参考EventInfo Model"
 //	@Success		200				{object}	CreateEventResp
-//	@Router			/teamup/event/create [post]
+//	@Router			/team_up/event/create [post]
 func CreateEvent(c *model.TeamUpContext) (interface{}, error) {
 	util.Logger.Println("[CreateEvent] starts")
 	event := &model.EventInfo{}

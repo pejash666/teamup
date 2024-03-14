@@ -16,12 +16,12 @@ import (
 //
 //	@Summary		更新活动元信息
 //	@Description	个人或者组织更新活动元信息
-//	@Tags			/teamup/event
+//	@Tags			/team_up/event
 //	@Accept			json
 //	@Produce		json
 //	@Param			update_event	body		string	true	"更新活动入参,参考EventInfo"
 //	@Success		200				{object}	CreateEventResp
-//	@Router			/teamup/event/update [post]
+//	@Router			/team_up/event/update [post]
 func UpdateEvent(c *model.TeamUpContext) (interface{}, error) {
 	util.Logger.Printf("[UpdateEvent] starts")
 	// 从DB获取event
