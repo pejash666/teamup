@@ -21,4 +21,5 @@ ENV TZ Asia/Shanghai
 WORKDIR /app
 COPY --from=builder /app/main /app/main
 COPY --from=builder /build/questionnaire /app/questionnaire
+COPY --from=builder /build/docs /app/docs
 CMD ["./main"]
