@@ -19,7 +19,7 @@ func InitMySQL() {
 	}
 	var err error
 	onceMySQL.Do(func() {
-		dsn := fmt.Sprintf(constant.MySQLDSN, "root", "sdqd960410", "tcp(127.0.0.1:3306)", "teamup")
+		dsn := fmt.Sprintf(constant.MySQLDSN, "root", "sdqd960410", "tcp(10.0.16.9:3306)", "teamup")
 		MySQLDB, err = gorm.Open(mysql.Open(dsn))
 		if err != nil {
 			Logger.Panicf("InitMySQL failed, err:%v", err)
