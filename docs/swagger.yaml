@@ -1,4 +1,15 @@
 definitions:
+  handler.ConfirmLoginResp:
+    properties:
+      data:
+        additionalProperties:
+          type: string
+        type: object
+      err_no:
+        type: integer
+      err_tips:
+        type: string
+    type: object
   handler.CreateEventID:
     properties:
       event_id:
@@ -613,6 +624,34 @@ paths:
       summary: 用户定级
       tags:
       - /team_up/user
+  /team_up/user/confirm_login:
+    post:
+      consumes:
+      - application/json
+      description: 前端使用微信code+获取手机号的code请求服务端登录
+      parameters:
+      - description: 静默登录的code
+        in: body
+        name: silent_code
+        required: true
+        schema:
+          type: string
+      - description: 获取电话号的code
+        in: body
+        name: phone_code
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.ConfirmLoginResp'
+      summary: 用户登录+获取手机号
+      tags:
+      - /team_up/user
   /team_up/user/get_calibration_questions:
     post:
       consumes:
@@ -741,7 +780,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/handler.UserLoginResp'
-      summary: 用户登录
+      summary: 用户登录(废弃，请使用confirm_login)
       tags:
       - /team_up/user
   /team_up/user/my_tab:
@@ -850,7 +889,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.BackEndResp'
-      summary: 获取用户手机号
+      summary: 获取用户手机号(废弃，请使用confirm_login)
       tags:
       - /team_up/user
   /team_up/user/update_user_info:

@@ -4,40 +4,52 @@ import (
 	"errors"
 	"github.com/bytedance/sonic"
 	"gorm.io/gorm"
+	"strconv"
 	"teamup/constant"
 	"teamup/db/mysql"
 	"teamup/iface"
 	"teamup/model"
+	"teamup/service/info"
 	"teamup/service/login"
 	"teamup/util"
 )
 
-type UserLoginResp struct {
+type ConfirmLoginBody struct {
+	SilentCode string `json:"silent_code"` // 静默登录的code（前段自动拿到的静默code）
+	PhoneCode  string `json:"phone_code"`  // 获取电话号的code（需要用户显式授权）
+}
+
+type ConfirmLoginResp struct {
 	ErrNo   int32             `json:"err_no"`
 	ErrTips string            `json:"err_tips"`
 	Data    map[string]string `json:"data"`
 }
 
-// UserLogin godoc
+// ConfirmLogin godoc
 //
-//	@Summary		用户登录(废弃，请使用confirm_login)
-//	@Description	前端使用微信code请求服务端登录
-//	@Tags			/team_up/user
-//	@Accept			json
-//	@Produce		json
-//	@Param			code	body		string	true	"微信Code"
-//	@Success		200		{object}	UserLoginResp
-//	@Router			/team_up/user/login [post]
-func UserLogin(c *model.TeamUpContext) (interface{}, error) {
-	util.Logger.Println("UserLogin started")
-	body := &model.GeneralCodeBody{}
+//		@Summary		用户登录+获取手机号
+//		@Description	前端使用微信code+获取手机号的code请求服务端登录
+//		@Tags			/team_up/user
+//		@Accept			json
+//		@Produce		json
+//		@Param			silent_code	body		string	true	"静默登录的code"
+//	    @Param			phone_code	body		string	true	"获取电话号的code"
+//		@Success		200		{object}	ConfirmLoginResp
+//		@Router			/team_up/user/confirm_login [post]
+func ConfirmLogin(c *model.TeamUpContext) (interface{}, error) {
+	util.Logger.Println("ConfirmLogin started")
+	body := &ConfirmLoginBody{}
 	err := c.BindJSON(body)
 	if err != nil {
-		util.Logger.Printf("[UserLogin] BindJSON failed,err:%v", err)
-		return nil, iface.NewBackEndError(iface.InternalError, err.Error())
+		util.Logger.Printf("[ConfirmLogin] bindJSON failed, err:%v", err)
+		return nil, iface.NewBackEndError(iface.ParamsError, err.Error())
 	}
-
-	c2s, err := login.Code2Session(c, body.Code)
+	if body.PhoneCode == "" || body.SilentCode == "" {
+		util.Logger.Printf("[ConfirmLogin] missing code, body:%+v", body)
+		return nil, iface.NewBackEndError(iface.ParamsError, "missing code")
+	}
+	// 获取用户openID和sessionKey
+	c2s, err := login.Code2Session(c, body.SilentCode)
 	if err != nil {
 		return nil, iface.NewBackEndError(iface.InternalError, err.Error())
 	}
@@ -46,8 +58,22 @@ func UserLogin(c *model.TeamUpContext) (interface{}, error) {
 		// todo: 塞进err表？
 		return nil, iface.NewBackEndError(c2s.ErrCode, c2s.ErrMsg)
 	}
+	// 获取用户手机号码
+	phoneInfo, err := info.GetUserPhoneNumber(c, &model.GeneralCodeBody{Code: body.PhoneCode})
+	if err != nil {
+		return nil, iface.NewBackEndError(iface.InternalError, err.Error())
+	}
+	if phoneInfo.WechatBase != nil && phoneInfo.WechatBase.ErrCode != 0 {
+		util.Logger.Printf("[ConfirmLogin] wechat resp code is not 0")
+		return nil, iface.NewBackEndError(phoneInfo.ErrCode, phoneInfo.ErrMsg)
+	}
+	phoneNum, err := strconv.ParseInt(phoneInfo.PhoneInfo.PhoneNumber, 10, 64)
+	if err != nil {
+		util.Logger.Printf("[ConfirmLogin] parse phoneInfo failed, err:%v", err)
+		return nil, iface.NewBackEndError(iface.InternalError, err.Error())
+	}
+	// 创造三条新的纪录
 	user := &mysql.WechatUserInfo{}
-
 	err = util.DB().Where("open_id = ? AND is_primary = ?", c2s.OpenID, 1).Take(user).Error
 	if err != nil {
 		joinedEvent := make([]uint, 0)
@@ -71,6 +97,7 @@ func UserLogin(c *model.TeamUpContext) (interface{}, error) {
 					JoinedGroup: jgs,
 					Preference:  ps,
 					Tags:        ts,
+					PhoneNumber: uint(phoneNum),
 				},
 				{
 					OpenId:      c2s.OpenID,
@@ -94,17 +121,18 @@ func UserLogin(c *model.TeamUpContext) (interface{}, error) {
 
 			err = util.DB().Create(&users).Error
 			if err != nil {
-				util.Logger.Printf("[UserLogin] create user failed, err:%v", err)
+				util.Logger.Printf("[ConfirmLogin] create user failed, err:%v", err)
 				return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
 			}
-			util.Logger.Printf("[UserLogin] save to DB success")
+			util.Logger.Printf("[ConfirmLogin] save to DB success")
 			goto jwtCreate
 		}
-		util.Logger.Printf("[UserLogin] query user record failed, err:%v", err)
+		util.Logger.Printf("[ConfirmLogin] query user record failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
 	}
-	// 如果前端没有缓存的jwt token，但是服务端有数据，只需要更新session_key
+	// 如果前端没有缓存的jwt token，但是服务端有数据，只需要更新session_key和电话号码
 	user.SessionKey = c2s.SessionKey
+	user.PhoneNumber = uint(phoneNum)
 	err = util.DB().Save(user).Error
 	if err != nil {
 		util.Logger.Printf("[UserLogin] save user record failed, err:%v", err)

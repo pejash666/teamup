@@ -11,7 +11,7 @@ import (
 
 // UpdateUserPhoneNumber godoc
 //
-//	@Summary		获取用户手机号
+//	@Summary		获取用户手机号(废弃，请使用confirm_login)
 //	@Description	前端获取加密的用户手机号，服务端进行解码，存储
 //	@Tags			/team_up/user
 //	@Accept			json

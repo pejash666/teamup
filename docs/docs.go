@@ -235,6 +235,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/team_up/user/confirm_login": {
+            "post": {
+                "description": "前端使用微信code+获取手机号的code请求服务端登录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "/team_up/user"
+                ],
+                "summary": "用户登录+获取手机号",
+                "parameters": [
+                    {
+                        "description": "静默登录的code",
+                        "name": "silent_code",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "获取电话号的code",
+                        "name": "phone_code",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ConfirmLoginResp"
+                        }
+                    }
+                }
+            }
+        },
         "/team_up/user/get_calibration_questions": {
             "post": {
                 "description": "获取定级问题详情",
@@ -415,7 +458,7 @@ const docTemplate = `{
                 "tags": [
                     "/team_up/user"
                 ],
-                "summary": "用户登录",
+                "summary": "用户登录(废弃，请使用confirm_login)",
                 "parameters": [
                     {
                         "description": "微信Code",
@@ -583,7 +626,7 @@ const docTemplate = `{
                 "tags": [
                     "/team_up/user"
                 ],
-                "summary": "获取用户手机号",
+                "summary": "获取用户手机号(废弃，请使用confirm_login)",
                 "parameters": [
                     {
                         "description": "微信Code",
@@ -641,6 +684,23 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "handler.ConfirmLoginResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "err_no": {
+                    "type": "integer"
+                },
+                "err_tips": {
+                    "type": "string"
+                }
+            }
+        },
         "handler.CreateEventID": {
             "type": "object",
             "properties": {

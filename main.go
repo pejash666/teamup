@@ -70,6 +70,10 @@ func HttpHandler() *gin.Engine {
 	userGroup.POST("/login", API(handler.UserLogin, model.APIOption{
 		NeedLoginStatus: false,
 	}))
+	// 登录与获取手机号融合登录
+	userGroup.POST("/confirm_login", API(handler.ConfirmLogin, model.APIOption{
+		NeedLoginStatus: false,
+	}))
 	// 前端获取密文手机号，服务端解码并存储(通了)
 	userGroup.POST("/update_phone_number", API(handler.UpdateUserPhoneNumber, model.APIOption{
 		NeedLoginStatus: true,
