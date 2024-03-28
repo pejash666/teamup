@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"github.com/go-cmd/cmd"
+	"os/exec"
 	"strconv"
 	"teamup/iface"
 	"teamup/model"
@@ -40,7 +41,14 @@ func UploadImage(c *model.TeamUpContext) (interface{}, error) {
 		util.Logger.Printf("[UploadImage] concurrent request for upload file, please try again")
 		return nil, iface.NewBackEndError(iface.ParamsError, "concurrent request")
 	}
-	path := fmt.Sprintf("./%s", imageType)
+	// todo: 测试逻辑
+	testPath, err := exec.Command("pwd").Output()
+	if err != nil {
+		return nil, iface.NewBackEndError(iface.InternalError, "get test path failed")
+	}
+	util.Logger.Printf("[UploadImage] testPath:%s", testPath)
+
+	path := fmt.Sprintf("./app/%s", imageType)
 	// 执行系统命令获取当前的数量
 	command := cmd.NewCmd("bash", "-c", fmt.Sprintf("ls -l %s | grep \"^-\" | grep -c \"png$\"", path))
 	<-command.Start()
