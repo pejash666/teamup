@@ -6,6 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"io"
+	"os"
 
 	"log"
 	"net/http"
@@ -168,11 +170,37 @@ func HttpHandler() *gin.Engine {
 	// 静态资源Group
 	imageGroup := r.Group("/team_up/static_image")
 	// 用户定级职业的证明
-	imageGroup.Static("/user_calibration_proof", "./app/calibration_proof")
+	imageGroup.Static("/user_calibration_proof", "./calibration_proof")
 	// 用户创建组织的logo
-	imageGroup.Static("/organization_logo", "./app/organization_logo")
+	imageGroup.Static("/organization_logo", "./organization_logo")
 
 	// swagger
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// 处理请求图片响应的路由
+	userGroup.GET("/image/:directoryname/:filename", func(c *gin.Context) {
+		filename := c.Param("filename")
+		directoryname := c.Param("directoryname")
+		// 检查文件是否存在
+		_, err := os.Stat(fmt.Sprintf("%s/%s", directoryname, filename))
+		if os.IsNotExist(err) {
+			c.String(http.StatusNotFound, "File not found")
+			return
+		}
+
+		// 设置Content-Type头为image/jpeg
+		c.Header("Content-Type", "image/jpeg")
+
+		// 打开图片文件并将其写入响应
+		file, err := os.Open(fmt.Sprintf("%s/%s", directoryname, filename))
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Internal server error")
+			return
+		}
+		defer file.Close()
+
+		io.Copy(c.Writer, file)
+	})
+
 	return r
 }

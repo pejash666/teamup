@@ -39,7 +39,7 @@ func UploadImage(c *model.TeamUpContext) (interface{}, error) {
 		return nil, iface.NewBackEndError(iface.ParamsError, "concurrent request")
 	}
 
-	path := fmt.Sprintf("./app/%s", imageType)
+	path := fmt.Sprintf("./%s", imageType)
 	//// 执行系统命令获取当前的数量
 	//command := cmd.NewCmd("bash", "-c", fmt.Sprintf("ls -l %s | grep \"^-\" | grep -c \"png$\"", path))
 	//<-command.Start()
@@ -65,7 +65,8 @@ func UploadImage(c *model.TeamUpContext) (interface{}, error) {
 		util.Logger.Printf("[UploadImage] file size is too big")
 		return nil, iface.NewBackEndError(iface.ParamsError, "file too big")
 	}
-	filePath := path + "/" + imageName
+	filePath := fmt.Sprintf("%s/%s", path, imageName)
+
 	err = c.SaveUploadedFile(file, filePath)
 	if err != nil {
 		util.Logger.Printf("[UploadImage] iSaveUploadedFile failed, err:%v", err)
