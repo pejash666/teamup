@@ -2,8 +2,6 @@ package handler
 
 import (
 	"fmt"
-	"github.com/go-cmd/cmd"
-	"strconv"
 	"teamup/iface"
 	"teamup/model"
 	"teamup/util"
@@ -40,34 +38,21 @@ func UploadImage(c *model.TeamUpContext) (interface{}, error) {
 		util.Logger.Printf("[UploadImage] concurrent request for upload file, please try again")
 		return nil, iface.NewBackEndError(iface.ParamsError, "concurrent request")
 	}
-	// todo: 测试逻辑
-	testCommand := cmd.NewCmd("bash", "-c", "pwd")
-	//if err != nil {
-	//	util.Logger.Printf("[UploadImage] get test path failed, err:%v", err)
-	//	return nil, iface.NewBackEndError(iface.InternalError, "get test path failed")
-	//}
-	//util.Logger.Printf("[UploadImage] testPath:%s", testPath)
-	<-testCommand.Start()
-	util.Logger.Printf("[UploadImage] testCommand:%d", testCommand.Status().Stdout)
 
 	path := fmt.Sprintf("./app/%s", imageType)
-	// 执行系统命令获取当前的数量
-	command := cmd.NewCmd("bash", "-c", fmt.Sprintf("ls -l %s | grep \"^-\" | grep -c \"png$\"", path))
-	<-command.Start()
-	//status := command.Status()
-	//if status.Exit != 0 {
-	//	util.Logger.Printf("[UploadImage] get image count failed, err:%v", status.Error)
+	//// 执行系统命令获取当前的数量
+	//command := cmd.NewCmd("bash", "-c", fmt.Sprintf("ls -l %s | grep \"^-\" | grep -c \"png$\"", path))
+	//<-command.Start()
+	//util.Logger.Printf("[UploadImage] command:%d", command.Status().Stdout)
+	//currentNumStr := command.Status().Stdout[0]
+	//currentNum, err := strconv.ParseInt(currentNumStr, 10, 64)
+	//if err != nil {
+	//	util.Logger.Printf("[UploadImage] ParseInt failed, err:%v", err)
 	//	return nil, iface.NewBackEndError(iface.InternalError, "get image count failed")
 	//}
-	util.Logger.Printf("[UploadImage] command:%d", command.Status().Stdout)
-	currentNumStr := command.Status().Stdout[0]
-	currentNum, err := strconv.ParseInt(currentNumStr, 10, 64)
-	if err != nil {
-		util.Logger.Printf("[UploadImage] ParseInt failed, err:%v", err)
-		return nil, iface.NewBackEndError(iface.InternalError, "get image count failed")
-	}
+
 	// 获取当前的图片名
-	imageName := imageType + "_" + fmt.Sprintf("%d.png", currentNum+1) // organization_logo_1.png
+	imageName := imageType + "_" + fmt.Sprintf("%d.png", time.Now().UnixNano()) // organization_logo_时间戳.png
 
 	// 获取用户上传的图片
 	file, err := c.FormFile("file")
