@@ -121,6 +121,10 @@ func HttpHandler() *gin.Engine {
 	// 发布分数(通了)
 	userGroup.POST("/publish_score", API(handler.PublishScore, model.APIOption{
 		NeedLoginStatus: true}))
+	// 上传图片
+	userGroup.POST("/upload_image", API(handler.UploadImage, model.APIOption{
+		NeedLoginStatus: true,
+	}))
 
 	// 组织类接口
 	organizationGroup := r.Group("/team_up/organization")
@@ -164,9 +168,9 @@ func HttpHandler() *gin.Engine {
 	// 静态资源Group
 	imageGroup := r.Group("/team_up/static_image")
 	// 用户定级职业的证明
-	imageGroup.Static("/user_calibration_proof", "./user_calibration_proof")
+	imageGroup.Static("/user_calibration_proof", "./calibration_proof")
 	// 用户创建组织的logo
-	imageGroup.Static("/organization_logo", "./organization_logos")
+	imageGroup.Static("/organization_logo", "./organization_logo")
 
 	// swagger
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

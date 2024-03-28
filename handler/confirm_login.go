@@ -27,15 +27,15 @@ type ConfirmLoginResp struct {
 
 // ConfirmLogin godoc
 //
-//		@Summary		用户登录+获取手机号
-//		@Description	前端使用微信code+获取手机号的code请求服务端登录
-//		@Tags			/team_up/user
-//		@Accept			json
-//		@Produce		json
-//		@Param			silent_code	body		string	true	"静默登录的code"
-//	    @Param			phone_code	body		string	true	"获取电话号的code"
-//		@Success		200		{object}	ConfirmLoginResp
-//		@Router			/team_up/user/confirm_login [post]
+//	@Summary		用户登录+获取手机号
+//	@Description	前端使用微信code+获取手机号的code请求服务端登录
+//	@Tags			/team_up/user
+//	@Accept			json
+//	@Produce		json
+//	@Param			silent_code	body		string	true	"静默登录的code"
+//	@Param			phone_code	body		string	true	"获取电话号的code"
+//	@Success		200			{object}	ConfirmLoginResp
+//	@Router			/team_up/user/confirm_login [post]
 func ConfirmLogin(c *model.TeamUpContext) (interface{}, error) {
 	util.Logger.Println("ConfirmLogin started")
 	body := &ConfirmLoginBody{}

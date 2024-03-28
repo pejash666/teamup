@@ -186,6 +186,62 @@ const docTemplate = `{
                     "/team_up/organization"
                 ],
                 "summary": "创建组织",
+                "parameters": [
+                    {
+                        "description": "组织名称",
+                        "name": "name",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "运动类型",
+                        "name": "sport_type",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "城市",
+                        "name": "city",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "地址",
+                        "name": "address",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "联系方式",
+                        "name": "contact",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "logo图",
+                        "name": "logo",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -670,6 +726,45 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/handler.UpdateUserInfoReq"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.BackEndResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/team_up/user/upload_image": {
+            "post": {
+                "description": "前端获取加密的用户手机号，服务端进行解码，存储",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "/team_up/user"
+                ],
+                "summary": "前端上传文件流给服务端",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "图片类型:organization_logo, calibration_proof, event_image",
+                        "name": "image_type",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "文件流",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {

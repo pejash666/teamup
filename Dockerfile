@@ -22,4 +22,7 @@ WORKDIR /app
 COPY --from=builder /app/main /app/main
 COPY --from=builder /build/questionnaire /app/questionnaire
 COPY --from=builder /build/docs /app/docs
+COPY --from=builder /build/calibration_proof /app/calibration_proof
+COPY --from=builder /build/organization_logo /app/organization_logo
+COPY --from=builder /build/event_image /app/event_image
 CMD ["./main"]

@@ -48,3 +48,16 @@ func RedisGet(key string) (string, error) {
 	Logger.Printf("[RedisGet] success for key:%v", key)
 	return res, nil
 }
+
+func GetLock(key string, exp time.Duration) bool {
+	res, err := Redis().SetNX(key, 1, exp).Result()
+	if err != nil {
+		Logger.Printf("redis SetNX failed for key:%s, err:%v", key, err)
+		return false
+	}
+	return res
+}
+
+func DelLock(key string) {
+	_, _ = Redis().Del(key).Result()
+}

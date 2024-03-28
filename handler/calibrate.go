@@ -2,10 +2,8 @@ package handler
 
 import (
 	"github.com/bytedance/sonic"
-	"path"
 	"sort"
 	"strconv"
-	"strings"
 	"teamup/constant"
 	"teamup/db/mysql"
 	"teamup/iface"
@@ -74,6 +72,7 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 		util.Logger.Printf("[Calibrate] unmarshal questionnaire failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.ParamsError, "invalid questionnaire")
 	}
+	file := c.PostForm("proof")
 	//err := c.BindJSON(body)
 	//if err != nil {
 	//	util.Logger.Printf("[Calibrate] BindJSON failed, err:%v", err)
@@ -89,7 +88,6 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 	sort.SliceStable(questionnaire, func(i, j int) bool {
 		return questionnaire[i].QID < questionnaire[j].QID
 	})
-	proofPath := ""
 	isPro := false
 	totalScore := float32(0)
 	maxScore := float32(0)
@@ -98,31 +96,27 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 		if q.QID == 1 {
 			maxScore = MaxScoreMap[q.Option]
 			if q.Option == "E" {
-				// 将logo资源存在服务器内
-				file, err := c.FormFile("proof")
-				if err != nil {
-					util.Logger.Printf("[Calibrate] FormFile failed, err:%v", err)
-					return nil, iface.NewBackEndError(iface.ParamsError, "invalid file")
+				if file == "" {
+					return nil, iface.NewBackEndError(iface.ParamsError, "pro need proof file")
 				}
-				// 不能大于1mb
-				if file.Size > 1<<20 {
-					util.Logger.Printf("[Calibrate] file size is too big")
-					return nil, iface.NewBackEndError(iface.ParamsError, "file too big")
-				}
-				fileName := strings.Split(file.Filename, ".")
-				if fileName[len(fileName)-1] != "png" && fileName[len(fileName)-1] != "jpeg" {
-					util.Logger.Printf("[Calibrate] invalid file, should either png or jpeg, now:%v", fileName[len(fileName)-1])
-					return nil, iface.NewBackEndError(iface.ParamsError, "invalid filename")
-				}
-				filePath := path.Join("./user_calibration_proof", c.BasicUser.OpenID+"."+fileName[len(fileName)-1])
-				// todo: 是否要将这个存起来？
-				err = c.SaveUploadedFile(file, filePath)
-				if err != nil {
-					util.Logger.Printf("[Calibrate] iSaveUploadedFile failed, err:%v", err)
-					return nil, iface.NewBackEndError(iface.ParamsError, "save file failed")
-				}
+				//	// 不能大于1mb
+				//	if file.Size > 1<<20 {
+				//		util.Logger.Printf("[Calibrate] file size is too big")
+				//		return nil, iface.NewBackEndError(iface.ParamsError, "file too big")
+				//	}
+				//	fileName := strings.Split(file.Filename, ".")
+				//	if fileName[len(fileName)-1] != "png" && fileName[len(fileName)-1] != "jpeg" {
+				//		util.Logger.Printf("[Calibrate] invalid file, should either png or jpeg, now:%v", fileName[len(fileName)-1])
+				//		return nil, iface.NewBackEndError(iface.ParamsError, "invalid filename")
+				//	}
+				//	filePath := path.Join("./user_calibration_proof", c.BasicUser.OpenID+"."+fileName[len(fileName)-1])
+				//	// todo: 是否要将这个存起来？
+				//	err = c.SaveUploadedFile(file, filePath)
+				//	if err != nil {
+				//		util.Logger.Printf("[Calibrate] iSaveUploadedFile failed, err:%v", err)
+				//		return nil, iface.NewBackEndError(iface.ParamsError, "save file failed")
+				//	}
 				isPro = true
-				proofPath = "/user_calibration_proof/" + c.BasicUser.OpenID + "." + fileName[len(fileName)-1]
 			}
 		}
 		totalScore += getCalibrationScore(q.QID, q.Option)
@@ -149,7 +143,7 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 	if !isPro {
 		user.IsCalibrated = 1
 	} else {
-		user.CalibrationProof = util.GetImageUrl(c, proofPath)
+		user.CalibrationProof = file
 	}
 	err = util.DB().Save(user).Error
 	if err != nil {
@@ -160,7 +154,7 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 		SportType: sportType,
 		Level:     totalScore,
 	}
-	baseImg := ""
+	//baseImg := ""
 	// 如果是上传了图片，则返回一个base64的字符串
 	//if proofPath != "" && isPro {
 	//	file, err := os.Open(proofPath)
@@ -178,9 +172,8 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 	//	}
 	//	res["proof_image"] = baseImg
 	//}
-	if proofPath != "" && isPro {
-		baseImg = util.GetImageUrl(c, proofPath)
-		res.ProofImage = baseImg
+	if file != "" && isPro {
+		res.ProofImage = file
 	}
 	util.Logger.Printf("[Calibrate] success")
 	return res, nil

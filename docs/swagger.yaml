@@ -588,6 +588,43 @@ paths:
       consumes:
       - application/json
       description: 用户上传组织信息
+      parameters:
+      - description: 组织名称
+        in: body
+        name: name
+        required: true
+        schema:
+          type: string
+      - description: 运动类型
+        in: body
+        name: sport_type
+        required: true
+        schema:
+          type: string
+      - description: 城市
+        in: body
+        name: city
+        required: true
+        schema:
+          type: string
+      - description: 地址
+        in: body
+        name: address
+        required: true
+        schema:
+          type: string
+      - description: 联系方式
+        in: body
+        name: contact
+        required: true
+        schema:
+          type: string
+      - description: logo图
+        in: body
+        name: logo
+        required: true
+        schema:
+          type: string
       produces:
       - application/json
       responses:
@@ -912,6 +949,32 @@ paths:
           schema:
             $ref: '#/definitions/model.BackEndResp'
       summary: 前端调用getUserProfile后调用，更新后端用户信息表
+      tags:
+      - /team_up/user
+  /team_up/user/upload_image:
+    post:
+      consumes:
+      - application/json
+      description: 前端获取加密的用户手机号，服务端进行解码，存储
+      parameters:
+      - description: 图片类型:organization_logo, calibration_proof, event_image
+        in: formData
+        name: image_type
+        required: true
+        type: string
+      - description: 文件流
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.BackEndResp'
+      summary: 前端上传文件流给服务端
       tags:
       - /team_up/user
 swagger: "2.0"
