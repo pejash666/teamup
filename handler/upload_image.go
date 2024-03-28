@@ -3,7 +3,6 @@ package handler
 import (
 	"fmt"
 	"github.com/go-cmd/cmd"
-	"os/exec"
 	"strconv"
 	"teamup/iface"
 	"teamup/model"
@@ -42,12 +41,14 @@ func UploadImage(c *model.TeamUpContext) (interface{}, error) {
 		return nil, iface.NewBackEndError(iface.ParamsError, "concurrent request")
 	}
 	// todo: 测试逻辑
-	testPath, err := exec.Command("pwd").Output()
-	if err != nil {
-		util.Logger.Printf("[UploadImage] get test path failed, err:%v", err)
-		return nil, iface.NewBackEndError(iface.InternalError, "get test path failed")
-	}
-	util.Logger.Printf("[UploadImage] testPath:%s", testPath)
+	testCommand := cmd.NewCmd("bash", "-c", "pwd")
+	//if err != nil {
+	//	util.Logger.Printf("[UploadImage] get test path failed, err:%v", err)
+	//	return nil, iface.NewBackEndError(iface.InternalError, "get test path failed")
+	//}
+	//util.Logger.Printf("[UploadImage] testPath:%s", testPath)
+	<-testCommand.Start()
+	util.Logger.Printf("[UploadImage] testCommand:%d", testCommand.Status().Stdout)
 
 	path := fmt.Sprintf("./app/%s", imageType)
 	// 执行系统命令获取当前的数量
@@ -58,6 +59,7 @@ func UploadImage(c *model.TeamUpContext) (interface{}, error) {
 	//	util.Logger.Printf("[UploadImage] get image count failed, err:%v", status.Error)
 	//	return nil, iface.NewBackEndError(iface.InternalError, "get image count failed")
 	//}
+	util.Logger.Printf("[UploadImage] command:%d", command.Status().Stdout)
 	currentNumStr := command.Status().Stdout[0]
 	currentNum, err := strconv.ParseInt(currentNumStr, 10, 64)
 	if err != nil {
