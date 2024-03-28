@@ -168,9 +168,9 @@ func HttpHandler() *gin.Engine {
 	// 静态资源Group
 	imageGroup := r.Group("/team_up/static_image")
 	// 用户定级职业的证明
-	imageGroup.Static("/user_calibration_proof", "./calibration_proof")
+	imageGroup.Static("/user_calibration_proof", "./app/calibration_proof")
 	// 用户创建组织的logo
-	imageGroup.Static("/organization_logo", "./organization_logo")
+	imageGroup.Static("/organization_logo", "./app/organization_logo")
 
 	// swagger
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
