@@ -44,6 +44,7 @@ func UploadImage(c *model.TeamUpContext) (interface{}, error) {
 	// todo: 测试逻辑
 	testPath, err := exec.Command("pwd").Output()
 	if err != nil {
+		util.Logger.Printf("[UploadImage] get test path failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.InternalError, "get test path failed")
 	}
 	util.Logger.Printf("[UploadImage] testPath:%s", testPath)
