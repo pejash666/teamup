@@ -957,7 +957,7 @@ paths:
       - application/json
       description: 前端获取加密的用户手机号，服务端进行解码，存储
       parameters:
-      - description: 图片类型:organization_logo, calibration_proof, event_image
+      - description: 图片类型:organization_logo, calibration_proof, event_image, avatar_image
         in: formData
         name: image_type
         required: true

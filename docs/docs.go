@@ -754,7 +754,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "图片类型:organization_logo, calibration_proof, event_image",
+                        "description": "图片类型:organization_logo, calibration_proof, event_image, avatar_image",
                         "name": "image_type",
                         "in": "formData",
                         "required": true
