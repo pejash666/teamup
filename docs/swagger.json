@@ -94,6 +94,76 @@
                 }
             }
         },
+        "/team_up/event/list": {
+            "post": {
+                "description": "根据筛选条件获取活动列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "/team_up/event"
+                ],
+                "summary": "获取活动列表",
+                "parameters": [
+                    {
+                        "description": "运动类型：pedal, tennis, pickleball",
+                        "name": "sport_type",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "城市",
+                        "name": "city",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "开始时间，秒级时间戳",
+                        "name": "start_time",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "获取的数量",
+                        "name": "num",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "偏移量",
+                        "name": "offset",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.GetEventListResp"
+                        }
+                    }
+                }
+            }
+        },
         "/team_up/event/page": {
             "post": {
                 "description": "活动详情页，包含活动元信息和参与的用户信息",
@@ -870,6 +940,37 @@
                     "items": {
                         "$ref": "#/definitions/model.Question"
                     }
+                },
+                "err_no": {
+                    "type": "integer"
+                },
+                "err_tips": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.GetEventListData": {
+            "type": "object",
+            "properties": {
+                "event_list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.Event"
+                    }
+                },
+                "has_more": {
+                    "type": "boolean"
+                },
+                "offset": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.GetEventListResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handler.GetEventListData"
                 },
                 "err_no": {
                     "type": "integer"

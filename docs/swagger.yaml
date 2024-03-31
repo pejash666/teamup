@@ -71,6 +71,26 @@ definitions:
       err_tips:
         type: string
     type: object
+  handler.GetEventListData:
+    properties:
+      event_list:
+        items:
+          $ref: '#/definitions/handler.Event'
+        type: array
+      has_more:
+        type: boolean
+      offset:
+        type: integer
+    type: object
+  handler.GetEventListResp:
+    properties:
+      data:
+        $ref: '#/definitions/handler.GetEventListData'
+      err_no:
+        type: integer
+      err_tips:
+        type: string
+    type: object
   handler.GetHostInfoResp:
     properties:
       data:
@@ -537,6 +557,52 @@ paths:
           schema:
             $ref: '#/definitions/handler.CreateEventResp'
       summary: 创建活动
+      tags:
+      - /team_up/event
+  /team_up/event/list:
+    post:
+      consumes:
+      - application/json
+      description: 根据筛选条件获取活动列表
+      parameters:
+      - description: 运动类型：pedal, tennis, pickleball
+        in: body
+        name: sport_type
+        required: true
+        schema:
+          type: string
+      - description: 城市
+        in: body
+        name: city
+        required: true
+        schema:
+          type: string
+      - description: 开始时间，秒级时间戳
+        in: body
+        name: start_time
+        required: true
+        schema:
+          type: integer
+      - description: 获取的数量
+        in: body
+        name: num
+        required: true
+        schema:
+          type: integer
+      - description: 偏移量
+        in: body
+        name: offset
+        required: true
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.GetEventListResp'
+      summary: 获取活动列表
       tags:
       - /team_up/event
   /team_up/event/page:

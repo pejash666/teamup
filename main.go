@@ -137,6 +137,10 @@ func HttpHandler() *gin.Engine {
 
 	// 活动类接口
 	eventGroup := r.Group("/team_up/event")
+	// 全部活动列表
+	eventGroup.POST("/list", API(handler.EventList, model.APIOption{
+		NeedLoginStatus: false,
+	}))
 	// 活动页面(通了)
 	eventGroup.POST("/page", API(handler.EventPage, model.APIOption{
 		NeedLoginStatus: true,
