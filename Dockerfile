@@ -25,4 +25,5 @@ COPY --from=builder /build/docs /app/docs
 COPY --from=builder /build/calibration_proof /app/calibration_proof
 COPY --from=builder /build/organization_logo /app/organization_logo
 COPY --from=builder /build/event_image /app/event_image
+COPY --from=builder /build/avatar_image /app/avatar_image
 CMD ["./main"]

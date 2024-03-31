@@ -12,6 +12,7 @@ const (
 	ImageTypeOrganizationLogo = "organization_logo"
 	ImageTypeCalibrationProof = "calibration_proof"
 	ImageTypeEventImage       = "event_image"
+	ImageTypeAvatar           = "avatar_image"
 )
 
 // UploadImage godoc
@@ -21,13 +22,13 @@ const (
 //	@Tags			/team_up/user
 //	@Accept			json
 //	@Produce		json
-//	@Param			image_type	formData	string	true	"图片类型:organization_logo, calibration_proof, event_image"
+//	@Param			image_type	formData	string	true	"图片类型:organization_logo, calibration_proof, event_image, avatar_image"
 //	@Param			file		formData	file	true	"文件流"
 //	@Success		200			{object}	model.BackEndResp
 //	@Router			/team_up/user/upload_image [post]
 func UploadImage(c *model.TeamUpContext) (interface{}, error) {
-	imageType := c.PostForm("image_type")
-	if imageType != ImageTypeOrganizationLogo && imageType != ImageTypeCalibrationProof && imageType != ImageTypeEventImage {
+	imageType := c.Query("image_type")
+	if imageType != ImageTypeOrganizationLogo && imageType != ImageTypeCalibrationProof && imageType != ImageTypeEventImage && imageType != ImageTypeAvatar {
 		util.Logger.Printf("[UploadImage] invalid image type")
 		return nil, iface.NewBackEndError(iface.ParamsError, "invalid image type")
 	}
