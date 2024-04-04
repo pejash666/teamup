@@ -134,8 +134,9 @@ func paramsCheck(event *model.EventInfo) (bool, string) {
 	if event.Name == "" || event.City == "" ||
 		event.StartTime == 0 ||
 		event.EndTime == 0 ||
-		event.MaxPeopleNum == 0 || event.SportType == "" ||
-		event.Price == 0 || event.GameType == "" {
+		event.MaxPeopleNum == 0 ||
+		event.SportType == "" ||
+		event.GameType == "" {
 		return false, "invalid param"
 	}
 	// 判断时间是否符合预期
@@ -151,6 +152,9 @@ func paramsCheck(event *model.EventInfo) (bool, string) {
 	// 已经预定场地的需要检查场地名称和场地类型
 	if event.IsBooked && (event.FieldName == "" || event.FieldType == "") {
 		return false, "invalid field"
+	}
+	if event.IsBooked && event.Price == 0 {
+		return false, "booked filed must have price"
 	}
 	// pedal只允许双打 人数 >= 4 <= 8
 	if event.SportType == constant.SportTypePedal {
