@@ -8,6 +8,7 @@ import (
 	"teamup/iface"
 	"teamup/model"
 	"teamup/util"
+	"time"
 )
 
 type MyTab struct {
@@ -28,7 +29,7 @@ type SportTypeInfo struct {
 }
 
 type LevelInfo struct {
-	IsCalibrated bool           `json:"is_calibrated"`
+	Status       string         `json:"status"` // 定级状态：need_to_calibrate;wait_for_approve;approved(7.0以下自动审批)
 	CurrentLevel float32        `json:"current_level"`
 	LevelDetail  []*LevelChange `json:"level_detail"`
 }
@@ -41,6 +42,9 @@ type LevelChange struct {
 type Event struct {
 	StartTime        int64       `json:"start_time"`
 	EndTime          int64       `json:"end_time"`
+	Weekday          string      `json:"weekday"`
+	StartTimeStr     string      `json:"start_time_str"`
+	EndTineStr       string      `json:"end_time_str"`
 	IsBooked         bool        `json:"is_booked"`
 	FieldName        string      `json:"field_name"`
 	CurrentPlayer    []*UserInfo `json:"current_player"`
@@ -55,6 +59,7 @@ type Event struct {
 type Organization struct {
 	Name     string `json:"name"`
 	EventNum int    `json:"event_num"`
+	Status   string `json:"status"` // 组织状态：no_organization;wait_for_approve;approved
 }
 
 type GetMyTabResp struct {
@@ -96,24 +101,41 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 		}
 		sportTypeInfo := &SportTypeInfo{}
 		sportTypeInfo.SportType = user.SportType
-		sportTypeInfo.LevelInfo = &LevelInfo{
-			IsCalibrated: user.IsCalibrated == 1,
-			CurrentLevel: float32(user.Level) / 1000,
-			LevelDetail:  GetRecentLevelChanges(user.OpenId, user.SportType, 10),
+		levelInfo := &LevelInfo{}
+		levelInfo.Status = GetCalibrationStatus(user.IsCalibrated == 1, user.Level)
+		// 只有定级过且审批通过的的人，才返回信息
+		if levelInfo.Status == "approved" {
+			levelInfo.CurrentLevel = float32(user.Level / 1000)
+			levelInfo.LevelDetail = GetRecentLevelChanges(user.OpenId, user.SportType, 10)
 		}
-		// 用户在这个sport_type里是host，获取organization信息
-		if user.IsHost == 1 {
-			organization := &mysql.Organization{}
-			err = util.DB().Where("id = ?", user.OrganizationID).Take(organization).Error
-			if err != nil {
-				util.Logger.Printf("[GetMyTab] query organization failed, err:%v", err)
-				return nil, iface.NewBackEndError(iface.MysqlError, "query organization failed")
+		sportTypeInfo.LevelInfo = levelInfo
+
+		// 用sport_type + open_id 查找organization表
+		organization := &mysql.Organization{}
+		myOrganization := &Organization{}
+		err = util.DB().Where("sport_type = ? AND host_open_id = ?", user.SportType, user.OpenId).Take(organization).Error
+		if err != nil {
+			// 名下无组织
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				util.Logger.Printf("[GetMyTab] user:%s has no organization in this sport_type:%s", user.Nickname, user.SportType)
+				myOrganization.Status = "no_organization"
+			} else {
+				util.Logger.Printf("[GetMyTab] query organization using soprt_type and openID failed, err:%v", err)
+				return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
 			}
-			sportTypeInfo.MyOrganization = &Organization{
-				Name:     organization.Name,
-				EventNum: organization.TotalEventNum,
+			// 查到记录了, 检查状态
+		} else {
+			myOrganization.Name = organization.Name
+			myOrganization.EventNum = organization.TotalEventNum
+			// 已经审批通过了
+			if user.IsHost == 1 {
+				myOrganization.Status = "wait_for_approve"
+				// 还没审批通过呢
+			} else {
+				myOrganization.Status = "approved"
 			}
 		}
+		sportTypeInfo.MyOrganization = myOrganization
 
 		// 用户如果有参与的活动，则需要在这里展示
 		if user.JoinedEvent != "" {
@@ -135,6 +157,9 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 				eventShow := &Event{
 					StartTime:        event.StartTime,
 					EndTime:          event.EndTime,
+					Weekday:          time.Unix(event.StartTime, 0).Weekday().String(),
+					StartTimeStr:     time.Unix(event.StartTime, 0).Format("15:04"),
+					EndTineStr:       time.Unix(event.EndTime, 0).Format("15:04"),
 					IsBooked:         event.IsBooked == 1,
 					FieldName:        event.FieldName,
 					CurrentPlayerNum: event.CurrentPlayerNum,
@@ -182,8 +207,10 @@ func GetRecentLevelChanges(openID, sportType string, limit int) []*LevelChange {
 	var records []mysql.UserEvent
 	err := util.DB().Where("open_id = ? AND sport_type = ?", openID, sportType).Order("created_at desc").Find(&records).Limit(limit).Error
 	if err != nil {
+		// 没有变化信息，返回空
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			util.Logger.Printf("[GetRecentLevelChanges] no record for level_change")
+			return make([]*LevelChange, 0)
 		}
 	}
 	res := make([]*LevelChange, 0)
@@ -201,4 +228,17 @@ func GetRecentLevelChanges(openID, sportType string, limit int) []*LevelChange {
 		res = append(res, levelChange)
 	}
 	return res
+}
+
+// GetCalibrationStatus 获取用户定级状态
+func GetCalibrationStatus(isCalibrated bool, level int) string {
+	if isCalibrated {
+		return "approved"
+	} else {
+		if level == 7000 {
+			return "wait_for_approve"
+		} else {
+			return "need_to_calibrate"
+		}
+	}
 }

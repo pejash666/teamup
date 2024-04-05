@@ -903,6 +903,9 @@ const docTemplate = `{
                 "end_time": {
                     "type": "integer"
                 },
+                "end_time_str": {
+                    "type": "string"
+                },
                 "field_name": {
                     "type": "string"
                 },
@@ -926,6 +929,12 @@ const docTemplate = `{
                 },
                 "start_time": {
                     "type": "integer"
+                },
+                "start_time_str": {
+                    "type": "string"
+                },
+                "weekday": {
+                    "type": "string"
                 }
             }
         },
@@ -1078,14 +1087,15 @@ const docTemplate = `{
                 "current_level": {
                     "type": "number"
                 },
-                "is_calibrated": {
-                    "type": "boolean"
-                },
                 "level_detail": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/handler.LevelChange"
                     }
+                },
+                "status": {
+                    "description": "定级状态：need_to_calibrate;wait_for_approve;approved(7.0以下自动审批)",
+                    "type": "string"
                 }
             }
         },
@@ -1145,6 +1155,10 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "组织状态：no_organization;wait_for_approve;approved",
                     "type": "string"
                 }
             }

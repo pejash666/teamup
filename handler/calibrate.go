@@ -129,6 +129,10 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 	if totalScore > maxScore {
 		totalScore = maxScore
 	}
+	// 如果最后 < 0; 则展示0
+	if totalScore < 0 {
+		totalScore = 0
+	}
 
 	// 更新用户表
 	user := &mysql.WechatUserInfo{}
