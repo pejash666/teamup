@@ -30,11 +30,11 @@ type CalibrationProofApprovalBody struct {
 //	@Accept			json
 //	@Produce		json
 //	@Param			approve_type	query		string	true	"审批事件类型：organization 或者 calibration_proof"
-//	@Param			organization_id	body		int		false	"组织ID"
-//	@Param			open_id			body		string	false	"用户open_id"
-//	@Param			sport_type		body		string	false	"用户运动类型"
+//	@Param			organization_id	body		int		false	"要批准的组织ID，当审批事件类型为organization时必传"
+//	@Param			open_id			body		string	false	"要批准的的用户open_id，当审批事件类型为calibration_proof时必传"
+//	@Param			sport_type		body		string	false	"要批准的用户运动类型，当审批事件类型为calibration_proof时必传"
 //	@Success		200				{object}	model.BackEndResp
-//	@Router			/team_up/admin/get_approval_items [get]
+//	@Router			/team_up/admin/approve [post]
 func Approve(c *model.TeamUpContext) (interface{}, error) {
 	//  todo: 这里也需要增加前端页面
 	approveType := c.Query("approve_type")

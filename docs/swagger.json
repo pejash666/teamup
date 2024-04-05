@@ -4,8 +4,8 @@
         "contact": {}
     },
     "paths": {
-        "/team_up/admin/get_approval_items": {
-            "get": {
+        "/team_up/admin/approve": {
+            "post": {
                 "description": "管理员审批：包含创建组织的申请与Pro级别的认证事件",
                 "consumes": [
                     "application/json"
@@ -26,7 +26,7 @@
                         "required": true
                     },
                     {
-                        "description": "组织ID",
+                        "description": "要批准的组织ID，当审批事件类型为organization时必传",
                         "name": "organization_id",
                         "in": "body",
                         "schema": {
@@ -34,7 +34,7 @@
                         }
                     },
                     {
-                        "description": "用户open_id",
+                        "description": "要批准的的用户open_id，当审批事件类型为calibration_proof时必传",
                         "name": "open_id",
                         "in": "body",
                         "schema": {
@@ -42,7 +42,7 @@
                         }
                     },
                     {
-                        "description": "用户运动类型",
+                        "description": "要批准的用户运动类型，当审批事件类型为calibration_proof时必传",
                         "name": "sport_type",
                         "in": "body",
                         "schema": {
@@ -55,6 +55,29 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/model.BackEndResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/team_up/admin/get_approval_items": {
+            "get": {
+                "description": "管理员审批：获取待审批的事项（包括定级别为pro级别的用户或者用户创建的组织信息）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "/team_up/admin"
+                ],
+                "summary": "待审批事项清单",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.GetApprovalItemsResp"
                         }
                     }
                 }
@@ -941,6 +964,39 @@
                 }
             }
         },
+        "handler.GetApprovalItemsResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handler.GetApprovalItemsResult"
+                },
+                "err_no": {
+                    "type": "integer"
+                },
+                "err_tips": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.GetApprovalItemsResult": {
+            "type": "object",
+            "properties": {
+                "calibration_items": {
+                    "description": "待审批的定位为职业的用户列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/mysql.WechatUserInfoWithoutGorm"
+                    }
+                },
+                "organization_items": {
+                    "description": "待审批的组织列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/mysql.OrganizationWithoutGorm"
+                    }
+                }
+            }
+        },
         "handler.GetCalibrationQuestionsResp": {
             "type": "object",
             "properties": {
@@ -1593,6 +1649,134 @@
                 "field_num": {
                     "description": "比赛场地数",
                     "type": "integer"
+                }
+            }
+        },
+        "mysql.OrganizationWithoutGorm": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "description": "详细地址",
+                    "type": "string"
+                },
+                "city": {
+                    "description": "城市",
+                    "type": "string"
+                },
+                "contact": {
+                    "description": "联系方式",
+                    "type": "string"
+                },
+                "host_open_id": {
+                    "description": "主理人openID",
+                    "type": "string"
+                },
+                "is_approved": {
+                    "description": "是否通过审批",
+                    "type": "integer"
+                },
+                "logo": {
+                    "description": "组织图标logo",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "组织名字",
+                    "type": "string"
+                },
+                "reviewer": {
+                    "description": "审批人",
+                    "type": "string"
+                },
+                "sport_type": {
+                    "description": "运动类型",
+                    "type": "string"
+                },
+                "total_event_num": {
+                    "description": "活动次数",
+                    "type": "integer"
+                }
+            }
+        },
+        "mysql.WechatUserInfoWithoutGorm": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "description": "微信用户头像",
+                    "type": "string"
+                },
+                "calibration_proof": {
+                    "description": "自称是pro的（定级7.0的人）需要额外提供图片",
+                    "type": "string"
+                },
+                "gender": {
+                    "description": "性别",
+                    "type": "integer"
+                },
+                "is_calibrated": {
+                    "description": "是否完成定级",
+                    "type": "integer"
+                },
+                "is_host": {
+                    "description": "1标识有，0标识无",
+                    "type": "integer"
+                },
+                "is_primary": {
+                    "description": "是否是主要的recprd",
+                    "type": "integer"
+                },
+                "joined_event": {
+                    "description": "参与的活动",
+                    "type": "string"
+                },
+                "joined_group": {
+                    "description": "参加的组织",
+                    "type": "string"
+                },
+                "joined_times": {
+                    "description": "参与次数",
+                    "type": "integer"
+                },
+                "level": {
+                    "description": "级别",
+                    "type": "integer"
+                },
+                "nickname": {
+                    "description": "微信用户昵称",
+                    "type": "string"
+                },
+                "open_id": {
+                    "description": "微信用户open_id",
+                    "type": "string"
+                },
+                "organization_id": {
+                    "description": "主理的组织名",
+                    "type": "integer"
+                },
+                "phone_number": {
+                    "description": "用户手机号",
+                    "type": "integer"
+                },
+                "preference": {
+                    "type": "string"
+                },
+                "reviewer": {
+                    "description": "审批人（只有职业才需要）",
+                    "type": "string"
+                },
+                "session_key": {
+                    "description": "微信session_key 用于解密",
+                    "type": "string"
+                },
+                "sport_type": {
+                    "description": "运动类型",
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "string"
+                },
+                "union_id": {
+                    "description": "微信用户union_id",
+                    "type": "string"
                 }
             }
         }

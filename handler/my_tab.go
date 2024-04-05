@@ -128,11 +128,11 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 			myOrganization.Name = organization.Name
 			myOrganization.EventNum = organization.TotalEventNum
 			// 已经审批通过了
-			if user.IsHost == 1 {
-				myOrganization.Status = "wait_for_approve"
+			if organization.IsApproved == 1 {
+				myOrganization.Status = "approved"
 				// 还没审批通过呢
 			} else {
-				myOrganization.Status = "approved"
+				myOrganization.Status = "wait_for_approve"
 			}
 		}
 		sportTypeInfo.MyOrganization = myOrganization
