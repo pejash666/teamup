@@ -28,6 +28,8 @@ type EventMeta struct {
 	EndTime          int64  `gorm:"column:end_time" json:"end_time"`
 	EndTimeStr       string `gorm:"column:end_time_str" json:"end_time_str"`
 	FieldName        string `gorm:"column:field_name" json:"filed_name"`
+	Longitude        string `gorm:"column:longitude" json:"longitude"`
+	Latitude         string `gorm:"column:latitude" json:"latitude"`
 	MaxPlayerNum     uint   `gorm:"column:max_player_num" json:"max_player_num"` // 匹克球只能是偶数
 	CurrentPlayerNum uint   `gorm:"column:current_player_num" json:"current_player_num"`
 	CurrentPlayer    string `gorm:"column:current_player" json:"current_player"`

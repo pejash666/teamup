@@ -153,6 +153,10 @@ func HttpHandler() *gin.Engine {
 	eventGroup.POST("/update", API(handler.UpdateEvent, model.APIOption{
 		NeedLoginStatus: true,
 	}))
+	// 获取场地列表 (通了)
+	eventGroup.POST("/fields_list", API(handler.GetFieldsList, model.APIOption{
+		NeedLoginStatus: true,
+	}))
 	//// 获取活动结果
 	//eventGroup.POST("/get_result", API(handler.GetEventResult, model.APIOption{
 	//	NeedLoginStatus: true,

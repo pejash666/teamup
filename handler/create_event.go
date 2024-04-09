@@ -150,7 +150,7 @@ func paramsCheck(event *model.EventInfo) (bool, string) {
 		return false, "invalid time"
 	}
 	// 已经预定场地的需要检查场地名称和场地类型
-	if event.IsBooked && (event.FieldName == "" || event.FieldType == "") {
+	if event.IsBooked && (event.FieldName == "" || event.FieldType == "") && (event.Longitude == "" || event.Latitude == "") {
 		return false, "invalid field"
 	}
 	if event.IsBooked && event.Price == 0 {

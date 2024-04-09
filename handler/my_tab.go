@@ -47,6 +47,8 @@ type Event struct {
 	EndTineStr       string      `json:"end_time_str"`
 	IsBooked         bool        `json:"is_booked"`
 	FieldName        string      `json:"field_name"`
+	Longitude        float64     `json:"longitude"`
+	Latitude         float64     `json:"latitude"`
 	CurrentPlayer    []*UserInfo `json:"current_player"`
 	CurrentPlayerNum uint        `json:"current_player_num"`
 	MaxPlayerNum     uint        `json:"max_player_num"`
@@ -54,12 +56,18 @@ type Event struct {
 	MatchType        string      `json:"match_type"`
 	LowestLevel      float32     `json:"lowest_level"`
 	HighestLevel     float32     `json:"highest_level"`
+	Status           string      `json:"status"` // event状态：created;full;finished
 }
 
 type Organization struct {
-	Name     string `json:"name"`
-	EventNum int    `json:"event_num"`
-	Status   string `json:"status"` // 组织状态：no_organization;wait_for_approve;approved
+	ID        uint    `json:"id"`
+	Name      string  `json:"name"`
+	Logo      string  `json:"logo"`
+	Address   string  `json:"address"`
+	Longitude float64 `json:"longitude,omitempty"`
+	Latitude  float64 `json:"latitude,omitempty"`
+	EventNum  int     `json:"event_num"`
+	Status    string  `json:"status"` // 组织状态：no_organization;wait_for_approve;approved
 }
 
 type GetMyTabResp struct {
@@ -125,7 +133,10 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 			}
 			// 查到记录了, 检查状态
 		} else {
+			myOrganization.ID = organization.ID
 			myOrganization.Name = organization.Name
+			myOrganization.Address = organization.Address
+			myOrganization.Logo = organization.Logo
 			myOrganization.EventNum = organization.TotalEventNum
 			// 已经审批通过了
 			if organization.IsApproved == 1 {

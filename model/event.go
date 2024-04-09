@@ -28,6 +28,8 @@ type EventInfo struct {
 	EndTime          int64   `json:"end_time"`
 	EndTimeStr       string  `json:"end_time_str"`
 	FieldName        string  `json:"field_name,omitempty"`
+	Longitude        string  `json:"longitude,omitempty"`
+	Latitude         string  `json:"latitude,omitempty"`
 	MaxPeopleNum     uint    `json:"max_people_num"`
 	CurrentPeople    uint    `json:"current_people"`
 	Price            uint    `json:"price"`

@@ -128,6 +128,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/team_up/event/fields_list": {
+            "post": {
+                "description": "根据运动类型和城市获取场地列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "/team_up/event"
+                ],
+                "summary": "获取场地列表",
+                "parameters": [
+                    {
+                        "description": "城市",
+                        "name": "city",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "运动类型",
+                        "name": "sport_type",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.GetFieldsListResp"
+                        }
+                    }
+                }
+            }
+        },
         "/team_up/event/list": {
             "post": {
                 "description": "根据筛选条件获取活动列表",
@@ -941,6 +984,12 @@ const docTemplate = `{
                 "is_booked": {
                     "type": "boolean"
                 },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
                 "lowest_level": {
                     "type": "number"
                 },
@@ -954,6 +1003,10 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "start_time_str": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "event状态：created;full;finished",
                     "type": "string"
                 },
                 "weekday": {
@@ -1047,6 +1100,31 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/handler.GetEventListData"
+                },
+                "err_no": {
+                    "type": "integer"
+                },
+                "err_tips": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.GetFieldsListRes": {
+            "type": "object",
+            "properties": {
+                "fields_list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.Organization"
+                    }
+                }
+            }
+        },
+        "handler.GetFieldsListResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handler.GetFieldsListRes"
                 },
                 "err_no": {
                     "type": "integer"
@@ -1207,8 +1285,23 @@ const docTemplate = `{
         "handler.Organization": {
             "type": "object",
             "properties": {
+                "address": {
+                    "type": "string"
+                },
                 "event_num": {
                     "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "longitude": {
+                    "type": "number"
                 },
                 "name": {
                     "type": "string"
@@ -1555,6 +1648,12 @@ const docTemplate = `{
                 "is_public": {
                     "description": "是否是公开比赛",
                     "type": "boolean"
+                },
+                "latitude": {
+                    "type": "string"
+                },
+                "longitude": {
+                    "type": "string"
                 },
                 "lowest_level": {
                     "description": "适合的最低级别",

@@ -24,6 +24,8 @@ CREATE TABLE `event_info`
     `end_time`      int(11) not null default 0  comment '结束的时间戳',
     `end_time_str`  varchar(64) not null default '' comment '结束事件, 比如15:04',
     `field_name`    varchar(64) not null default '' comment '场地名字',
+    `longitude`     varchar(64) not null default '' comment '经度',
+    `latitude`      varchar(64) not null default '' comment '纬度',
     `field_type`    varchar(64) not null default '' comment '场地类型',
     `max_player_num`    smallint not null default 0 comment '最多几人',
     `current_player_num` smallint not null default 0 comment '当前几人',

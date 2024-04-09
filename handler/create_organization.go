@@ -3,6 +3,7 @@ package handler
 import (
 	"errors"
 	"gorm.io/gorm"
+	"teamup/constant"
 	"teamup/db/mysql"
 	"teamup/iface"
 	"teamup/model"
@@ -14,6 +15,8 @@ type CreateOrganizationBody struct {
 	SportType string `json:"sport_type"` // 运动类型
 	City      string `json:"city"`       // 城市
 	Address   string `json:"address"`    // 地址
+	Longitude string `json:"longitude"`  // 经度
+	Latitude  string `json:"latitude"`   // 纬度
 	Contact   string `json:"contact"`    // 联系方式
 	Logo      string `json:"logo"`       // 组织logo
 }
@@ -47,6 +50,10 @@ func CreateOrganization(c *model.TeamUpContext) (interface{}, error) {
 				util.Logger.Printf("[CreateOrganization] BindJSON failed, err:%v", err)
 				return nil, iface.NewBackEndError(iface.ParamsError, "invalid params")
 			}
+			isPass, reason := CreateOrganizationParamCheck(body)
+			if !isPass {
+				return nil, iface.NewBackEndError(iface.ParamsError, reason)
+			}
 			organization.Name = body.Name
 			organization.HostOpenID = c.BasicUser.OpenID
 			organization.SportType = body.SportType
@@ -54,36 +61,9 @@ func CreateOrganization(c *model.TeamUpContext) (interface{}, error) {
 			organization.Address = body.Address
 			organization.Contact = body.Contact
 			organization.Logo = body.Logo
-			//// 将logo资源存在服务器内
-			//file, err := c.FormFile("logo")
-			//if err != nil {
-			//	util.Logger.Printf("[CreateOrganization] FormFile failed, err:%v", err)
-			//	return nil, iface.NewBackEndError(iface.ParamsError, "invalid logo")
-			//}
-			//// 不能大于1mb
-			//if file.Size > 1<<20 {
-			//	util.Logger.Printf("[CreateOrganization] file size is too big")
-			//	return nil, iface.NewBackEndError(iface.ParamsError, "file too big")
-			//}
-			//fileName := strings.Split(file.Filename, ".")
-			//if fileName[len(fileName)-1] != "png" && fileName[len(fileName)-1] != "jpeg" {
-			//	util.Logger.Printf("[CreateOrganization] invalid file, should either png or jpeg")
-			//	return nil, iface.NewBackEndError(iface.ParamsError, "invalid filename")
-			//}
-			//dst := path.Join("./organization_logos", strconv.FormatInt(int64(organization.ID), 10)+"_logo."+fileName[len(fileName)-1])
-			//err = c.SaveUploadedFile(file, dst)
-			//if err != nil {
-			//	util.Logger.Printf("[CreateOrganization] iSaveUploadedFile failed, err:%v", err)
-			//	return nil, iface.NewBackEndError(iface.ParamsError, "save file failed")
-			//}
-			//organization.Name = c.PostForm("name")
-			//organization.HostOpenID = c.BasicUser.OpenID
-			//organization.SportType = c.PostForm("sport_type")
-			//organization.City = c.PostForm("city")
-			//organization.Address = c.PostForm("address")
-			//organization.Contact = c.PostForm("contact")
-			//imagePath := "/organization_logos/" + strconv.FormatInt(int64(organization.ID), 10) + "_logo." + fileName[len(fileName)-1]
-			//organization.Logo = util.GetImageUrl(c, imagePath)
+			// 存一下经纬度
+			organization.Longitude = body.Longitude
+			organization.Latitude = body.Latitude
 			result := util.DB().Create(organization)
 			if result.Error != nil {
 				util.Logger.Printf("[CreateOrganization] DB().Create failed, err:%v", result.Error)
@@ -97,4 +77,29 @@ func CreateOrganization(c *model.TeamUpContext) (interface{}, error) {
 		}
 	}
 	return nil, iface.NewBackEndError(iface.ParamsError, "user already have organization in this sport type")
+}
+
+func CreateOrganizationParamCheck(param *CreateOrganizationBody) (bool, string) {
+	if param.City == "" {
+		return false, "invalid city"
+	}
+	if param.SportType == "" || (param.SportType != constant.SportTypePedal && param.SportType != constant.SportTypeTennis && param.SportType != constant.SportTypePickelBall) {
+		return false, "invalid sport type"
+	}
+	if param.Name == "" {
+		return false, "invalid name"
+	}
+	if param.Logo == "" {
+		return false, "invalid logo"
+	}
+	if param.Contact == "" {
+		return false, "invalid contact"
+	}
+	if param.Address == "" {
+		return false, "invalid address"
+	}
+	if param.Longitude == "" || param.Latitude == "" {
+		return false, "invalid longitude/latitude"
+	}
+	return true, ""
 }
