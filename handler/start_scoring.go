@@ -54,7 +54,7 @@ type StartScoringResp struct {
 }
 
 // StartScoring 用户点击开始记分
-// 对于pedal运动：
+// 对于padel运动：
 // 1. Americano记分模式，有N个用户参加，则生成N-1场对局，俩俩搭配；
 //  每场比赛后，每名玩家累计自己的比分，按照总分加和排名，这种case下，服务端一次性下发所有的轮次信息给到用户。
 // 2. Mexicano记分模式，有N个用户参加，首先随机生成一轮对局，结束后，根据结果需要安排首轮第一与首轮第四一组 对抗 首轮第三与首轮第二
@@ -143,13 +143,13 @@ func StartScoring(c *model.TeamUpContext) (interface{}, error) {
 
 	// 进行分组
 	switch event.SportType {
-	case constant.SportTypePedal:
+	case constant.SportTypePadel:
 		// 进行人数校验，网球规则必须为偶数
-		if event.ScoreRule == constant.PedalScoreRuleTennis && len(players)%2 != 0 {
-			util.Logger.Printf("[StartScoring] unmatched pedal game and player")
+		if event.ScoreRule == constant.PadelScoreRuleTennis && len(players)%2 != 0 {
+			util.Logger.Printf("[StartScoring] unmatched padel game and player")
 			return nil, iface.NewBackEndError(iface.ParamsError, "invalid gametype & player")
 		}
-		res.RoundInfo = dividePedal(c, event, players)
+		res.RoundInfo = dividePadel(c, event, players)
 	case constant.SportTypePickelBall:
 		// 进行人数校验
 		if (event.GameType == constant.EventGameTypeDuo && len(players)%2 != 0) || (event.GameType == constant.EventGameTypeSolo && len(players) != 2) {
@@ -169,14 +169,14 @@ func StartScoring(c *model.TeamUpContext) (interface{}, error) {
 	return res, nil
 }
 
-// dividePedal pedal分组
-func dividePedal(c *model.TeamUpContext, event *mysql.EventMeta, players []*model.Player) []*RoundInfo {
+// dividePadel padel分组
+func dividePadel(c *model.TeamUpContext, event *mysql.EventMeta, players []*model.Player) []*RoundInfo {
 	switch event.ScoreRule {
-	case constant.PedalScoreRuleAmericano:
+	case constant.PadelScoreRuleAmericano:
 		return divideAmericano(c, event, players)
-	case constant.PedalScoreRuleMexicano:
+	case constant.PadelScoreRuleMexicano:
 		return divideMexicano(event, players)
-	case constant.PedalScoreRuleTennis:
+	case constant.PadelScoreRuleTennis:
 		return divideTennis(c, event, players)
 	default:
 		return nil
@@ -233,7 +233,7 @@ func dividePickleBall(c *model.TeamUpContext, event *mysql.EventMeta, players []
 			})
 		}
 
-	case constant.PickleBallScoreRuleServe, constant.PedalScoreRuleTennis:
+	case constant.PickleBallScoreRuleServe, constant.PadelScoreRuleTennis:
 		// 单打
 		if event.GameType == constant.EventGameTypeSolo {
 			return []*RoundInfo{
@@ -309,13 +309,13 @@ func dividePickleBall(c *model.TeamUpContext, event *mysql.EventMeta, players []
 	return res
 }
 
-// divideTennis tennis规则，适用与pedal的tennis记分规则，和tennis sport_type 分组
-// tennis规则下搭档也是固定的，所以如果是pedal运动，人数必须为偶数
+// divideTennis tennis规则，适用与padel的tennis记分规则，和tennis sport_type 分组
+// tennis规则下搭档也是固定的，所以如果是padel运动，人数必须为偶数
 func divideTennis(c *model.TeamUpContext, event *mysql.EventMeta, players []*model.Player) []*RoundInfo {
 	return dividePickleBall(c, event, players)
 }
 
-// divideAmericano pedal的Americano规则
+// divideAmericano padel的Americano规则
 func divideAmericano(c *model.TeamUpContext, event *mysql.EventMeta, players []*model.Player) []*RoundInfo {
 	// adaptive算法
 	// 比如有abcd 4个人， 生成3场比赛
@@ -541,7 +541,7 @@ func divideAmericano(c *model.TeamUpContext, event *mysql.EventMeta, players []*
 
 //}
 
-// divideMexicano pedal的Mexicano规则
+// divideMexicano padel的Mexicano规则
 func divideMexicano(event *mysql.EventMeta, players []*model.Player) []*RoundInfo {
 	return nil
 }

@@ -35,7 +35,7 @@ func GetCalibrationQuestions(c *model.TeamUpContext) (interface{}, error) {
 		util.Logger.Printf("[GetCalibrationQuestions] BindJSON failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.ParamsError, "invalid req")
 	}
-	if body.SportType != constant.SportTypePedal && body.SportType != constant.SportTypeTennis && body.SportType != constant.SportTypePickelBall {
+	if body.SportType != constant.SportTypePadel && body.SportType != constant.SportTypeTennis && body.SportType != constant.SportTypePickelBall {
 		return nil, iface.NewBackEndError(iface.ParamsError, "invalid sport_type")
 	}
 	questionnaire := model.Questionnaire{}

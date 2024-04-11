@@ -156,10 +156,10 @@ func paramsCheck(event *model.EventInfo) (bool, string) {
 	if event.IsBooked && event.Price == 0 {
 		return false, "booked filed must have price"
 	}
-	// pedal只允许双打 人数 >= 4 <= 8
-	if event.SportType == constant.SportTypePedal {
+	// padel只允许双打 人数 >= 4 <= 8
+	if event.SportType == constant.SportTypePadel {
 		if event.GameType == constant.EventGameTypeSolo {
-			return false, "pedal only can duo"
+			return false, "padel only can duo"
 		}
 		if event.MaxPeopleNum < 4 || event.MaxPeopleNum > 8 {
 			return false, "invalid max_people_number"

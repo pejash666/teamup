@@ -83,7 +83,7 @@ func CreateOrganizationParamCheck(param *CreateOrganizationBody) (bool, string) 
 	if param.City == "" {
 		return false, "invalid city"
 	}
-	if param.SportType == "" || (param.SportType != constant.SportTypePedal && param.SportType != constant.SportTypeTennis && param.SportType != constant.SportTypePickelBall) {
+	if param.SportType == "" || (param.SportType != constant.SportTypePadel && param.SportType != constant.SportTypeTennis && param.SportType != constant.SportTypePickelBall) {
 		return false, "invalid sport type"
 	}
 	if param.Name == "" {

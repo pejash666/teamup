@@ -62,7 +62,7 @@ type CalibrateRes struct {
 //	@Router			/team_up/user/calibrate [post]
 func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 	sportType := c.PostForm("sport_type")
-	if sportType != constant.SportTypePedal && sportType != constant.SportTypeTennis && sportType != constant.SportTypePickelBall {
+	if sportType != constant.SportTypePadel && sportType != constant.SportTypeTennis && sportType != constant.SportTypePickelBall {
 		return nil, iface.NewBackEndError(iface.ParamsError, "invalid sport_type")
 	}
 	questionnaireParam := c.PostForm("questionnaire")
@@ -78,7 +78,7 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 	//	util.Logger.Printf("[Calibrate] BindJSON failed, err:%v", err)
 	//	return nil, iface.NewBackEndError(iface.ParamsError, "invalid req")
 	//}
-	//if body.SportType != constant.SportTypePedal && body.SportType != constant.SportTypeTennis && body.SportType != constant.SportTypePickelBall {
+	//if body.SportType != constant.SportTypePadel && body.SportType != constant.SportTypeTennis && body.SportType != constant.SportTypePickelBall {
 	//	return nil, iface.NewBackEndError(iface.ParamsError, "invalid sport_type")
 	//}
 	if len(questionnaire) < 1 {

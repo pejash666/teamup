@@ -771,7 +771,7 @@ paths:
       - application/json
       description: 根据筛选条件获取活动列表
       parameters:
-      - description: 运动类型：pedal, tennis, pickleball
+      - description: 运动类型：padel, tennis, pickleball
         in: body
         name: sport_type
         required: true

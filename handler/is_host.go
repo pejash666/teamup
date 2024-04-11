@@ -30,7 +30,7 @@ type Info struct {
 //	@Router			/team_up/user/get_host_info [get]
 func GetHostInfo(c *model.TeamUpContext) (interface{}, error) {
 	var users []*mysql.WechatUserInfo
-	result := util.DB().Where("open_id = ? AND sport_type IN ?", c.BasicUser.OpenID, []string{constant.SportTypePedal, constant.SportTypeTennis, constant.SportTypePickelBall}).Find(&users)
+	result := util.DB().Where("open_id = ? AND sport_type IN ?", c.BasicUser.OpenID, []string{constant.SportTypePadel, constant.SportTypeTennis, constant.SportTypePickelBall}).Find(&users)
 	if result.Error != nil {
 		util.Logger.Printf("[IsUserHostBySportType] DB select failed, err:%v", result.Error)
 		return nil, iface.NewBackEndError(iface.MysqlError, result.Error.Error())

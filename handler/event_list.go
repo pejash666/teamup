@@ -57,7 +57,7 @@ type EventListOrderOption struct {
 //	@Tags			/team_up/event
 //	@Accept			json
 //	@Produce		json
-//	@Param			sport_type	body		string	true	"运动类型：pedal, tennis, pickleball"
+//	@Param			sport_type	body		string	true	"运动类型：padel, tennis, pickleball"
 //	@Param			city		body		string	true	"城市"
 //	@Param			start_time	body		int		true	"开始时间，秒级时间戳"
 //	@Param			num			body		int		true	"获取的数量"

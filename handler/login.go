@@ -66,7 +66,7 @@ func UserLogin(c *model.TeamUpContext) (interface{}, error) {
 					SessionKey:  c2s.SessionKey,
 					UnionId:     c2s.UnionID,
 					IsPrimary:   1,
-					SportType:   constant.SportTypePedal,
+					SportType:   constant.SportTypePadel,
 					JoinedEvent: jes,
 					JoinedGroup: jgs,
 					Preference:  ps,

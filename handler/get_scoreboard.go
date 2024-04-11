@@ -16,11 +16,11 @@ type ScoreBoard struct {
 }
 
 var SportTypeScoreOptions = map[string]*model.ScoreOptions{
-	constant.SportTypePedal: {
-		AvailableScoreRule: []string{constant.PedalScoreRuleAmericano, constant.PedalScoreRuleTennis},
+	constant.SportTypePadel: {
+		AvailableScoreRule: []string{constant.PadelScoreRuleAmericano, constant.PadelScoreRuleTennis},
 		AvailableRoundTarget: map[string][]int{
-			constant.PedalScoreRuleAmericano: {8, 16, 24, 32},
-			constant.PedalScoreRuleTennis:    {6},
+			constant.PadelScoreRuleAmericano: {8, 16, 24, 32},
+			constant.PadelScoreRuleTennis:    {6},
 		},
 		FieldNum: 1,
 	},
@@ -32,7 +32,7 @@ var SportTypeScoreOptions = map[string]*model.ScoreOptions{
 		FieldNum: 1,
 	},
 	constant.SportTypeTennis: {
-		AvailableScoreRule: []string{constant.PedalScoreRuleTennis},
+		AvailableScoreRule: []string{constant.PadelScoreRuleTennis},
 		AvailableRoundTarget: map[string][]int{
 			constant.SportTypeTennis: {6},
 		},
@@ -70,7 +70,7 @@ func GetScoreboard(c *model.TeamUpContext) (interface{}, error) {
 	// 获取活动的信息, 根据单/双打 和 运动类型，能够开始记分的标准不一样
 	// 匹克球单打：2人
 	// 匹克球双打：4人
-	// pedal双打：4人
+	// padel双打：4人
 	event := &mysql.EventMeta{}
 	err = util.DB().Where("id = ? AND status IN ?", body.EventID, []string{constant.EventStatusCreated, constant.EventStatusFull}).Take(event).Error
 	if err != nil {
@@ -80,8 +80,8 @@ func GetScoreboard(c *model.TeamUpContext) (interface{}, error) {
 	// 如果已经满员的，肯定OK
 	if event.Status != constant.EventStatusFull {
 		switch event.SportType {
-		case constant.SportTypePedal:
-			// pedal 最少有4个人
+		case constant.SportTypePadel:
+			// padel 最少有4个人
 			if event.CurrentPlayerNum < 4 {
 				util.Logger.Printf("[GetScoreBoard] currentNum is less than 4, cant start")
 				return nil, iface.NewBackEndError(iface.ParamsError, "invalid player num")

@@ -175,7 +175,7 @@
                 "summary": "获取活动列表",
                 "parameters": [
                     {
-                        "description": "运动类型：pedal, tennis, pickleball",
+                        "description": "运动类型：padel, tennis, pickleball",
                         "name": "sport_type",
                         "in": "body",
                         "required": true,

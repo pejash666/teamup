@@ -111,12 +111,12 @@ func GetScoreResult(c *model.TeamUpContext) (interface{}, error) {
 			playerMap[player.OpenID].TotalScore += roundTmp.HomeScore
 			// 如果是竞技类比赛需要计算等级的变化
 			if isCompetitive {
-				// 如果是pedal americano 或者 pickleball的单打，levelChange是每个人都不一样的
+				// 如果是padel americano 或者 pickleball的单打，levelChange是每个人都不一样的
 				// 其他方式，levelChange是每个队伍之间不一样，队内是一样的
 				// 对于用户的前5场比赛，factor需要大一些，能够更快的校准
 				factor := 0.1
 				needTeamLevelChange := true
-				if (event.SportType == constant.SportTypePedal && event.ScoreRule == constant.PedalScoreRuleAmericano) || (event.SportType == constant.SportTypePickelBall && event.GameType == constant.EventGameTypeSolo) {
+				if (event.SportType == constant.SportTypePadel && event.ScoreRule == constant.PadelScoreRuleAmericano) || (event.SportType == constant.SportTypePickelBall && event.GameType == constant.EventGameTypeSolo) {
 					needTeamLevelChange = false
 					ppl := &mysql.WechatUserInfo{}
 					err = util.DB().Where("open_id = ? AND sport_type = ?", player.OpenID, event.SportType).Take(ppl).Error
@@ -152,7 +152,7 @@ func GetScoreResult(c *model.TeamUpContext) (interface{}, error) {
 			if isCompetitive {
 				factor := 0.1
 				needTeamLevelChange := true
-				if (event.SportType == constant.SportTypePedal && event.ScoreRule == constant.PedalScoreRuleAmericano) || (event.SportType == constant.SportTypePickelBall && event.GameType == constant.EventGameTypeSolo) {
+				if (event.SportType == constant.SportTypePadel && event.ScoreRule == constant.PadelScoreRuleAmericano) || (event.SportType == constant.SportTypePickelBall && event.GameType == constant.EventGameTypeSolo) {
 					needTeamLevelChange = false
 					ppl := &mysql.WechatUserInfo{}
 					err = util.DB().Where("open_id = ? AND sport_type = ?", player.OpenID, event.SportType).Take(ppl).Error
