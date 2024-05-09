@@ -8,7 +8,7 @@ import (
 const (
 	// todo: 替换为线上的网址
 	LocalTestSchema = "localhost:8080/team_up/static_image/%s/%s"
-	ImageUrlSchema  = "https://www.teamupup.cn:1443/team_up/user/image/%s/%s"
+	ImageUrlSchema  = "https://www.teamupup.cn/team_up/user/image/%s/%s"
 )
 
 // GetImageUrl 获取存储在服务器的静态资源链接
