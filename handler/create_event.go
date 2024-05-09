@@ -171,6 +171,10 @@ func paramsCheck(event *model.EventInfo) (bool, string) {
 			return false, "invalid max_people_number"
 		}
 	}
+	// 只有组织创建的才能上传eventImage
+	if event.OrganizationID < 1 && event.EventImage != "" {
+		return false, "only host can upload event image"
+	}
 	return true, ""
 }
 
@@ -223,6 +227,7 @@ func EventMeta(c *model.TeamUpContext, event *model.EventInfo) (*mysql.EventMeta
 	}
 	if event.IsHost {
 		meta.OrganizationID = event.OrganizationID
+		meta.EventImage = event.EventImage
 	}
 	util.Logger.Printf("[CreateEvent] eventMeta:%+v", meta)
 	return meta, nil

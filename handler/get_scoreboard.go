@@ -134,6 +134,7 @@ func GetScoreboard(c *model.TeamUpContext) (interface{}, error) {
 		Weekday:         event.Weekday,
 		MaxPeopleNum:    event.MaxPlayerNum,
 		CurrentPeople:   event.CurrentPlayerNum,
+		EventImage:      event.EventImage,
 	}
 	scoreBoard.EventInfo = eventInfo
 

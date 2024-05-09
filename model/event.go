@@ -34,6 +34,7 @@ type EventInfo struct {
 	CurrentPeople    uint    `json:"current_people"`
 	Price            uint    `json:"price"`
 	OrganizationLogo string  `json:"organization_logo,omitempty"`
+	EventImage       string  `json:"event_image,omitempty"` // 活动图片（只有组织创建的活动才能上传）
 
 	IsDraft bool `json:"is_draft,omitempty"` // 是否是草稿请求
 }

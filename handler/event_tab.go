@@ -79,6 +79,7 @@ func EventPage(c *model.TeamUpContext) (interface{}, error) {
 	eventInfo.HighestLevel = float32(eventMeta.HighestLevel) / 1000
 	eventInfo.Price = eventMeta.Price
 	eventInfo.MaxPeopleNum = eventMeta.MaxPlayerNum
+	eventInfo.EventImage = eventMeta.EventImage
 	// 获取creator的头像，名字
 	creator := &mysql.WechatUserInfo{}
 	err = util.DB().Where("open_id = ? AND sport_type = ?", eventMeta.Creator, eventMeta.SportType).Take(creator).Error

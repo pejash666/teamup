@@ -57,6 +57,7 @@ type Event struct {
 	LowestLevel      float32     `json:"lowest_level"`
 	HighestLevel     float32     `json:"highest_level"`
 	Status           string      `json:"status"` // event状态：created;full;finished
+	EventImage       string      `json:"event_image"`
 }
 
 type Organization struct {
@@ -179,6 +180,7 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 					MatchType:        event.MatchType,
 					LowestLevel:      float32(event.LowestLevel) / 100,
 					HighestLevel:     float32(event.HighestLevel) / 100,
+					EventImage:       event.EventImage,
 				}
 				// 获取参与这个活动的用户信息
 				currentPeople := make([]string, 0)

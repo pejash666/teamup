@@ -31,6 +31,7 @@ CREATE TABLE `event_info`
     `current_player_num` smallint not null default 0 comment '当前几人',
     `current_player` varchar(64) not null default '' comment '参与的用户id',
     `price`         smallint not null default 0 comment '价格',
+    `event_image`   varchar(255) not null default '' comment '活动图片',
     `created_at`  TIMESTAMP        NOT NULL     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at`  TIMESTAMP        NOT NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     `deleted_at`  TIMESTAMP        NULL     ,

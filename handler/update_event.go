@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"github.com/bytedance/sonic"
 	"gorm.io/gorm"
 	"teamup/constant"
@@ -61,6 +60,7 @@ func UpdateEvent(c *model.TeamUpContext) (interface{}, error) {
 	meta.Desc = event.Desc
 	meta.Name = event.Name
 	meta.City = event.City
+	meta.EventImage = event.EventImage
 	if event.IsCompetitive {
 		meta.MatchType = constant.EventMatchTypeCompetitive
 	} else {
@@ -177,8 +177,6 @@ func UpdateEvent(c *model.TeamUpContext) (interface{}, error) {
 			return nil
 		})
 	}
-	fmt.Println(meta.IsHost)
-	fmt.Println(event.IsHost)
 	// 之前是组织创建的活动，现在改成个人创建
 	if meta.IsHost == 1 && !event.IsHost {
 		meta.IsHost = 0
@@ -188,7 +186,6 @@ func UpdateEvent(c *model.TeamUpContext) (interface{}, error) {
 			return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
 		}
 	} else if meta.IsHost == 0 && event.IsHost {
-		fmt.Println("here")
 		// 检查此用户是不是此运动类型的host
 		user := &mysql.WechatUserInfo{}
 		err = util.DB().Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, event.SportType).Take(user).Error
