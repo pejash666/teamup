@@ -972,6 +972,9 @@ const docTemplate = `{
                 "end_time_str": {
                     "type": "string"
                 },
+                "event_image": {
+                    "type": "string"
+                },
                 "field_name": {
                     "type": "string"
                 },
@@ -1608,6 +1611,10 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "end_time_str": {
+                    "type": "string"
+                },
+                "event_image": {
+                    "description": "活动图片（只有组织创建的活动才能上传）",
                     "type": "string"
                 },
                 "field_name": {
