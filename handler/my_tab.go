@@ -211,7 +211,8 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 		}
 		res.SportTypeInfos = append(res.SportTypeInfos, sportTypeInfo)
 	}
-	util.Logger.Printf("[GetMytTab] success, res is %v", util.ToReadable(res))
+	resStr, _ := sonic.MarshalString(res)
+	util.Logger.Printf("[GetMytTab] success, res is %v", resStr)
 	return res, nil
 }
 

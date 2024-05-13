@@ -141,7 +141,8 @@ func EventList(c *model.TeamUpContext) (interface{}, error) {
 	}
 	res.EventList = eventList
 
-	util.Logger.Printf("[GetEventList] success, res is %v", util.ToReadable(res))
+	eventListStr, _ := sonic.MarshalString(eventList)
+	util.Logger.Printf("[GetEventList] success, res is %v", eventListStr)
 	return res, nil
 }
 
