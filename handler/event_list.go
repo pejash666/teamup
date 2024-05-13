@@ -148,6 +148,7 @@ func EventList(c *model.TeamUpContext) (interface{}, error) {
 
 func EventMetaToEventInfo(event *mysql.EventMeta) (*Event, error) {
 	eventShow := &Event{
+		ID:               event.ID,
 		StartTime:        event.StartTime,
 		EndTime:          event.EndTime,
 		IsBooked:         event.IsBooked == 1,
@@ -156,8 +157,8 @@ func EventMetaToEventInfo(event *mysql.EventMeta) (*Event, error) {
 		MaxPlayerNum:     event.MaxPlayerNum,
 		GameType:         event.GameType,
 		MatchType:        event.MatchType,
-		LowestLevel:      float32(event.LowestLevel) / 100,
-		HighestLevel:     float32(event.HighestLevel) / 100,
+		LowestLevel:      float32(event.LowestLevel) / 1000,
+		HighestLevel:     float32(event.HighestLevel) / 1000,
 		EventImage:       event.EventImage,
 	}
 	// 获取status
@@ -166,8 +167,8 @@ func EventMetaToEventInfo(event *mysql.EventMeta) (*Event, error) {
 	} else {
 		eventShow.Status = event.Status
 	}
-	// 已经定场地了，查询organization表获取经纬度
-	if event.IsBooked == 1 && event.Latitude != "" && event.Longitude != "" {
+	// 订场地只能从已合作的场地里面选择
+	if event.FieldName != "" && event.Latitude != "" && event.Longitude != "" {
 		longitude, err := strconv.ParseFloat(event.Longitude, 64)
 		if err != nil {
 			return nil, iface.NewBackEndError(iface.InternalError, err.Error())
@@ -181,7 +182,7 @@ func EventMetaToEventInfo(event *mysql.EventMeta) (*Event, error) {
 	}
 	// 获取参与这个活动的用户信息
 	currentPeople := make([]string, 0)
-	// 只有此活动有人参与，才
+	// 只有此活动有人参与，才需要解析
 	if event.CurrentPlayer != "" {
 		err := sonic.UnmarshalString(event.CurrentPlayer, &currentPeople)
 		if err != nil {

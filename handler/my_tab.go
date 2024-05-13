@@ -40,6 +40,7 @@ type LevelChange struct {
 }
 
 type Event struct {
+	ID               uint        `json:"id"`
 	StartTime        int64       `json:"start_time"`
 	EndTime          int64       `json:"end_time"`
 	Weekday          string      `json:"weekday"`
@@ -167,6 +168,7 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 			sportTypeInfo.MyGames = make([]*Event, 0)
 			for _, event := range events {
 				eventShow := &Event{
+					ID:               event.ID,
 					StartTime:        event.StartTime,
 					EndTime:          event.EndTime,
 					Weekday:          time.Unix(event.StartTime, 0).Weekday().String(),
