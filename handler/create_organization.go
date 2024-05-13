@@ -34,6 +34,8 @@ type CreateOrganizationBody struct {
 //	@Param			address		body		string	true	"地址"
 //	@Param			contact		body		string	true	"联系方式"
 //	@Param			logo		body		string	true	"logo图"
+//	@Param			longitude	body		string	true	"经度"
+//	@Param			latitude	body		string	true	"纬度"
 //	@Success		200			{object}	model.BackEndResp
 //	@Router			/team_up/organization/create [post]
 func CreateOrganization(c *model.TeamUpContext) (interface{}, error) {

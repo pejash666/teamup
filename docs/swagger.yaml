@@ -902,6 +902,18 @@ paths:
         required: true
         schema:
           type: string
+      - description: 经度
+        in: body
+        name: longitude
+        required: true
+        schema:
+          type: string
+      - description: 纬度
+        in: body
+        name: latitude
+        required: true
+        schema:
+          type: string
       produces:
       - application/json
       responses:
