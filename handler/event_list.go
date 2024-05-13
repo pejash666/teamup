@@ -179,25 +179,47 @@ func EventMetaToEventInfo(event *mysql.EventMeta) (*Event, error) {
 	}
 	// 获取参与这个活动的用户信息
 	currentPeople := make([]string, 0)
-	err := sonic.UnmarshalString(event.CurrentPlayer, &currentPeople)
-	if err != nil {
-		util.Logger.Printf("[GetMyTab] unmarshal failed, err:%v", err)
-		return nil, iface.NewBackEndError(iface.MysqlError, "unmarshal failed")
+	// 只有此活动有人参与，才
+	if event.CurrentPlayer != "" {
+		err := sonic.UnmarshalString(event.CurrentPlayer, &currentPeople)
+		if err != nil {
+			util.Logger.Printf("[GetMyTab] unmarshal failed, err:%v", err)
+			return nil, iface.NewBackEndError(iface.MysqlError, "unmarshal failed")
+		}
+		var joiners []mysql.WechatUserInfo
+		err = util.DB().Where("open_id IN ? AND is_primary = 1", currentPeople).Find(&joiners).Error
+		if err != nil {
+			util.Logger.Printf("[GetMyTab] query joiners info failed, err:%v", err)
+			return nil, iface.NewBackEndError(iface.MysqlError, "query failed")
+		}
+		currentPLayers := make([]*UserInfo, 0)
+		for _, joiner := range joiners {
+			currentPLayers = append(currentPLayers, &UserInfo{
+				NickName:  joiner.Nickname,
+				AvatarUrl: joiner.Avatar,
+			})
+		}
+		eventShow.CurrentPlayer = currentPLayers
 	}
-	var joiners []mysql.WechatUserInfo
-	err = util.DB().Where("open_id IN ? AND is_primary = 1", currentPeople).Find(&joiners).Error
-	if err != nil {
-		util.Logger.Printf("[GetMyTab] query joiners info failed, err:%v", err)
-		return nil, iface.NewBackEndError(iface.MysqlError, "query failed")
-	}
-	currentPLayers := make([]*UserInfo, 0)
-	for _, joiner := range joiners {
-		currentPLayers = append(currentPLayers, &UserInfo{
-			NickName:  joiner.Nickname,
-			AvatarUrl: joiner.Avatar,
-		})
-	}
-	eventShow.CurrentPlayer = currentPLayers
+	//err := sonic.UnmarshalString(event.CurrentPlayer, &currentPeople)
+	//if err != nil {
+	//	util.Logger.Printf("[GetMyTab] unmarshal failed, err:%v", err)
+	//	return nil, iface.NewBackEndError(iface.MysqlError, "unmarshal failed")
+	//}
+	//var joiners []mysql.WechatUserInfo
+	//err := util.DB().Where("open_id IN ? AND is_primary = 1", currentPeople).Find(&joiners).Error
+	//if err != nil {
+	//	util.Logger.Printf("[GetMyTab] query joiners info failed, err:%v", err)
+	//	return nil, iface.NewBackEndError(iface.MysqlError, "query failed")
+	//}
+	//currentPLayers := make([]*UserInfo, 0)
+	//for _, joiner := range joiners {
+	//	currentPLayers = append(currentPLayers, &UserInfo{
+	//		NickName:  joiner.Nickname,
+	//		AvatarUrl: joiner.Avatar,
+	//	})
+	//}
+	//eventShow.CurrentPlayer = currentPLayers
 	return eventShow, nil
 }
 

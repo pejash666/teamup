@@ -214,17 +214,17 @@ func EventMeta(c *model.TeamUpContext, event *model.EventInfo) (*mysql.EventMeta
 		meta.Status = constant.EventStatusCreated
 	}
 	// 如果自己也加入，则直接在创建时添加进去
+	currentPeople := make([]string, 0)
 	if event.SelfJoin {
 		meta.CurrentPlayerNum = 1
-		currentPeople := make([]string, 0)
 		currentPeople = append(currentPeople, c.BasicUser.OpenID)
-		currentPeopleStr, err := sonic.MarshalString(currentPeople)
-		if err != nil {
-			util.Logger.Printf("[EventMeta] self join failed")
-			return nil, err
-		}
-		meta.CurrentPlayer = currentPeopleStr
 	}
+	currentPeopleStr, err := sonic.MarshalString(currentPeople)
+	if err != nil {
+		util.Logger.Printf("[EventMeta] self join failed")
+		return nil, err
+	}
+	meta.CurrentPlayer = currentPeopleStr
 	if event.IsHost {
 		meta.OrganizationID = event.OrganizationID
 		meta.EventImage = event.EventImage
