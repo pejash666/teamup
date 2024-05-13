@@ -77,6 +77,7 @@ func EventList(c *model.TeamUpContext) (interface{}, error) {
 		util.Logger.Printf("[GetEventList] invalid body:%v", body)
 		return nil, iface.NewBackEndError(iface.ParamsError, "invalid query")
 	}
+	util.Logger.Printf("[GetEventList] req:%v", util.ToReadable(body))
 	// 获取筛选条件
 	hostOption, fieldOption, statusOption := GetEventListOptions(body)
 	util.Logger.Printf("%v, %v, %v", hostOption, fieldOption, statusOption)
@@ -140,7 +141,7 @@ func EventList(c *model.TeamUpContext) (interface{}, error) {
 	}
 	res.EventList = eventList
 
-	util.Logger.Printf("[GetEventList] success, res:%+v", res)
+	util.Logger.Printf("[GetEventList] success, res:%+v", util.ToReadable(res))
 	return res, nil
 }
 
