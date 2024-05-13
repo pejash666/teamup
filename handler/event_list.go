@@ -141,7 +141,7 @@ func EventList(c *model.TeamUpContext) (interface{}, error) {
 	}
 	res.EventList = eventList
 
-	util.Logger.Printf("[GetEventList] success, res:%+v", util.ToReadable(res))
+	util.Logger.Printf("[GetEventList] success, res is %v", util.ToReadable(res))
 	return res, nil
 }
 
