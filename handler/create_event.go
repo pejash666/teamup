@@ -66,6 +66,7 @@ func CreateEvent(c *model.TeamUpContext) (interface{}, error) {
 		event.Latitude = orga.Latitude
 		event.FieldType = "outdoor" // 默认outdoor
 		event.FieldName = orga.Name // event的场地名字 就是组织名字
+		event.IsBooked = true       // 场地创建的活动标记为已订场地
 	}
 	isPass, reason := paramsCheck(event)
 	if !isPass {
