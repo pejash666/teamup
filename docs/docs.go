@@ -1002,7 +1002,13 @@ const docTemplate = `{
                 "highest_level": {
                     "type": "number"
                 },
+                "id": {
+                    "type": "integer"
+                },
                 "is_booked": {
+                    "type": "boolean"
+                },
+                "is_host": {
                     "type": "boolean"
                 },
                 "latitude": {

@@ -59,6 +59,7 @@ type Event struct {
 	HighestLevel     float32     `json:"highest_level"`
 	Status           string      `json:"status"` // event状态：created;full;finished
 	EventImage       string      `json:"event_image"`
+	IsHost           bool        `json:"is_host,omitempty"`
 }
 
 type Organization struct {

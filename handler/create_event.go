@@ -41,7 +41,7 @@ func CreateEvent(c *model.TeamUpContext) (interface{}, error) {
 	}
 	util.Logger.Printf("[CreateEvent] req:%+v", event)
 	// 如果是host创建的，需要额外check这个用户在这个sport_type下是不是host
-	if event.IsHost {
+	if event.IsHost && event.OrganizationID != 0 {
 		user := &mysql.WechatUserInfo{}
 		err = util.DB().Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, event.SportType).Take(user).Error
 		if err != nil {
@@ -51,7 +51,21 @@ func CreateEvent(c *model.TeamUpContext) (interface{}, error) {
 			util.Logger.Printf("[CreateEvent] user not host")
 			return nil, iface.NewBackEndError(iface.NotHostError, "not host")
 		}
-		event.OrganizationID = int64(user.OrganizationID)
+		// 如果是以场馆身份创建的，则需要检查organization_id是不是当前用户的organization_id
+		if event.OrganizationID != int64(user.OrganizationID) {
+			util.Logger.Printf("[CreateEvent] organization id not match")
+			return nil, iface.NewBackEndError(iface.ParamsError, "organization id not match")
+		}
+		// 查询orga表，获取经纬度和fieldname
+		orga := &mysql.Organization{}
+		err = util.DB().Where("id = ?", event.OrganizationID).Take(orga).Error
+		if err != nil {
+			return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
+		}
+		event.Longitude = orga.Longitude
+		event.Latitude = orga.Latitude
+		event.FieldType = "outdoor" // 默认outdoor
+		event.FieldName = orga.Name // event的场地名字 就是组织名字
 	}
 	isPass, reason := paramsCheck(event)
 	if !isPass {
@@ -149,8 +163,8 @@ func paramsCheck(event *model.EventInfo) (bool, string) {
 	if startTime.After(endTime) {
 		return false, "invalid time"
 	}
-	// 已经预定场地的需要检查场地名称和场地类型
-	if event.IsBooked && (event.FieldName == "" || event.FieldType == "") && (event.Longitude == "" || event.Latitude == "") {
+	// 个人已经预定场地的需要检查场地名称和场地类型
+	if !event.IsHost && event.IsBooked && (event.FieldName == "" || event.FieldType == "") && (event.Longitude == "" || event.Latitude == "") {
 		return false, "invalid field"
 	}
 	if event.IsBooked && event.Price == 0 {
@@ -201,6 +215,8 @@ func EventMeta(c *model.TeamUpContext, event *model.EventInfo) (*mysql.EventMeta
 		FieldType:    event.FieldType,
 		MaxPlayerNum: event.MaxPeopleNum,
 		Price:        event.Price,
+		Latitude:     event.Latitude,
+		Longitude:    event.Longitude,
 	}
 
 	if event.IsCompetitive {

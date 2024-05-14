@@ -160,6 +160,7 @@ func EventMetaToEventInfo(event *mysql.EventMeta) (*Event, error) {
 		LowestLevel:      float32(event.LowestLevel) / 1000,
 		HighestLevel:     float32(event.HighestLevel) / 1000,
 		EventImage:       event.EventImage,
+		IsHost:           event.IsHost == 1,
 	}
 	// 获取status
 	if time.Now().Unix() > event.StartTime && time.Now().Unix() < event.EndTime {
