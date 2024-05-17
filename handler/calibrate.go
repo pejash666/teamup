@@ -51,15 +51,16 @@ type CalibrateRes struct {
 
 // Calibrate godoc
 //
-//	@Summary		用户定级
-//	@Description	获取定级问题详情
-//	@Tags			/team_up/user
-//	@Accept			json
-//	@Produce		json
-//	@Param			sport_type		formData	string	true	"运动类型"
-//	@Param			questionnaire	formData	string	true	"问卷结构体"
-//	@Success		200				{object}	GetCalibrationQuestionsResp
-//	@Router			/team_up/user/calibrate [post]
+//		@Summary		用户定级
+//		@Description	获取定级问题详情
+//		@Tags			/team_up/user
+//		@Accept			json
+//		@Produce		json
+//		@Param			sport_type		formData	string	true	"运动类型"
+//		@Param			questionnaire	formData	string	true	"问卷结构体"
+//	 @Param          pre_calibrate   formData    string  true    "是否只是计算前5题，传\"true\" or \"false\""
+//		@Success		200				{object}	GetCalibrationQuestionsResp
+//		@Router			/team_up/user/calibrate [post]
 func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 	sportType := c.PostForm("sport_type")
 	if sportType != constant.SportTypePadel && sportType != constant.SportTypeTennis && sportType != constant.SportTypePickelBall {
@@ -73,6 +74,11 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 		return nil, iface.NewBackEndError(iface.ParamsError, "invalid questionnaire")
 	}
 	file := c.PostForm("proof")
+	preCalibrateStr := c.PostForm("pre_calibrate")
+	pc, err := strconv.ParseBool(preCalibrateStr)
+	if err != nil {
+		return nil, iface.NewBackEndError(iface.ParamsError, "invalid pre_calibrate")
+	}
 	//err := c.BindJSON(body)
 	//if err != nil {
 	//	util.Logger.Printf("[Calibrate] BindJSON failed, err:%v", err)
@@ -133,26 +139,27 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 	if totalScore < 0 {
 		totalScore = 0
 	}
-
-	// 更新用户表
-	user := &mysql.WechatUserInfo{}
-	err = util.DB().Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, sportType).Take(user).Error
-	if err != nil {
-		util.Logger.Printf("[Calibrate] query record failed, err:%v", err)
-		return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
-	}
-	// level保存的时候 是 x 1000的整数
-	user.Level = int(totalScore * 1000)
-	// 非pro直接更新calibration状态，pro需要等待人工审批
-	if !isPro {
-		user.IsCalibrated = 1
-	} else {
-		user.CalibrationProof = file
-	}
-	err = util.DB().Save(user).Error
-	if err != nil {
-		util.Logger.Printf("[Calibrate] save user failed, err:%v", err)
-		return nil, iface.NewBackEndError(iface.InternalError, err.Error())
+	// 只有非 pre_calibrate 场景需要存表
+	if !pc {
+		user := &mysql.WechatUserInfo{}
+		err = util.DB().Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, sportType).Take(user).Error
+		if err != nil {
+			util.Logger.Printf("[Calibrate] query record failed, err:%v", err)
+			return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
+		}
+		// level保存的时候 是 x 1000的整数
+		user.Level = int(totalScore * 1000)
+		// 非pro直接更新calibration状态，pro需要等待人工审批
+		if !isPro {
+			user.IsCalibrated = 1
+		} else {
+			user.CalibrationProof = file
+		}
+		err = util.DB().Save(user).Error
+		if err != nil {
+			util.Logger.Printf("[Calibrate] save user failed, err:%v", err)
+			return nil, iface.NewBackEndError(iface.InternalError, err.Error())
+		}
 	}
 	res := &CalibrateRes{
 		SportType: sportType,
