@@ -51,16 +51,16 @@ type CalibrateRes struct {
 
 // Calibrate godoc
 //
-//		@Summary		用户定级
-//		@Description	获取定级问题详情
-//		@Tags			/team_up/user
-//		@Accept			json
-//		@Produce		json
-//		@Param			sport_type		formData	string	true	"运动类型"
-//		@Param			questionnaire	formData	string	true	"问卷结构体"
-//	 @Param          pre_calibrate   formData    string  true    "是否只是计算前5题，传\"true\" or \"false\""
-//		@Success		200				{object}	GetCalibrationQuestionsResp
-//		@Router			/team_up/user/calibrate [post]
+//	@Summary		用户定级
+//	@Description	获取定级问题详情
+//	@Tags			/team_up/user
+//	@Accept			json
+//	@Produce		json
+//	@Param			sport_type		formData	string	true	"运动类型"
+//	@Param			questionnaire	formData	string	true	"问卷结构体"
+//	@Param			pre_calibrate	formData	string	true	"是否只是计算前5题，传\"true\" or \"false\""
+//	@Success		200				{object}	GetCalibrationQuestionsResp
+//	@Router			/team_up/user/calibrate [post]
 func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 	sportType := c.PostForm("sport_type")
 	if sportType != constant.SportTypePadel && sportType != constant.SportTypeTennis && sportType != constant.SportTypePickelBall {

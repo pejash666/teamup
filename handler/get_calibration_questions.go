@@ -21,15 +21,15 @@ type GetCalibrationQuestionsBody struct {
 
 // GetCalibrationQuestions godoc
 //
-//		@Summary		获取定级问题
-//		@Description	获取定级问题详情
-//		@Tags			/team_up/user
-//		@Accept			json
-//		@Produce		json
-//		@Param			sport_type	body		string	true	"获取定级问题入参"
-//	 @Param          need_full   body        bool    true    "是否需要第6题"
-//		@Success		200			{object}	GetCalibrationQuestionsResp
-//		@Router			/team_up/user/get_calibration_questions [post]
+//	@Summary		获取定级问题
+//	@Description	获取定级问题详情
+//	@Tags			/team_up/user
+//	@Accept			json
+//	@Produce		json
+//	@Param			sport_type	body		string	true	"获取定级问题入参"
+//	@Param			need_full	body		bool	true	"是否需要第6题"
+//	@Success		200			{object}	GetCalibrationQuestionsResp
+//	@Router			/team_up/user/get_calibration_questions [post]
 func GetCalibrationQuestions(c *model.TeamUpContext) (interface{}, error) {
 	body := &GetCalibrationQuestionsBody{}
 	err := c.BindJSON(body)

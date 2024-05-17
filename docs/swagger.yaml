@@ -944,6 +944,11 @@ paths:
         name: questionnaire
         required: true
         type: string
+      - description: 是否只是计算前5题，传\
+        in: formData
+        name: pre_calibrate
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -994,6 +999,12 @@ paths:
         required: true
         schema:
           type: string
+      - description: 是否需要第6题
+        in: body
+        name: need_full
+        required: true
+        schema:
+          type: boolean
       produces:
       - application/json
       responses:

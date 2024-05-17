@@ -433,6 +433,13 @@ const docTemplate = `{
                         "name": "questionnaire",
                         "in": "formData",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "是否只是计算前5题，传\\",
+                        "name": "pre_calibrate",
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -509,6 +516,15 @@ const docTemplate = `{
                         "required": true,
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    {
+                        "description": "是否需要第6题",
+                        "name": "need_full",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "boolean"
                         }
                     }
                 ],
