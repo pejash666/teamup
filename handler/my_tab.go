@@ -40,26 +40,29 @@ type LevelChange struct {
 }
 
 type Event struct {
-	ID               uint        `json:"id"`
-	StartTime        int64       `json:"start_time"`
-	EndTime          int64       `json:"end_time"`
-	Weekday          string      `json:"weekday"`
-	StartTimeStr     string      `json:"start_time_str"`
-	EndTineStr       string      `json:"end_time_str"`
-	IsBooked         bool        `json:"is_booked"`
-	FieldName        string      `json:"field_name"`
-	Longitude        float64     `json:"longitude"`
-	Latitude         float64     `json:"latitude"`
-	CurrentPlayer    []*UserInfo `json:"current_player"`
-	CurrentPlayerNum uint        `json:"current_player_num"`
-	MaxPlayerNum     uint        `json:"max_player_num"`
-	GameType         string      `json:"game_type"`
-	MatchType        string      `json:"match_type"`
-	LowestLevel      float32     `json:"lowest_level"`
-	HighestLevel     float32     `json:"highest_level"`
-	Status           string      `json:"status"` // event状态：created;full;finished
-	EventImage       string      `json:"event_image"`
-	IsHost           bool        `json:"is_host"`
+	ID                  uint        `json:"id"`
+	EventName           string      `json:"even_name"`
+	StartTime           int64       `json:"start_time"`
+	EndTime             int64       `json:"end_time"`
+	Weekday             string      `json:"weekday"`
+	StartTimeStr        string      `json:"start_time_str"`
+	EndTineStr          string      `json:"end_time_str"`
+	IsBooked            bool        `json:"is_booked"`
+	FieldName           string      `json:"field_name"`
+	Longitude           float64     `json:"longitude"`
+	Latitude            float64     `json:"latitude"`
+	CurrentPlayer       []*UserInfo `json:"current_player"`
+	CurrentPlayerNum    uint        `json:"current_player_num"`
+	MaxPlayerNum        uint        `json:"max_player_num"`
+	GameType            string      `json:"game_type"`
+	MatchType           string      `json:"match_type"`
+	LowestLevel         float32     `json:"lowest_level"`
+	HighestLevel        float32     `json:"highest_level"`
+	Status              string      `json:"status"` // event状态：created;full;finished
+	EventImage          string      `json:"event_image"`
+	IsHost              bool        `json:"is_host"`
+	OrganizationLogo    string      `json:"organization_logo"` // 组织图片
+	OrganizationAddress string      `json:"organization_address"`
 }
 
 type Organization struct {

@@ -162,6 +162,17 @@ func EventMetaToEventInfo(event *mysql.EventMeta) (*Event, error) {
 		EventImage:       event.EventImage,
 		IsHost:           event.IsHost == 1,
 	}
+	// 如果是组织创建的，获取组织的地址，logo
+	if event.IsHost == 1 {
+		organization := &mysql.Organization{}
+		err := util.DB().Where("id = ?", event.OrganizationID).Take(organization).Error
+		if err != nil {
+			util.Logger.Printf("[EventMetaToEventInfo] query organization failed for id:%d", event.OrganizationID)
+			return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
+		}
+		eventShow.OrganizationLogo = organization.Logo
+		eventShow.OrganizationAddress = organization.Address
+	}
 	// 获取status
 	if time.Now().Unix() > event.StartTime && time.Now().Unix() < event.EndTime {
 		eventShow.Status = constant.EventStatusInProgress

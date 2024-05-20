@@ -48,6 +48,7 @@ func GetCalibrationQuestions(c *model.TeamUpContext) (interface{}, error) {
 		// 默认展示中文
 		questionnaire = util.QuestionnaireCn
 	}
+	finalQuestionnaire := make([]*model.Question, 0)
 	// 根据入参的sport_type做问题和选项的替换
 	for _, question := range questionnaire {
 		// 第6题需要前5题的结果进行额外计算，所以需要判断need_full
@@ -58,7 +59,8 @@ func GetCalibrationQuestions(c *model.TeamUpContext) (interface{}, error) {
 		for k, option := range question.Options {
 			question.Options[k] = strings.Replace(option, "{sport_type}", body.SportType, -1)
 		}
+		finalQuestionnaire = append(finalQuestionnaire, question)
 	}
-	util.Logger.Printf("[GetCalibrationQuestions] success, res:%+v", questionnaire)
-	return questionnaire, nil
+	util.Logger.Printf("[GetCalibrationQuestions] success, res:%+v", finalQuestionnaire)
+	return finalQuestionnaire, nil
 }

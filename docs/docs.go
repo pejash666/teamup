@@ -1006,6 +1006,9 @@ const docTemplate = `{
                 "end_time_str": {
                     "type": "string"
                 },
+                "even_name": {
+                    "type": "string"
+                },
                 "event_image": {
                     "type": "string"
                 },
@@ -1041,6 +1044,13 @@ const docTemplate = `{
                 },
                 "max_player_num": {
                     "type": "integer"
+                },
+                "organization_address": {
+                    "type": "string"
+                },
+                "organization_logo": {
+                    "description": "组织图片",
+                    "type": "string"
                 },
                 "start_time": {
                     "type": "integer"
