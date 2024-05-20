@@ -149,6 +149,7 @@ func EventList(c *model.TeamUpContext) (interface{}, error) {
 func EventMetaToEventInfo(event *mysql.EventMeta) (*Event, error) {
 	eventShow := &Event{
 		ID:               event.ID,
+		EventName:        event.Name,
 		StartTime:        event.StartTime,
 		EndTime:          event.EndTime,
 		IsBooked:         event.IsBooked == 1,
