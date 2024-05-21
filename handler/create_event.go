@@ -40,8 +40,26 @@ func CreateEvent(c *model.TeamUpContext) (interface{}, error) {
 		return nil, iface.NewBackEndError(iface.InternalError, err.Error())
 	}
 	util.Logger.Printf("[CreateEvent] req:%+v", event)
+
+	isPass, reason := paramsCheck(event)
+	if !isPass {
+		util.Logger.Printf("[CreateEvent] paramCheck failed")
+		return nil, iface.NewBackEndError(iface.ParamsError, reason)
+	}
+	// 通过organization_id获取组织信息
+	// 查询orga表，获取经纬度和fieldname
+	orga := &mysql.Organization{}
+	err = util.DB().Where("id = ?", event.OrganizationID).Take(orga).Error
+	if err != nil {
+		return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
+	}
+	// 无论个人还是组织创建的活动，都需要传organization_id,所以场地相关的信息都是从组织信息中获取
+	event.Longitude = orga.Longitude
+	event.Latitude = orga.Latitude
+	event.FieldType = "outdoor" // 默认outdoor
+	event.FieldName = orga.Name // event的场地名字 就是组织名字
 	// 如果是host创建的，需要额外check这个用户在这个sport_type下是不是host
-	if event.IsHost && event.OrganizationID != 0 {
+	if event.IsHost {
 		user := &mysql.WechatUserInfo{}
 		err = util.DB().Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, event.SportType).Take(user).Error
 		if err != nil {
@@ -56,22 +74,7 @@ func CreateEvent(c *model.TeamUpContext) (interface{}, error) {
 			util.Logger.Printf("[CreateEvent] organization id not match")
 			return nil, iface.NewBackEndError(iface.ParamsError, "organization id not match")
 		}
-		// 查询orga表，获取经纬度和fieldname
-		orga := &mysql.Organization{}
-		err = util.DB().Where("id = ?", event.OrganizationID).Take(orga).Error
-		if err != nil {
-			return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
-		}
-		event.Longitude = orga.Longitude
-		event.Latitude = orga.Latitude
-		event.FieldType = "outdoor" // 默认outdoor
-		event.FieldName = orga.Name // event的场地名字 就是组织名字
-		event.IsBooked = true       // 场地创建的活动标记为已订场地
-	}
-	isPass, reason := paramsCheck(event)
-	if !isPass {
-		util.Logger.Printf("[CreateEvent] paramCheck failed")
-		return nil, iface.NewBackEndError(iface.ParamsError, reason)
+		event.IsBooked = true // 场地创建的活动标记为已订场地
 	}
 
 	meta, err := EventMeta(c, event)
@@ -151,7 +154,7 @@ func paramsCheck(event *model.EventInfo) (bool, string) {
 		event.EndTime == 0 ||
 		event.MaxPeopleNum == 0 ||
 		event.SportType == "" ||
-		event.GameType == "" {
+		event.GameType == "" || event.OrganizationID < 1 {
 		return false, "invalid param"
 	}
 	// 判断时间是否符合预期
@@ -165,9 +168,9 @@ func paramsCheck(event *model.EventInfo) (bool, string) {
 		return false, "invalid time"
 	}
 	// 个人已经预定场地的需要检查场地名称和场地类型
-	if !event.IsHost && event.IsBooked && (event.FieldName == "" || event.FieldType == "") && (event.Longitude == "" || event.Latitude == "") {
-		return false, "invalid field"
-	}
+	//if !event.IsHost && event.IsBooked && (event.FieldName == "" || event.FieldType == "") && (event.Longitude == "" || event.Latitude == "") {
+	//	return false, "invalid field"
+	//}
 	if event.IsBooked && event.Price == 0 {
 		return false, "booked filed must have price"
 	}
@@ -187,7 +190,7 @@ func paramsCheck(event *model.EventInfo) (bool, string) {
 		}
 	}
 	// 只有组织创建的才能上传eventImage
-	if event.OrganizationID < 1 && event.EventImage != "" {
+	if !event.IsHost && event.EventImage != "" {
 		return false, "only host can upload event image"
 	}
 	return true, ""
@@ -195,29 +198,30 @@ func paramsCheck(event *model.EventInfo) (bool, string) {
 
 func EventMeta(c *model.TeamUpContext, event *model.EventInfo) (*mysql.EventMeta, error) {
 	meta := &mysql.EventMeta{
-		Creator:      c.BasicUser.OpenID,
-		SportType:    event.SportType,
-		GameType:     event.GameType,
-		IsBooked:     util.BoolToDB(event.IsBooked),
-		IsPublic:     util.BoolToDB(event.IsPublic),
-		IsHost:       util.BoolToDB(event.IsHost),
-		LowestLevel:  int(event.LowestLevel * 1000),
-		HighestLevel: int(event.HighestLevel * 1000),
-		Date:         time.Unix(event.StartTime, 0).Format("20060102"),
-		Weekday:      time.Unix(event.StartTime, 0).Weekday().String(),
-		City:         event.City,
-		Name:         event.Name,
-		Desc:         event.Desc,
-		StartTime:    event.StartTime,
-		StartTimeStr: time.Unix(event.StartTime, 0).Format("15:04"), // 分钟级别
-		EndTime:      event.EndTime,
-		EndTimeStr:   time.Unix(event.EndTime, 0).Format("15:04"),
-		FieldName:    event.FieldName,
-		FieldType:    event.FieldType,
-		MaxPlayerNum: event.MaxPeopleNum,
-		Price:        event.Price,
-		Latitude:     event.Latitude,
-		Longitude:    event.Longitude,
+		Creator:        c.BasicUser.OpenID,
+		SportType:      event.SportType,
+		GameType:       event.GameType,
+		IsBooked:       util.BoolToDB(event.IsBooked),
+		IsPublic:       util.BoolToDB(event.IsPublic),
+		IsHost:         util.BoolToDB(event.IsHost),
+		LowestLevel:    int(event.LowestLevel * 1000),
+		HighestLevel:   int(event.HighestLevel * 1000),
+		Date:           time.Unix(event.StartTime, 0).Format("20060102"),
+		Weekday:        time.Unix(event.StartTime, 0).Weekday().String(),
+		City:           event.City,
+		Name:           event.Name,
+		Desc:           event.Desc,
+		StartTime:      event.StartTime,
+		StartTimeStr:   time.Unix(event.StartTime, 0).Format("15:04"), // 分钟级别
+		EndTime:        event.EndTime,
+		EndTimeStr:     time.Unix(event.EndTime, 0).Format("15:04"),
+		FieldName:      event.FieldName,
+		FieldType:      event.FieldType,
+		MaxPlayerNum:   event.MaxPeopleNum,
+		Price:          event.Price,
+		Latitude:       event.Latitude,
+		Longitude:      event.Longitude,
+		OrganizationID: event.OrganizationID,
 	}
 
 	if event.IsCompetitive {
@@ -242,8 +246,8 @@ func EventMeta(c *model.TeamUpContext, event *model.EventInfo) (*mysql.EventMeta
 		return nil, err
 	}
 	meta.CurrentPlayer = currentPeopleStr
+
 	if event.IsHost {
-		meta.OrganizationID = event.OrganizationID
 		meta.EventImage = event.EventImage
 	}
 	util.Logger.Printf("[CreateEvent] eventMeta:%+v", meta)

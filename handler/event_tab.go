@@ -45,17 +45,27 @@ func EventPage(c *model.TeamUpContext) (interface{}, error) {
 	eventTab := &EventTab{}
 	eventInfo := &model.EventInfo{}
 	eventInfo.IsHost = eventMeta.IsHost == 1
-	if eventInfo.IsHost {
-		organization := &mysql.Organization{}
-		result := util.DB().Where("id = ?", eventMeta.OrganizationID).Take(organization)
-		if result.Error != nil {
-			util.Logger.Printf("[EventPage] get organization record from DB failed, err:%v", result.Error)
-			return nil, iface.NewBackEndError(iface.MysqlError, "get record failed")
-		}
-		eventInfo.OrganizationID = int64(organization.ID)
-		eventInfo.OrganizationLogo = organization.Logo
-		eventInfo.OrganizationAddress = organization.Address
+	// event都会有organization_id
+	organization := &mysql.Organization{}
+	err = util.DB().Where("id = ?", eventMeta.OrganizationID).Take(organization).Error
+	if err != nil {
+		util.Logger.Printf("[EventPage] get organization record from DB failed, err:%v", result.Error)
+		return nil, iface.NewBackEndError(iface.MysqlError, "get record failed")
 	}
+	eventInfo.OrganizationID = int64(organization.ID)
+	eventInfo.OrganizationLogo = organization.Logo
+	eventInfo.OrganizationAddress = organization.Address
+	//if eventInfo.IsHost {
+	//	organization := &mysql.Organization{}
+	//	result := util.DB().Where("id = ?", eventMeta.OrganizationID).Take(organization)
+	//	if result.Error != nil {
+	//		util.Logger.Printf("[EventPage] get organization record from DB failed, err:%v", result.Error)
+	//		return nil, iface.NewBackEndError(iface.MysqlError, "get record failed")
+	//	}
+	//	eventInfo.OrganizationID = int64(organization.ID)
+	//	eventInfo.OrganizationLogo = organization.Logo
+	//	eventInfo.OrganizationAddress = organization.Address
+	//}
 	eventInfo.Id = int64(eventMeta.ID)
 	eventInfo.Desc = eventMeta.Desc
 	eventInfo.Name = eventMeta.Name
