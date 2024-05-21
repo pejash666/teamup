@@ -45,6 +45,7 @@ type Event struct {
 	StartTime           int64       `json:"start_time"`
 	EndTime             int64       `json:"end_time"`
 	Weekday             string      `json:"weekday"`
+	Date                string      `json:"date"`
 	StartTimeStr        string      `json:"start_time_str"`
 	EndTineStr          string      `json:"end_time_str"`
 	IsBooked            bool        `json:"is_booked"`

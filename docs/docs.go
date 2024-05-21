@@ -1000,6 +1000,9 @@ const docTemplate = `{
                 "current_player_num": {
                     "type": "integer"
                 },
+                "date": {
+                    "type": "string"
+                },
                 "end_time": {
                     "type": "integer"
                 },

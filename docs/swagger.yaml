@@ -32,6 +32,8 @@ definitions:
         type: array
       current_player_num:
         type: integer
+      date:
+        type: string
       end_time:
         type: integer
       end_time_str:
