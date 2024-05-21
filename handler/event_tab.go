@@ -54,6 +54,9 @@ func EventPage(c *model.TeamUpContext) (interface{}, error) {
 		}
 		eventInfo.OrganizationID = int64(organization.ID)
 		eventInfo.OrganizationLogo = organization.Logo
+		eventInfo.Longitude = organization.Longitude
+		eventInfo.Latitude = organization.Latitude
+		eventInfo.FieldName = organization.Address
 	}
 	eventInfo.Id = int64(eventMeta.ID)
 	eventInfo.Desc = eventMeta.Desc
@@ -79,6 +82,7 @@ func EventPage(c *model.TeamUpContext) (interface{}, error) {
 	eventInfo.HighestLevel = float32(eventMeta.HighestLevel) / 1000
 	eventInfo.Price = eventMeta.Price
 	eventInfo.MaxPeopleNum = eventMeta.MaxPlayerNum
+	eventInfo.CurrentPeople = eventMeta.CurrentPlayerNum
 	eventInfo.EventImage = eventMeta.EventImage
 	// 获取creator的头像，名字
 	creator := &mysql.WechatUserInfo{}
