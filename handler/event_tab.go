@@ -54,9 +54,7 @@ func EventPage(c *model.TeamUpContext) (interface{}, error) {
 		}
 		eventInfo.OrganizationID = int64(organization.ID)
 		eventInfo.OrganizationLogo = organization.Logo
-		eventInfo.Longitude = organization.Longitude
-		eventInfo.Latitude = organization.Latitude
-		eventInfo.FieldName = organization.Address
+		eventInfo.OrganizationAddress = organization.Address
 	}
 	eventInfo.Id = int64(eventMeta.ID)
 	eventInfo.Desc = eventMeta.Desc
@@ -65,6 +63,9 @@ func EventPage(c *model.TeamUpContext) (interface{}, error) {
 	eventInfo.Status = eventMeta.Status
 	eventInfo.Weekday = eventMeta.Weekday
 	eventInfo.City = eventMeta.City
+	eventInfo.Longitude = eventMeta.Longitude
+	eventInfo.Latitude = eventMeta.Latitude
+	eventInfo.FieldName = eventMeta.FieldName
 	eventInfo.StartTime = eventMeta.StartTime
 	eventInfo.StartTimeStr = eventMeta.StartTimeStr
 	eventInfo.EndTime = eventMeta.EndTime

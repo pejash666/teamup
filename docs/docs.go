@@ -1725,6 +1725,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "organization_address": {
+                    "type": "string"
+                },
                 "organization_id": {
                     "description": "组织ID",
                     "type": "integer"
