@@ -44,7 +44,6 @@ func GetApprovalItems(c *model.TeamUpContext) (interface{}, error) {
 			return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
 		}
 	} else {
-
 		res.OrganizationItems = organizationWithoutGorm(organizations)
 	}
 	// 获取自我认定为7.0职业水平，且未经校准的人
@@ -96,7 +95,7 @@ func userWithoutGorm(ogs []mysql.WechatUserInfo) []mysql.WechatUserInfoWithoutGo
 
 func organizationWithoutGorm(ogs []mysql.Organization) []mysql.OrganizationWithoutGorm {
 	res := make([]mysql.OrganizationWithoutGorm, 0)
-	for _, og := range res {
+	for _, og := range ogs {
 		res = append(res, mysql.OrganizationWithoutGorm{
 			SportType:     og.SportType,
 			Name:          og.Name,
