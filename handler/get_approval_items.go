@@ -97,6 +97,7 @@ func organizationWithoutGorm(ogs []mysql.Organization) []mysql.OrganizationWitho
 	res := make([]mysql.OrganizationWithoutGorm, 0)
 	for _, og := range ogs {
 		res = append(res, mysql.OrganizationWithoutGorm{
+			ID:            og.ID,
 			SportType:     og.SportType,
 			Name:          og.Name,
 			City:          og.City,

@@ -25,7 +25,8 @@ func (o Organization) TableName() string {
 }
 
 type OrganizationWithoutGorm struct {
-	SportType     string `gorm:"sport_type" json:"sport_type"`                  // 运动类型
+	ID            uint   `gorm:"column:id" json:"id"`                           // 组织ID
+	SportType     string `gorm:"column:sport_type" json:"sport_type"`           // 运动类型
 	Name          string `gorm:"column:name" json:"name"`                       // 组织名字
 	City          string `gorm:"column:city" json:"city"`                       // 城市
 	Address       string `gorm:"column:address" json:"address"`                 // 详细地址

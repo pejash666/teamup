@@ -1844,6 +1844,10 @@ const docTemplate = `{
                     "description": "主理人openID",
                     "type": "string"
                 },
+                "id": {
+                    "description": "组织ID",
+                    "type": "integer"
+                },
                 "is_approved": {
                     "description": "是否通过审批",
                     "type": "integer"
