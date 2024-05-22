@@ -12,6 +12,7 @@ import (
 type EventTab struct {
 	EventInfo *model.EventInfo `json:"event_info"`
 	Players   []*model.Player  `json:"players"`
+	IsUserIn  bool             `json:"is_user_in"` // 表示当前用户是否已加入此活动
 }
 
 type EventPageBody struct {
@@ -134,11 +135,16 @@ func EventPage(c *model.TeamUpContext) (interface{}, error) {
 				Level:        float32(user.Level) / 1000,
 			}
 			players = append(players, player)
+			// 当前用户已经加入了这个活动的标识，前端用来展示退出button
+			if player.OpenID == c.BasicUser.OpenID {
+				eventTab.IsUserIn = true
+			}
 		}
 		eventTab.Players = players
 	} else {
 		eventTab.Players = make([]*model.Player, 0)
 	}
+
 	util.Logger.Printf("[EventPage] success, res:%+v", eventInfo)
 	return eventTab, nil
 }

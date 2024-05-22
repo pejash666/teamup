@@ -1076,6 +1076,10 @@ const docTemplate = `{
                 "event_info": {
                     "$ref": "#/definitions/model.EventInfo"
                 },
+                "is_user_in": {
+                    "description": "表示当前用户是否已加入此活动",
+                    "type": "boolean"
+                },
                 "players": {
                     "type": "array",
                     "items": {
