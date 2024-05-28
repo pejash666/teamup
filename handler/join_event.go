@@ -97,7 +97,7 @@ func JoinEvent(c *model.TeamUpContext) (interface{}, error) {
 	}
 	util.Logger.Printf("[JoinEvent] eventID:%d can be joined", body.EventID)
 	// 开启事务
-	util.DB().Transaction(func(tx *gorm.DB) error {
+	err = util.DB().Transaction(func(tx *gorm.DB) error {
 		// 增加一条user_event记录
 		// 更新用户表（参与次数）
 		// 更新事件表（参与人数）
@@ -119,24 +119,24 @@ func JoinEvent(c *model.TeamUpContext) (interface{}, error) {
 				return err
 			}
 		}
-		user := &mysql.WechatUserInfo{}
+		wechatUser := &mysql.WechatUserInfo{}
 		if err = tx.Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, event.SportType).Take(user).Error; err != nil {
 			util.Logger.Printf("[JoinEvent] query user failed, err:%v", err)
 			return err
 		}
-		user.JoinedTimes += 1
+		wechatUser.JoinedTimes += 1
 		joinedEvent := make([]uint, 0)
 		err = sonic.UnmarshalString(user.JoinedEvent, &joinedEvent)
 		if err != nil {
 			return err
 		}
 		joinedEvent = append(joinedEvent, body.EventID)
-		joinedEventStr, err := sonic.MarshalString(joinedEvent)
-		if err != nil {
-			return err
+		joinedEventStr, Terr := sonic.MarshalString(joinedEvent)
+		if Terr != nil {
+			return Terr
 		}
-		user.JoinedEvent = joinedEventStr
-		if err = tx.Save(user).Error; err != nil {
+		wechatUser.JoinedEvent = joinedEventStr
+		if err = tx.Save(wechatUser).Error; err != nil {
 			util.Logger.Printf("[JoinEvent] save user failed, err:%v", err)
 			return err
 		}
@@ -157,9 +157,9 @@ func JoinEvent(c *model.TeamUpContext) (interface{}, error) {
 			return err
 		}
 		currentPeople = append(currentPeople, c.BasicUser.OpenID)
-		currentPeopleStr, err := sonic.MarshalString(currentPeople)
-		if err != nil {
-			return err
+		currentPeopleStr, Terr := sonic.MarshalString(currentPeople)
+		if Terr != nil {
+			return Terr
 		}
 		meta.CurrentPlayer = currentPeopleStr
 		if err = tx.Save(meta).Error; err != nil {
@@ -169,6 +169,9 @@ func JoinEvent(c *model.TeamUpContext) (interface{}, error) {
 
 		return nil
 	})
+	if err != nil {
+		return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
+	}
 
 	util.Logger.Printf("[JoinEvent] user:%s join event:%d success", c.BasicUser.OpenID, body.EventID)
 	return nil, nil
