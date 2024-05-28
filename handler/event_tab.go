@@ -133,6 +133,7 @@ func EventPage(c *model.TeamUpContext) (interface{}, error) {
 				Avatar:       user.Avatar,
 				IsCalibrated: user.IsCalibrated == 1,
 				Level:        float32(user.Level) / 1000,
+				OpenID:       user.OpenId,
 			}
 			players = append(players, player)
 			// 当前用户已经加入了这个活动的标识，前端用来展示退出button
