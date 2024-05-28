@@ -117,8 +117,8 @@ func EventPage(c *model.TeamUpContext) (interface{}, error) {
 			return nil, iface.NewBackEndError(iface.InternalError, "unmarshall error")
 		}
 		var users []mysql.WechatUserInfo
-		result := util.DB().Where("open_id IN ? AND sport_type = ?", currentPeople, eventMeta.SportType).Find(&users)
-		if result.Error != nil {
+		err = util.DB().Where("open_id IN ? AND sport_type = ?", currentPeople, eventMeta.SportType).Find(&users).Error
+		if err != nil {
 			util.Logger.Printf("[EventPage] find player in DB failed, err:%v", err)
 			return nil, iface.NewBackEndError(iface.MysqlError, "get record failed")
 		}
@@ -145,6 +145,6 @@ func EventPage(c *model.TeamUpContext) (interface{}, error) {
 		eventTab.Players = make([]*model.Player, 0)
 	}
 
-	util.Logger.Printf("[EventPage] success, res:%+v", eventInfo)
+	util.Logger.Printf("[EventPage] success, res:%+v", *eventTab)
 	return eventTab, nil
 }
