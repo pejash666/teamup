@@ -119,12 +119,12 @@ func JoinEvent(c *model.TeamUpContext) (interface{}, error) {
 				return err
 			}
 		}
-		wechatUser := &mysql.WechatUserInfo{}
-		if err = tx.Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, event.SportType).Take(user).Error; err != nil {
-			util.Logger.Printf("[JoinEvent] query user failed, err:%v", err)
-			return err
-		}
-		wechatUser.JoinedTimes += 1
+		//wechatUser := &mysql.WechatUserInfo{}
+		//if err = tx.Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, event.SportType).Take(user).Error; err != nil {
+		//	util.Logger.Printf("[JoinEvent] query user failed, err:%v", err)
+		//	return err
+		//}
+		user.JoinedTimes += 1
 		joinedEvent := make([]uint, 0)
 		err = sonic.UnmarshalString(user.JoinedEvent, &joinedEvent)
 		if err != nil {
@@ -135,24 +135,24 @@ func JoinEvent(c *model.TeamUpContext) (interface{}, error) {
 		if Terr != nil {
 			return Terr
 		}
-		wechatUser.JoinedEvent = joinedEventStr
-		if err = tx.Save(wechatUser).Error; err != nil {
+		user.JoinedEvent = joinedEventStr
+		if err = tx.Save(user).Error; err != nil {
 			util.Logger.Printf("[JoinEvent] save user failed, err:%v", err)
 			return err
 		}
 
-		meta := &mysql.EventMeta{}
-		if err = tx.Where("id = ?", body.EventID).Take(meta).Error; err != nil {
-			util.Logger.Printf("[JoinEvent] query user meta failed, err:%v", err)
-			return err
-		}
-		meta.CurrentPlayerNum += 1
-		if meta.CurrentPlayerNum == meta.MaxPlayerNum {
+		//meta := &mysql.EventMeta{}
+		//if err = tx.Where("id = ?", body.EventID).Take(meta).Error; err != nil {
+		//	util.Logger.Printf("[JoinEvent] query user meta failed, err:%v", err)
+		//	return err
+		//}
+		event.CurrentPlayerNum += 1
+		if event.CurrentPlayerNum == event.MaxPlayerNum {
 			util.Logger.Printf("[JoinEvent] event:%d is full now", body.EventID)
-			meta.Status = constant.EventStatusFull
+			event.Status = constant.EventStatusFull
 		}
 		currentPeople := make([]string, 0)
-		err = sonic.UnmarshalString(meta.CurrentPlayer, &currentPeople)
+		err = sonic.UnmarshalString(event.CurrentPlayer, &currentPeople)
 		if err != nil {
 			return err
 		}
@@ -161,8 +161,8 @@ func JoinEvent(c *model.TeamUpContext) (interface{}, error) {
 		if Terr != nil {
 			return Terr
 		}
-		meta.CurrentPlayer = currentPeopleStr
-		if err = tx.Save(meta).Error; err != nil {
+		event.CurrentPlayer = currentPeopleStr
+		if err = tx.Save(event).Error; err != nil {
 			util.Logger.Printf("[JoinEvent] save event meta failed, err:%v", err)
 			return err
 		}
