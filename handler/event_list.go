@@ -153,7 +153,7 @@ func EventMetaToEventInfo(event *mysql.EventMeta) (*Event, error) {
 		StartTime:        event.StartTime,
 		StartTimeStr:     strconv.Itoa(time.Unix(event.StartTime, 0).Hour()),
 		EndTime:          event.EndTime,
-		EndTineStr:       strconv.Itoa(time.Unix(event.EndTime, 0).Hour()),
+		EndTimeStr:       strconv.Itoa(time.Unix(event.EndTime, 0).Hour()),
 		Weekday:          time.Unix(event.StartTime, 0).Weekday().String(),
 		Date:             time.Unix(event.StartTime, 0).Format("2006-01-02"),
 		IsBooked:         event.IsBooked == 1,

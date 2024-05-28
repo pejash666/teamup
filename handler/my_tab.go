@@ -4,6 +4,8 @@ import (
 	"errors"
 	"github.com/bytedance/sonic"
 	"gorm.io/gorm"
+	"strconv"
+	"teamup/constant"
 	"teamup/db/mysql"
 	"teamup/iface"
 	"teamup/model"
@@ -47,7 +49,7 @@ type Event struct {
 	Weekday             string      `json:"weekday"`
 	Date                string      `json:"date"`
 	StartTimeStr        string      `json:"start_time_str"`
-	EndTineStr          string      `json:"end_time_str"`
+	EndTimeStr          string      `json:"end_time_str"`
 	IsBooked            bool        `json:"is_booked"`
 	FieldName           string      `json:"field_name"`
 	Longitude           float64     `json:"longitude"`
@@ -176,9 +178,10 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 					ID:               event.ID,
 					StartTime:        event.StartTime,
 					EndTime:          event.EndTime,
+					Date:             time.Unix(event.StartTime, 0).Format("2006-01-02"),
 					Weekday:          time.Unix(event.StartTime, 0).Weekday().String(),
-					StartTimeStr:     time.Unix(event.StartTime, 0).Format("15:04"),
-					EndTineStr:       time.Unix(event.EndTime, 0).Format("15:04"),
+					StartTimeStr:     strconv.Itoa(time.Unix(event.StartTime, 0).Hour()),
+					EndTimeStr:       strconv.Itoa(time.Unix(event.EndTime, 0).Hour()),
 					IsBooked:         event.IsBooked == 1,
 					FieldName:        event.FieldName,
 					CurrentPlayerNum: event.CurrentPlayerNum,
@@ -188,6 +191,37 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 					LowestLevel:      float32(event.LowestLevel) / 100,
 					HighestLevel:     float32(event.HighestLevel) / 100,
 					EventImage:       event.EventImage,
+					IsHost:           event.IsHost == 1,
+				}
+				// 获取组织的信息
+				if eventShow.IsHost {
+					orga := &mysql.Organization{}
+					err = util.DB().Where("id = ?", event.OrganizationID).Take(organization).Error
+					if err != nil {
+						util.Logger.Printf("[GetMyTab] query organization failed for id:%d", event.OrganizationID)
+						return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
+					}
+					eventShow.OrganizationLogo = orga.Logo
+					eventShow.OrganizationAddress = orga.Address
+				}
+				// 获取status
+				if time.Now().Unix() > event.StartTime && time.Now().Unix() < event.EndTime {
+					eventShow.Status = constant.EventStatusInProgress
+				} else {
+					eventShow.Status = event.Status
+				}
+				// 订场地只能从已合作的场地里面选择
+				if event.FieldName != "" && event.Latitude != "" && event.Longitude != "" {
+					longitude, errP := strconv.ParseFloat(event.Longitude, 64)
+					if errP != nil {
+						return nil, iface.NewBackEndError(iface.InternalError, err.Error())
+					}
+					latitude, errP := strconv.ParseFloat(event.Latitude, 64)
+					if errP != nil {
+						return nil, iface.NewBackEndError(iface.InternalError, err.Error())
+					}
+					eventShow.Latitude = latitude
+					eventShow.Longitude = longitude
 				}
 				// 获取参与这个活动的用户信息
 				currentPeople := make([]string, 0)
