@@ -15,4 +15,5 @@ type Player struct {
 	OpenID       string  `json:"open_id,omitempty"`
 	IsCalibrated bool    `json:"is_calibrated"`
 	Level        float32 `json:"level"`
+	IsScorer     bool    `json:"is_scorer"`
 }

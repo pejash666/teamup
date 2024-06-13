@@ -282,6 +282,8 @@ definitions:
         type: string
       is_calibrated:
         type: boolean
+      is_scorer:
+        type: boolean
       level:
         type: number
       level_change:
@@ -553,6 +555,8 @@ definitions:
       avatar:
         type: string
       is_calibrated:
+        type: boolean
+      is_scorer:
         type: boolean
       level:
         type: number
@@ -879,6 +883,28 @@ paths:
           schema:
             $ref: '#/definitions/handler.CreateEventResp'
       summary: 更新活动元信息
+      tags:
+      - /team_up/event
+  /team_up/event/update_scorer:
+    post:
+      consumes:
+      - application/json
+      description: 更新活动的记分员
+      parameters:
+      - description: 详见UpdateScorerRequest定义
+        in: body
+        name: code
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.BackEndResp'
+      summary: 更新活动的记分员
       tags:
       - /team_up/event
   /team_up/organization/create:

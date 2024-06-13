@@ -8,13 +8,25 @@ import (
 	"teamup/util"
 )
 
+// UpdateScorerRequest model info
+// @Description UpdateScorerRequest model info
+type UpdateScorerRequest struct {
+	EventID int64    `json:"event_id"`
+	OpenIDs []string `json:"open_ids"`
+}
+
 // UpdateScorer 用户可以配置可记分的用户
+//
+//	@Summary		更新活动的记分员
+//	@Description	更新活动的记分员
+//	@Tags			/team_up/event
+//	@Accept			json
+//	@Produce		json
+//	@Param			code	body		string	true	"详见UpdateScorerRequest定义"
+//	@Success		200		{object}	model.BackEndResp
+//	@Router			/team_up/event/update_scorer [post]
 func UpdateScorer(c *model.TeamUpContext) (interface{}, error) {
-	type Body struct {
-		EventID int64    `json:"event_id"`
-		OpenIDs []string `json:"open_ids"`
-	}
-	body := &Body{}
+	body := &UpdateScorerRequest{}
 	err := c.BindJSON(body)
 	if err != nil {
 		util.Logger.Printf("[UpdateScorer] bindJSON failed, err:%v", err)

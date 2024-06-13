@@ -309,6 +309,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/team_up/event/update_scorer": {
+            "post": {
+                "description": "更新活动的记分员",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "/team_up/event"
+                ],
+                "summary": "更新活动的记分员",
+                "parameters": [
+                    {
+                        "description": "详见UpdateScorerRequest定义",
+                        "name": "code",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.BackEndResp"
+                        }
+                    }
+                }
+            }
+        },
         "/team_up/organization/create": {
             "post": {
                 "description": "用户上传组织信息",
@@ -1381,6 +1415,9 @@ const docTemplate = `{
                 "is_calibrated": {
                     "type": "boolean"
                 },
+                "is_scorer": {
+                    "type": "boolean"
+                },
                 "level": {
                     "type": "number"
                 },
@@ -1773,6 +1810,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "is_calibrated": {
+                    "type": "boolean"
+                },
+                "is_scorer": {
                     "type": "boolean"
                 },
                 "level": {

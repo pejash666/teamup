@@ -130,15 +130,30 @@ func StartScoring(c *model.TeamUpContext) (interface{}, error) {
 			OpenID:       user.OpenId,
 			IsCalibrated: user.IsCalibrated == 1,
 			Level:        float32(user.Level) / 1000,
+			IsScorer:     false,
 		}
 		players = append(players, player)
 	}
 
-	// 如果scorer为空，则所有人都可以记分
+	// 如果scorer为空，则返回第一个player是scorer
 	if event.Scorers == "" {
-		res.Settings = &Settings{
-			ValidScorers: players,
+		players[0].IsScorer = true
+	} else {
+		openIDs := make([]string, 0)
+		err = sonic.UnmarshalString(event.Scorers, &openIDs)
+		if err != nil {
+			return nil, iface.NewBackEndError(iface.InternalError, "unmarshal failed")
 		}
+		for _, openID := range openIDs {
+			for _, player := range players {
+				if player.OpenID == openID {
+					player.IsScorer = true
+				}
+			}
+		}
+	}
+	res.Settings = &Settings{
+		ValidScorers: players,
 	}
 
 	// 进行分组
