@@ -72,6 +72,7 @@ func GetScoreResult(c *model.TeamUpContext) (interface{}, error) {
 		return nil, iface.NewBackEndError(iface.ParamsError, "bindJSON failed")
 	}
 	roundInfos := body.RoundInfo
+	util.Logger.Printf("[GetScoreResult] res:%v", util.ToReadable(body))
 	if len(roundInfos) < 1 {
 		return nil, iface.NewBackEndError(iface.ParamsError, "params error, please check")
 	}
