@@ -202,7 +202,7 @@ func GetScoreResult(c *model.TeamUpContext) (interface{}, error) {
 	res.RoundDetail = roundSlice
 	res.PlayersDetail = playerSlice
 
-	util.Logger.Printf("[GetScoreResult] success, res:%v", res)
+	util.Logger.Printf("[GetScoreResult] success, res:%v", util.ToReadable(res))
 	return res, nil
 }
 
