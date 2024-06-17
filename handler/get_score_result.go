@@ -65,8 +65,14 @@ type GetScoreResultResp struct {
 //	@Success		200					{object}	GetScoreResultResp
 //	@Router			/team_up/user/get_score_result [post]
 func GetScoreResult(c *model.TeamUpContext) (interface{}, error) {
+	raw, err := c.GetRawData()
+	if err != nil {
+		util.Logger.Printf("[GetScoreResult] get raw data failed, err:%v", err)
+		return nil, iface.NewBackEndError(iface.InternalError, "get raw data failed")
+	}
+	util.Logger.Println("[GetScoreResult] starts, rawData:%v", string(raw))
 	body := &UploadRoundInfos{}
-	err := c.BindJSON(body)
+	err = c.BindJSON(body)
 	if err != nil {
 		util.Logger.Printf("[GetScoreResult] bindJSON failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.ParamsError, "bindJSON failed")
