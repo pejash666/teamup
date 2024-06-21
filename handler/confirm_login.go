@@ -147,5 +147,5 @@ jwtCreate:
 		return nil, iface.NewBackEndError(iface.InternalError, err.Error())
 	}
 
-	return map[string]string{"user_token": jwt}, nil
+	return map[string]string{"user_token": jwt, "open_id": c2s.OpenID}, nil
 }
