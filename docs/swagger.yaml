@@ -246,6 +246,8 @@ definitions:
         items:
           $ref: '#/definitions/handler.UploadRoundInfo'
         type: array
+      score_rule:
+        type: string
     type: object
   handler.MyTab:
     properties:

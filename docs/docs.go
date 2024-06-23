@@ -1359,6 +1359,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/handler.UploadRoundInfo"
                     }
+                },
+                "score_rule": {
+                    "type": "string"
                 }
             }
         },
