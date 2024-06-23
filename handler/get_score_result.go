@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"fmt"
+	"github.com/bytedance/sonic"
 	"io"
 	"math"
 	"sort"
@@ -27,6 +28,7 @@ type PlayerAfterMatch struct {
 type MatchResult struct {
 	PlayersDetail []*PlayerAfterMatch `json:"players_detail"`
 	RoundDetail   []*UploadRoundInfo  `json:"round_detail"`
+	ScoreRule     string              `json:"score_rule"`
 }
 
 // UploadRoundInfos model info
@@ -81,11 +83,6 @@ func GetScoreResult(c *model.TeamUpContext) (interface{}, error) {
 		util.Logger.Printf("[GetScoreResult] bindJSON failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.ParamsError, "bindJSON failed")
 	}
-	roundInfos := body.RoundInfo
-	util.Logger.Printf("[GetScoreResult] res:%v", util.ToReadable(body))
-	if len(roundInfos) < 1 {
-		return nil, iface.NewBackEndError(iface.ParamsError, "params error, please check")
-	}
 	event := &mysql.EventMeta{}
 	// 获取活动信息
 	err = util.DB().Where("id = ?", body.EventID).Take(event).Error
@@ -93,6 +90,31 @@ func GetScoreResult(c *model.TeamUpContext) (interface{}, error) {
 		util.Logger.Printf("[GetScoreResult] query event from DB failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.MysqlError, "query record failed")
 	}
+	// 请求中没有round_info, 且mysql已经有了存储，则直接序列化返回
+	if len(body.RoundInfo) < 1 {
+		if event.EventResult == "" {
+			util.Logger.Printf("[GetScoreResult] roundInfo is nil, and event result also nil for event_id:%d", event.ID)
+			return nil, iface.NewBackEndError(iface.ParamsError, "invalid round info")
+		} else {
+			// 直接反序列化返回
+			result := &MatchResult{}
+			err = sonic.UnmarshalString(event.EventResult, result)
+			if err != nil {
+				util.Logger.Printf("[GetScoreResult] unmarshal event_result failed, err:%v", err)
+				return nil, iface.NewBackEndError(iface.InternalError, err.Error())
+			}
+			util.Logger.Printf("[]GetScoreResult] unmarshal success for event_id:%d", event.ID)
+			return result, nil
+		}
+	}
+
+	// 请求中有round_info，需要计算并存储
+	roundInfos := body.RoundInfo
+	util.Logger.Printf("[GetScoreResult] res:%v", util.ToReadable(body))
+	if len(roundInfos) < 1 {
+		return nil, iface.NewBackEndError(iface.ParamsError, "params error, please check")
+	}
+
 	res := &MatchResult{
 		PlayersDetail: make([]*PlayerAfterMatch, 0),
 		RoundDetail:   make([]*UploadRoundInfo, 0),
@@ -201,6 +223,20 @@ func GetScoreResult(c *model.TeamUpContext) (interface{}, error) {
 
 	res.RoundDetail = roundSlice
 	res.PlayersDetail = playerSlice
+	res.ScoreRule = event.ScoreRule
+
+	// 存入mysql
+	resStr, err := sonic.MarshalString(res)
+	if err != nil {
+		util.Logger.Printf("[GetScoreResult] marshal res failed, err:%v", err)
+		return nil, iface.NewBackEndError(iface.InternalError, err.Error())
+	}
+	event.EventResult = resStr
+	err = util.DB().Save(event).Error
+	if err != nil {
+		util.Logger.Printf("[GetScoreResult] save event_result to db failed for event_id:%d, err:%v", event.ID, err.Error())
+		return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
+	}
 
 	util.Logger.Printf("[GetScoreResult] success, res:%v", util.ToReadable(res))
 	return res, nil

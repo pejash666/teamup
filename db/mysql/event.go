@@ -34,7 +34,8 @@ type EventMeta struct {
 	CurrentPlayerNum uint   `gorm:"column:current_player_num" json:"current_player_num"`
 	CurrentPlayer    string `gorm:"column:current_player" json:"current_player"`
 	Price            uint   `gorm:"column:price" json:"price"`
-	EventImage       string `gorm:"column:event_image" json:"event_image"` // 活动图片
+	EventImage       string `gorm:"column:event_image" json:"event_image"`   // 活动图片
+	EventResult      string `gorm:"column:event_result" json:"event_result"` // 活动结果，json存储
 }
 
 func (e EventMeta) TableName() string {

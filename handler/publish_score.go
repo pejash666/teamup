@@ -14,8 +14,9 @@ import (
 //
 //	@Description	发布分数
 type PublishScoreBody struct {
-	EventID       int                 `json:"event_id"`
-	PlayersDetail []*PlayerAfterMatch `json:"players_detail"`
+	EventID         int                 `json:"event_id"`
+	PlayersDetail   []*PlayerAfterMatch `json:"players_detail"`
+	EventResultJson string              `json:"event_result_json"`
 }
 
 // PublishScore godoc
