@@ -7,6 +7,7 @@ import (
 	"teamup/iface"
 	"teamup/model"
 	"teamup/util"
+	"time"
 )
 
 type ScoreBoard struct {
@@ -135,6 +136,9 @@ func GetScoreboard(c *model.TeamUpContext) (interface{}, error) {
 		MaxPeopleNum:    event.MaxPlayerNum,
 		CurrentPeople:   event.CurrentPlayerNum,
 		EventImage:      event.EventImage,
+	}
+	if time.Now().Unix() > event.StartTime && time.Now().Unix() < event.EndTime {
+		eventInfo.Status = constant.EventStatusInProgress
 	}
 	scoreBoard.EventInfo = eventInfo
 

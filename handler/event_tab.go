@@ -7,6 +7,7 @@ import (
 	"teamup/iface"
 	"teamup/model"
 	"teamup/util"
+	"time"
 )
 
 type EventTab struct {
@@ -72,6 +73,9 @@ func EventPage(c *model.TeamUpContext) (interface{}, error) {
 	eventInfo.Name = eventMeta.Name
 	eventInfo.SportType = eventMeta.SportType
 	eventInfo.Status = eventMeta.Status
+	if time.Now().Unix() > eventMeta.StartTime && time.Now().Unix() < eventMeta.EndTime {
+		eventInfo.Status = constant.EventStatusInProgress
+	}
 	eventInfo.Weekday = eventMeta.Weekday
 	eventInfo.City = eventMeta.City
 	eventInfo.Longitude = eventMeta.Longitude

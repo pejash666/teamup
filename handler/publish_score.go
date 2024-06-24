@@ -37,6 +37,7 @@ func PublishScore(c *model.TeamUpContext) (interface{}, error) {
 		util.Logger.Printf("[PublishScore] bindJSON failed, err:%v", err)
 		return nil, iface.NewBackEndError(iface.ParamsError, "invalid params")
 	}
+	util.Logger.Printf("[PublishScore] starts, body:%v", util.ToReadable(body))
 	// 获取sport_type
 	event := &mysql.EventMeta{}
 	err = util.DB().Where("id = ?", body.EventID).Take(event).Error
@@ -45,32 +46,32 @@ func PublishScore(c *model.TeamUpContext) (interface{}, error) {
 		return nil, iface.NewBackEndError(iface.MysqlError, "query record failed")
 	}
 	// 更新每个用户的分数记录，增加一条分数变化记录，更新活动的状态
-	util.DB().Transaction(func(tx *gorm.DB) error {
+	err = util.DB().Transaction(func(tx *gorm.DB) error {
 		for _, player := range body.PlayersDetail {
-			lc, err := strconv.ParseFloat(player.LevelChangeStr, 32)
-			if err != nil {
-				return err
+			lc, errT := strconv.ParseFloat(player.LevelChangeStr, 32)
+			if errT != nil {
+				return errT
 			}
 			user := &mysql.WechatUserInfo{}
-			err = tx.Where("open_id = ? AND sport_type = ?", player.OpenID, event.SportType).Take(user).Error
-			if err != nil {
-				return err
+			errT = tx.Where("open_id = ? AND sport_type = ?", player.OpenID, event.SportType).Take(user).Error
+			if errT != nil {
+				return errT
 			}
 			user.Level += int(lc * 1000)
-			err = tx.Save(user).Error
-			if err != nil {
-				return err
+			errT = tx.Save(user).Error
+			if errT != nil {
+				return errT
 			}
 			userEvent := &mysql.UserEvent{}
-			err = tx.Where("open_id = ? AND sport_type = ? AND event_id = ? AND is_quit = 0", player.OpenID, event.SportType, event.ID).Take(userEvent).Error
-			if err != nil {
-				return err
+			errT = tx.Where("open_id = ? AND sport_type = ? AND event_id = ? AND is_quit = 0", player.OpenID, event.SportType, event.ID).Take(userEvent).Error
+			if errT != nil {
+				return errT
 			}
 			userEvent.IsIncrease = uint(util.BoolToDB(player.LevelChangeStr > "0"))
 			userEvent.LevelChange = int(lc * 1000)
-			err = util.DB().Save(userEvent).Error
-			if err != nil {
-				return err
+			errT = util.DB().Save(userEvent).Error
+			if errT != nil {
+				return errT
 			}
 		}
 		// 更新活动的状态
@@ -81,6 +82,10 @@ func PublishScore(c *model.TeamUpContext) (interface{}, error) {
 		}
 		return nil
 	})
+	if err != nil {
+		util.Logger.Printf("[PublishScore] update user failed, err:%v", err)
+		return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
+	}
 
 	util.Logger.Printf("[PublishScore] success")
 	return nil, nil

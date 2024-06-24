@@ -97,6 +97,12 @@ func StartScoring(c *model.TeamUpContext) (interface{}, error) {
 		return nil, iface.NewBackEndError(iface.ParamsError, "query record failed")
 	}
 	event.ScoreRule = body.ScoreRule
+	err = util.DB().Save(event).Error
+	if err != nil {
+		util.Logger.Printf("[StartScoring] save score_rule failed, err:%v", err)
+		return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
+	}
+
 	// 获取全部用户
 	var currentPlayers []string
 	err = sonic.UnmarshalString(event.CurrentPlayer, &currentPlayers)

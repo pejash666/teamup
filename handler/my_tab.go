@@ -201,9 +201,11 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 						util.Logger.Printf("[GetMyTab] query organization failed for id:%d", event.OrganizationID)
 						return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
 					}
+					util.Logger.Printf("[GetMyTab] event_id:%d, organization_id:%d", event.ID, event.OrganizationID)
 					eventShow.OrganizationLogo = orga.Logo
 					eventShow.OrganizationAddress = orga.Address
 				}
+				util.Logger.Printf("[GetMyTab] event_id:%d, start_time:%d, end_time:%d, time_now:%v", event.ID, event.StartTime, event.EndTime, time.Now().Unix())
 				// 获取status
 				if time.Now().Unix() > event.StartTime && time.Now().Unix() < event.EndTime {
 					eventShow.Status = constant.EventStatusInProgress

@@ -116,8 +116,9 @@ func EventList(c *model.TeamUpContext) (interface{}, error) {
 		}
 		eventList = append(eventList, eventInfo)
 	}
+
 	// 根据用户选择的order_by进行定制化排序
-	if body.EventListOrderOption == nil {
+	if body.EventListOrderOption == nil || body.EventListOrderOption.OrderBy == "by_time" {
 		SortByTime(eventList)
 	} else if body.EventListOrderOption.OrderBy == "by_distance" {
 		if body.EventListOrderOption.Latitude == nil || body.EventListOrderOption.Longitude == nil {
@@ -178,6 +179,7 @@ func EventMetaToEventInfo(event *mysql.EventMeta) (*Event, error) {
 		eventShow.OrganizationLogo = organization.Logo
 		eventShow.OrganizationAddress = organization.Address
 	}
+	util.Logger.Printf("[EventMetaToEventInfo] event_id:%d, start_time:%d, end_time:%d, time_now:%v", event.ID, event.StartTime, event.EndTime, time.Now().Unix())
 	// 获取status
 	if time.Now().Unix() > event.StartTime && time.Now().Unix() < event.EndTime {
 		eventShow.Status = constant.EventStatusInProgress
@@ -298,7 +300,7 @@ func SortByDistance(latitude, longitude *string, events []*Event) error {
 
 func SortByTime(events []*Event) {
 	sort.Slice(events, func(i, j int) bool {
-		return events[i].StartTime < events[j].StartTime
+		return events[i].StartTime > events[j].StartTime
 	})
 }
 
