@@ -48,7 +48,7 @@ func PublishScore(c *model.TeamUpContext) (interface{}, error) {
 	// 更新每个用户的分数记录，增加一条分数变化记录，更新活动的状态
 	err = util.DB().Transaction(func(tx *gorm.DB) error {
 		for _, player := range body.PlayersDetail {
-			lc, errT := strconv.ParseFloat(player.LevelChangeStr, 32)
+			lc, errT := strconv.ParseFloat(player.LevelChangeStr, 64)
 			if errT != nil {
 				return errT
 			}
@@ -67,7 +67,7 @@ func PublishScore(c *model.TeamUpContext) (interface{}, error) {
 			if errT != nil {
 				return errT
 			}
-			userEvent.IsIncrease = uint(util.BoolToDB(player.LevelChangeStr > "0"))
+			userEvent.IsIncrease = uint(util.BoolToDB(lc > 0))
 			userEvent.LevelChange = int(lc * 1000)
 			errT = util.DB().Save(userEvent).Error
 			if errT != nil {
