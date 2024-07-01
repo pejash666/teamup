@@ -137,7 +137,7 @@ func GetScoreboard(c *model.TeamUpContext) (interface{}, error) {
 		CurrentPeople:   event.CurrentPlayerNum,
 		EventImage:      event.EventImage,
 	}
-	if time.Now().Unix() > event.StartTime && time.Now().Unix() < event.EndTime {
+	if (time.Now().Unix() > event.StartTime && time.Now().Unix() < event.EndTime) && event.Status != constant.EventStatusFinished {
 		eventInfo.Status = constant.EventStatusInProgress
 	}
 	scoreBoard.EventInfo = eventInfo

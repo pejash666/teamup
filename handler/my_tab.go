@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/bytedance/sonic"
 	"gorm.io/gorm"
+	"sort"
 	"strconv"
 	"teamup/constant"
 	"teamup/db/mysql"
@@ -37,8 +38,8 @@ type LevelInfo struct {
 }
 
 type LevelChange struct {
-	Change float32 `json:"change"`
-	Date   string  `json:"date"`
+	Level float32 `json:"level"`
+	Date  string  `json:"date"`
 }
 
 type Event struct {
@@ -123,7 +124,7 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 		// 只有定级过且审批通过的的人，才返回信息
 		if levelInfo.Status == "approved" {
 			levelInfo.CurrentLevel = float32(user.Level / 1000)
-			levelInfo.LevelDetail = GetRecentLevelChanges(user.OpenId, user.SportType, 10)
+			levelInfo.LevelDetail = GetRecentLevelChanges(user.OpenId, user.SportType, 10, &user)
 		}
 		sportTypeInfo.LevelInfo = levelInfo
 
@@ -208,7 +209,7 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 				}
 				util.Logger.Printf("[GetMyTab] event_id:%d, start_time:%d, end_time:%d, time_now:%v", event.ID, event.StartTime, event.EndTime, time.Now().Unix())
 				// 获取status
-				if time.Now().Unix() > event.StartTime && time.Now().Unix() < event.EndTime {
+				if (time.Now().Unix() > event.StartTime && time.Now().Unix() < event.EndTime) && event.Status != constant.EventStatusFinished {
 					eventShow.Status = constant.EventStatusInProgress
 				} else {
 					eventShow.Status = event.Status
@@ -261,9 +262,9 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 }
 
 // GetRecentLevelChanges 获取最近 limit 场次内，分数的变化情况
-func GetRecentLevelChanges(openID, sportType string, limit int) []*LevelChange {
+func GetRecentLevelChanges(openID, sportType string, limit int, user *mysql.WechatUserInfo) []*LevelChange {
 	var records []mysql.UserEvent
-	err := util.DB().Where("open_id = ? AND sport_type = ?", openID, sportType).Order("created_at desc").Find(&records).Limit(limit).Error
+	err := util.DB().Where("open_id = ? AND sport_type = ?", openID, sportType).Order("updated_at desc").Find(&records).Limit(limit).Error
 	if err != nil {
 		// 没有变化信息，返回空
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -272,19 +273,26 @@ func GetRecentLevelChanges(openID, sportType string, limit int) []*LevelChange {
 		}
 	}
 	res := make([]*LevelChange, 0)
+	res = append(res, &LevelChange{
+		Level: float32(user.InitialLevel / 1000),
+		Date:  user.CreatedAt.Format("20060102"),
+	})
 	for _, record := range records {
 		change := float32(record.LevelChange) / 1000
 		// 这里会出现一天多次记录的情况，前端需要额外关注
-		date := record.CreatedAt.Format("20060102")
+		date := record.UpdatedAt.Format("20060102")
 		if record.IsIncrease == 0 {
 			change = change * (-1)
 		}
 		levelChange := &LevelChange{
-			Change: change,
-			Date:   date,
+			Level: change,
+			Date:  date,
 		}
 		res = append(res, levelChange)
 	}
+	sort.Slice(res, func(i, j int) bool {
+		return res[i].Date < res[j].Date
+	})
 	return res
 }
 

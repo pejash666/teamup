@@ -181,7 +181,7 @@ func EventMetaToEventInfo(event *mysql.EventMeta) (*Event, error) {
 	}
 	util.Logger.Printf("[EventMetaToEventInfo] event_id:%d, start_time:%d, end_time:%d, time_now:%v", event.ID, event.StartTime, event.EndTime, time.Now().Unix())
 	// 获取status
-	if time.Now().Unix() > event.StartTime && time.Now().Unix() < event.EndTime {
+	if (time.Now().Unix() > event.StartTime && time.Now().Unix() < event.EndTime) && event.Status != constant.EventStatusFinished {
 		eventShow.Status = constant.EventStatusInProgress
 	} else {
 		eventShow.Status = event.Status

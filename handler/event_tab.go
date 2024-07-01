@@ -73,7 +73,7 @@ func EventPage(c *model.TeamUpContext) (interface{}, error) {
 	eventInfo.Name = eventMeta.Name
 	eventInfo.SportType = eventMeta.SportType
 	eventInfo.Status = eventMeta.Status
-	if time.Now().Unix() > eventMeta.StartTime && time.Now().Unix() < eventMeta.EndTime {
+	if (time.Now().Unix() > eventMeta.StartTime && time.Now().Unix() < eventMeta.EndTime) && eventMeta.Status != constant.EventStatusFinished {
 		eventInfo.Status = constant.EventStatusInProgress
 	}
 	eventInfo.Weekday = eventMeta.Weekday

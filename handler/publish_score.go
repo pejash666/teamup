@@ -68,7 +68,7 @@ func PublishScore(c *model.TeamUpContext) (interface{}, error) {
 				return errT
 			}
 			userEvent.IsIncrease = uint(util.BoolToDB(lc > 0))
-			userEvent.LevelChange = int(lc * 1000)
+			userEvent.LevelChange = user.Level
 			errT = util.DB().Save(userEvent).Error
 			if errT != nil {
 				return errT

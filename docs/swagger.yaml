@@ -207,10 +207,10 @@ definitions:
     type: object
   handler.LevelChange:
     properties:
-      change:
-        type: number
       date:
         type: string
+      level:
+        type: number
     type: object
   handler.LevelInfo:
     properties:
