@@ -7,6 +7,7 @@ CREATE TABLE `user_event`
     `is_quit`       smallint not null default 0 comment '是否已经退出',
     `is_increase`   smallint not null default 0 comment '是否是上涨',
     `level_change`  int(11)  not null default 0 comment '变化的幅度',
+    `level_snapshot` int(11) not null default 0 comment '当前等级快照',
     `created_at`  TIMESTAMP        NOT NULL     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at`  TIMESTAMP        NOT NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     `deleted_at`  TIMESTAMP        NULL     ,

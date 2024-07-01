@@ -38,8 +38,9 @@ type LevelInfo struct {
 }
 
 type LevelChange struct {
-	Level float32 `json:"level"`
-	Date  string  `json:"date"`
+	Level  float32 `json:"level"`
+	Change float32 `json:"change"`
+	Date   string  `json:"date"`
 }
 
 type Event struct {
@@ -278,15 +279,17 @@ func GetRecentLevelChanges(openID, sportType string, limit int, user *mysql.Wech
 		Date:  user.CreatedAt.Format("20060102"),
 	})
 	for _, record := range records {
-		change := float32(record.LevelChange) / 1000
+		levelSnapshot := float32(record.LevelSnapshot) / 1000
+		lc := float32(record.LevelChange) / 1000
 		// 这里会出现一天多次记录的情况，前端需要额外关注
 		date := record.UpdatedAt.Format("20060102")
 		if record.IsIncrease == 0 {
-			change = change * (-1)
+			levelSnapshot = levelSnapshot * (-1)
 		}
 		levelChange := &LevelChange{
-			Level: change,
-			Date:  date,
+			Level:  levelSnapshot,
+			Date:   date,
+			Change: lc,
 		}
 		res = append(res, levelChange)
 	}
