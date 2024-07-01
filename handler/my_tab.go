@@ -176,20 +176,21 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 			for _, event := range events {
 				eventShow := &Event{
 					ID:               event.ID,
+					EventName:        event.Name,
 					StartTime:        event.StartTime,
 					EndTime:          event.EndTime,
 					Date:             time.Unix(event.StartTime, 0).Format("2006-01-02"),
 					Weekday:          time.Unix(event.StartTime, 0).Weekday().String(),
-					StartTimeStr:     strconv.Itoa(time.Unix(event.StartTime, 0).Hour()),
-					EndTimeStr:       strconv.Itoa(time.Unix(event.EndTime, 0).Hour()),
+					StartTimeStr:     event.StartTimeStr,
+					EndTimeStr:       event.EndTimeStr,
 					IsBooked:         event.IsBooked == 1,
 					FieldName:        event.FieldName,
 					CurrentPlayerNum: event.CurrentPlayerNum,
 					MaxPlayerNum:     event.MaxPlayerNum,
 					GameType:         event.GameType,
 					MatchType:        event.MatchType,
-					LowestLevel:      float32(event.LowestLevel) / 100,
-					HighestLevel:     float32(event.HighestLevel) / 100,
+					LowestLevel:      float32(event.LowestLevel) / 1000,
+					HighestLevel:     float32(event.HighestLevel) / 1000,
 					EventImage:       event.EventImage,
 					IsHost:           event.IsHost == 1,
 				}
@@ -201,7 +202,7 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 						util.Logger.Printf("[GetMyTab] query organization failed for id:%d", event.OrganizationID)
 						return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
 					}
-					util.Logger.Printf("[GetMyTab] event_id:%d, organization_id:%d", event.ID, event.OrganizationID)
+					util.Logger.Printf("[GetMyTab] event_id:%d, organization_id:%d, logo:%v, address:%v", event.ID, event.OrganizationID, orga.Logo, orga.Address)
 					eventShow.OrganizationLogo = orga.Logo
 					eventShow.OrganizationAddress = orga.Address
 				}
