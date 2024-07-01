@@ -197,7 +197,7 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 				// 获取组织的信息
 				if eventShow.IsHost {
 					orga := &mysql.Organization{}
-					err = util.DB().Where("id = ?", event.OrganizationID).Take(organization).Error
+					err = util.DB().Where("id = ?", event.OrganizationID).Take(orga).Error
 					if err != nil {
 						util.Logger.Printf("[GetMyTab] query organization failed for id:%d", event.OrganizationID)
 						return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
