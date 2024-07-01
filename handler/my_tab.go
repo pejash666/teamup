@@ -273,7 +273,7 @@ func GetRecentLevelChanges(openID, sportType string, limit int) []*LevelChange {
 	}
 	res := make([]*LevelChange, 0)
 	for _, record := range records {
-		change := float32(record.LevelChange) / 100
+		change := float32(record.LevelChange) / 1000
 		// 这里会出现一天多次记录的情况，前端需要额外关注
 		date := record.CreatedAt.Format("20060102")
 		if record.IsIncrease == 0 {

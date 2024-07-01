@@ -12,6 +12,7 @@ type WechatUserInfo struct {
 	SportType      string `gorm:"column:sport_type" json:"sport_type"`           // 运动类型
 	IsCalibrated   int    `gorm:"column:is_calibrated" json:"is_calibrated"`     // 是否完成定级
 	Level          int    `gorm:"column:level" json:"level"`                     // 级别
+	InitialLevel   int    `gorm:"column:initial_level" json:"initial_level"`     // 初始级别
 	Reviewer       string `grom:"column:reviewer" json:"reviewer"`               // 审批人（只有职业才需要）
 	UnionId        string `gorm:"column:union_id" json:"union_id"`               // 微信用户union_id
 	OpenId         string `gorm:"column:open_id" json:"open_id"`                 // 微信用户open_id

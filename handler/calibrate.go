@@ -149,6 +149,7 @@ func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 		}
 		// level保存的时候 是 x 1000的整数
 		user.Level = int(totalScore * 1000)
+		user.InitialLevel = int(totalScore * 1000)
 		// 非pro直接更新calibration状态，pro需要等待人工审批
 		if !isPro {
 			user.IsCalibrated = 1
