@@ -90,11 +90,11 @@ func JoinEvent(c *model.TeamUpContext) (interface{}, error) {
 		return nil, iface.NewBackEndError(iface.ParamsError, "level is not in valid range of the event")
 	}
 	// 非公开活动只能通过邀请链接加入
-	// todo: 需要测试
-	if event.IsPublic == 0 && !body.IsInviting {
-		util.Logger.Printf("[JoinEvent] event:%d is private, can only join via invitinglink", body.EventID)
-		return nil, iface.NewBackEndError(iface.PrivateEventError, "private event")
-	}
+	//// todo: 需要测试
+	//if event.IsPublic == 0 && !body.IsInviting {
+	//	util.Logger.Printf("[JoinEvent] event:%d is private, can only join via invitinglink", body.EventID)
+	//	return nil, iface.NewBackEndError(iface.PrivateEventError, "private event")
+	//}
 	util.Logger.Printf("[JoinEvent] eventID:%d can be joined", body.EventID)
 	// 开启事务
 	err = util.DB().Transaction(func(tx *gorm.DB) error {

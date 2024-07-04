@@ -126,8 +126,8 @@ func NewTeamUpContext(c *gin.Context, opt model.APIOption) (*model.TeamUpContext
 			Logger.Printf("NewTeamUpContext c.GetHeader failed, err:%v", err)
 			return nil, iface.NewBackEndError(iface.ParamsError, "invalid wechat_token")
 		}
-		jwt, err := ParseJWTToken(wechatToken)
-		if err != nil {
+		jwt, errA := ParseJWTToken(wechatToken)
+		if errA != nil {
 			Logger.Printf("NewTeamUpContext ParseJWTToken failed, err:%v", err)
 			return nil, iface.NewBackEndError(iface.InternalError, err.Error())
 		}

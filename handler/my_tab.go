@@ -283,9 +283,6 @@ func GetRecentLevelChanges(openID, sportType string, limit int, user *mysql.Wech
 		lc := float32(record.LevelChange) / 1000
 		// 这里会出现一天多次记录的情况，前端需要额外关注
 		date := record.UpdatedAt.Format("20060102")
-		if record.IsIncrease == 0 {
-			levelSnapshot = levelSnapshot * (-1)
-		}
 		levelChange := &LevelChange{
 			Level:  levelSnapshot,
 			Date:   date,

@@ -108,6 +108,16 @@ func CreateEvent(c *model.TeamUpContext) (interface{}, error) {
 		// 如果自己也加入，则需要给user参与次数，参与活动ID进行变更
 		if event.SelfJoin {
 			util.Logger.Printf("[CreateEvent] self join detected")
+			userEvent := &mysql.UserEvent{
+				EventID:   meta.ID,
+				SportType: event.SportType,
+				OpenID:    c.BasicUser.OpenID,
+				IsQuit:    0,
+			}
+			if err = tx.Save(userEvent).Error; err != nil {
+				util.Logger.Printf("[JoinEvent] Create user event failed, err:%v", err)
+				return err
+			}
 			user := &mysql.WechatUserInfo{}
 			err = tx.Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, event.SportType).Take(user).Error
 			if err != nil {

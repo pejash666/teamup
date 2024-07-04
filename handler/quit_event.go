@@ -56,10 +56,10 @@ func QuitEvent(c *model.TeamUpContext) (interface{}, error) {
 		// 更新event表
 		event.CurrentPlayerNum -= 1
 		currentPlayer := make([]string, 0)
-		err = sonic.UnmarshalString(event.CurrentPlayer, &currentPlayer)
-		if err != nil {
+		errT := sonic.UnmarshalString(event.CurrentPlayer, &currentPlayer)
+		if errT != nil {
 			util.Logger.Printf("[QuitEvent] unmarshalString failed, err:%v", err)
-			return err
+			return errT
 		}
 		playerAfterQuit := make([]string, 0)
 		for _, player := range currentPlayer {
@@ -68,34 +68,34 @@ func QuitEvent(c *model.TeamUpContext) (interface{}, error) {
 				playerAfterQuit = append(playerAfterQuit, player)
 			}
 		}
-		playerAfterQuitStr, err := sonic.MarshalString(playerAfterQuit)
-		if err != nil {
+		playerAfterQuitStr, errT := sonic.MarshalString(playerAfterQuit)
+		if errT != nil {
 			util.Logger.Printf("[QuitEvent] marshalString failed, err:%v", err)
-			return err
+			return errT
 		}
 		event.CurrentPlayer = playerAfterQuitStr
 		// 如果退出后，人不满了，需要修改状态
 		if event.CurrentPlayerNum < event.MaxPlayerNum {
 			event.Status = constant.EventStatusCreated
 		}
-		err = tx.Save(event).Error
+		errT = tx.Save(event).Error
 		if err != nil {
 			util.Logger.Printf("[QuitEvent] Save failed, err:%v", err)
-			return err
+			return errT
 		}
 		// 更新用户信息
 		user := &mysql.WechatUserInfo{}
-		err = tx.Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, event.SportType).Take(user).Error
-		if err != nil {
+		errT = tx.Where("open_id = ? AND sport_type = ?", c.BasicUser.OpenID, event.SportType).Take(user).Error
+		if errT != nil {
 			util.Logger.Printf("[QuitEvent] query user failed, err:%v", err)
-			return err
+			return errT
 		}
 		user.JoinedTimes -= 1
 		joinedEvent := make([]uint, 0)
-		err = sonic.UnmarshalString(user.JoinedEvent, &joinedEvent)
-		if err != nil {
+		errT = sonic.UnmarshalString(user.JoinedEvent, &joinedEvent)
+		if errT != nil {
 			util.Logger.Printf("[QuitEvent] unmarshalString failed, err:%v", err)
-			return err
+			return errT
 		}
 		newJoinedEvent := make([]uint, 0)
 		for _, joined := range joinedEvent {
@@ -104,29 +104,29 @@ func QuitEvent(c *model.TeamUpContext) (interface{}, error) {
 				newJoinedEvent = append(newJoinedEvent, joined)
 			}
 		}
-		newJoinedEventStr, err := sonic.MarshalString(newJoinedEvent)
-		if err != nil {
+		newJoinedEventStr, errT := sonic.MarshalString(newJoinedEvent)
+		if errT != nil {
 			util.Logger.Printf("[QuitEvent] marshalString failed, err:%v", err)
-			return err
+			return errT
 		}
 		user.JoinedEvent = newJoinedEventStr
-		err = tx.Save(user).Error
-		if err != nil {
+		errT = tx.Save(user).Error
+		if errT != nil {
 			util.Logger.Printf("[QuitEvent] Save failed, err:%v", err)
-			return err
+			return errT
 		}
 		// 更新user_event表
 		userEvent := &mysql.UserEvent{}
-		err = tx.Where("open_id = ? AND sport_type = ? AND event_id = ?", c.BasicUser.OpenID, event.SportType, event.ID).Take(userEvent).Error
-		if err != nil {
+		errT = tx.Where("open_id = ? AND sport_type = ? AND event_id = ?", c.BasicUser.OpenID, event.SportType, event.ID).Take(userEvent).Error
+		if errT != nil {
 			util.Logger.Printf("[QuitEvent] get record failed, err:%v", err)
-			return err
+			return errT
 		}
 		userEvent.IsQuit = 1
-		err = tx.Save(userEvent).Error
-		if err != nil {
+		errT = tx.Save(userEvent).Error
+		if errT != nil {
 			util.Logger.Printf("[QuitEvent] save user_event failed, err:%v", err)
-			return err
+			return errT
 		}
 		util.Logger.Printf("[QuitEvent] transaction success")
 		return nil
