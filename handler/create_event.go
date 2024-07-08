@@ -216,7 +216,7 @@ func EventMeta(c *model.TeamUpContext, event *model.EventInfo) (*mysql.EventMeta
 		IsHost:         util.BoolToDB(event.IsHost),
 		LowestLevel:    int(event.LowestLevel * 1000),
 		HighestLevel:   int(event.HighestLevel * 1000),
-		Date:           time.Unix(event.StartTime, 0).Format("20060102"),
+		Date:           time.Unix(event.StartTime, 0).Format("2006-01-02"),
 		Weekday:        time.Unix(event.StartTime, 0).Weekday().String(),
 		City:           event.City,
 		Name:           event.Name,

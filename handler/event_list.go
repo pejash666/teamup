@@ -156,7 +156,7 @@ func EventMetaToEventInfo(event *mysql.EventMeta) (*Event, error) {
 		EndTime:          event.EndTime,
 		EndTimeStr:       event.EndTimeStr,
 		Weekday:          time.Unix(event.StartTime, 0).Weekday().String(),
-		Date:             time.Unix(event.StartTime, 0).Format("2006-01-02"),
+		Date:             event.Date,
 		IsBooked:         event.IsBooked == 1,
 		FieldName:        event.FieldName,
 		CurrentPlayerNum: event.CurrentPlayerNum,
