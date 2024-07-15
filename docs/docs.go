@@ -1301,6 +1301,9 @@ const docTemplate = `{
         "handler.LevelChange": {
             "type": "object",
             "properties": {
+                "change": {
+                    "type": "number"
+                },
                 "date": {
                     "type": "string"
                 },
