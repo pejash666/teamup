@@ -273,23 +273,36 @@ func GetRecentLevelChanges(openID, sportType string, limit int, user *mysql.Wech
 			return make([]*LevelChange, 0)
 		}
 	}
+	dedupMap := make(map[string][]*mysql.UserEvent, 0)
+	for _, record := range records {
+		// 只关注发布比分的比赛
+		if record.IsPublished != 1 {
+			continue
+		}
+		date := record.UpdatedAt.Format("20060102")
+		if _, ok := dedupMap[date]; !ok {
+			dedupMap[date] = []*mysql.UserEvent{&record}
+		} else {
+			dedupMap[date] = append(dedupMap[date], &record)
+			sort.Slice(dedupMap[date], func(i, j int) bool {
+				// 越晚的比赛越靠前，发布的时候才会更新这个时间，所以最晚的就是当天最终的level信息
+				return dedupMap[date][i].UpdatedAt.Unix() > dedupMap[date][j].UpdatedAt.Unix()
+			})
+		}
+	}
+
 	res := make([]*LevelChange, 0)
 	res = append(res, &LevelChange{
 		Level: float32(user.InitialLevel / 1000),
 		Date:  user.CreatedAt.Format("20060102"),
 	})
-	for _, record := range records {
-		// 对于没有发布结果的比赛 或者 非竞技类的，不返回变化情况
-		if record.LevelChange == 0 || record.LevelSnapshot == 0 {
-			continue
-		}
-		levelSnapshot := float32(record.LevelSnapshot) / 1000
-		lc := float32(record.LevelChange) / 1000
-		// 这里会出现一天多次记录的情况，前端需要额外关注
-		date := record.UpdatedAt.Format("20060102")
+	// 如果一天参加了多场活动，那么只返回最后一场的变化情况
+	for dt, rds := range dedupMap {
+		levelSnapshot := float32(rds[0].LevelSnapshot) / 1000
+		lc := float32(rds[0].LevelChange) / 1000
 		levelChange := &LevelChange{
 			Level:  levelSnapshot,
-			Date:   date,
+			Date:   dt,
 			Change: lc,
 		}
 		res = append(res, levelChange)
