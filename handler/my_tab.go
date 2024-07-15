@@ -279,6 +279,10 @@ func GetRecentLevelChanges(openID, sportType string, limit int, user *mysql.Wech
 		Date:  user.CreatedAt.Format("20060102"),
 	})
 	for _, record := range records {
+		// 对于没有发布结果的比赛 或者 非竞技类的，不返回变化情况
+		if record.LevelChange == 0 || record.LevelSnapshot == 0 {
+			continue
+		}
 		levelSnapshot := float32(record.LevelSnapshot) / 1000
 		lc := float32(record.LevelChange) / 1000
 		// 这里会出现一天多次记录的情况，前端需要额外关注
