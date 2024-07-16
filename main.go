@@ -8,6 +8,9 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"io"
 	"os"
+	"teamup/constant"
+	"teamup/db/mysql"
+	"time"
 
 	"log"
 	"net/http"
@@ -57,6 +60,21 @@ func main() {
 		log.Printf("Actual pid is %d", syscall.Getpid())
 	}
 	server.ListenAndServe()
+
+	// 每分钟执行一次，将所有结束的活动设置为已结束
+	ticker := time.NewTicker(1 * time.Minute)
+	quit := make(chan struct{})
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				SetEventToFinished()
+			case <-quit:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
 }
 
 func HttpHandler() *gin.Engine {
@@ -215,4 +233,25 @@ func HttpHandler() *gin.Engine {
 	})
 
 	return r
+}
+
+func SetEventToFinished() {
+	// 获取所有进行中的活动
+	events := make([]*mysql.EventMeta, 0)
+	err := util.DB().Where("status <> ?", constant.EventStatusFinished).Find(&events).Error
+	if err != nil {
+		util.Logger.Printf("[SetEventToFinished] query event failed, err:%v", err)
+		return
+	}
+	for _, event := range events {
+		// 获取活动的开始时间
+		endTime := event.EndTime
+		// 获取当前时间
+		currentTime := time.Now().Unix()
+		// 如果当前时间大于活动的结束时间，则将活动状态设置为已结束
+		if currentTime > endTime {
+			event.Status = constant.EventStatusFinished
+		}
+	}
+	util.DB().Save(&events)
 }
