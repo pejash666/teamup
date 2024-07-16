@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/bytedance/sonic"
 	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/files"
@@ -64,6 +65,7 @@ func main() {
 	// 每分钟执行一次，将所有结束的活动设置为已结束
 	ticker := time.NewTicker(1 * time.Minute)
 	quit := make(chan struct{})
+	defer close(quit)
 	go func() {
 		for {
 			select {
@@ -243,6 +245,8 @@ func SetEventToFinished() {
 		util.Logger.Printf("[SetEventToFinished] query event failed, err:%v", err)
 		return
 	}
+	str, _ := sonic.MarshalString(events)
+	util.Logger.Printf("[SetEventToFinished] event list:%v", str)
 	for _, event := range events {
 		// 获取活动的开始时间
 		endTime := event.EndTime
@@ -251,7 +255,10 @@ func SetEventToFinished() {
 		// 如果当前时间大于活动的结束时间，则将活动状态设置为已结束
 		if currentTime > endTime {
 			event.Status = constant.EventStatusFinished
-			util.DB().Save(event)
+			err = util.DB().Save(event).Error
+			if err != nil {
+				util.Logger.Printf("[SetEventToFinished] save record failed, err:%v for id:%d", err, event.ID)
+			}
 		}
 	}
 }
