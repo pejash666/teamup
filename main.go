@@ -251,7 +251,7 @@ func SetEventToFinished() {
 		// 如果当前时间大于活动的结束时间，则将活动状态设置为已结束
 		if currentTime > endTime {
 			event.Status = constant.EventStatusFinished
+			util.DB().Save(event)
 		}
 	}
-	util.DB().Save(&events)
 }
