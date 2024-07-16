@@ -251,12 +251,17 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 				eventShow.CurrentPlayer = currentPLayers
 				sportTypeInfo.MyGames = append(sportTypeInfo.MyGames, eventShow)
 			}
+			sort.Slice(sportTypeInfo.MyGames, func(i, j int) bool {
+				return sportTypeInfo.MyGames[i].StartTime > sportTypeInfo.MyGames[j].StartTime
+			})
 		} else {
 			util.Logger.Printf("[GetMytTab] user hasn't joined any event in this sport_type")
 			sportTypeInfo.MyGames = make([]*Event, 0)
 		}
 		res.SportTypeInfos = append(res.SportTypeInfos, sportTypeInfo)
 	}
+	// sort myGames according to create time
+
 	resStr, _ := sonic.MarshalString(res)
 	util.Logger.Printf("[GetMytTab] success, res is %v", resStr)
 	return res, nil

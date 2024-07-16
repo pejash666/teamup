@@ -485,9 +485,9 @@ func divideAmericano(c *model.TeamUpContext, event *mysql.EventMeta, players []*
 			times := 1
 			for _, groups := range possibleGroups {
 				// 两组组合都没出现过
-				group1 := groups[0].Player.OpenID + groups[1].Player.OpenID
-				group2 := groups[2].Player.OpenID + groups[3].Player.OpenID
-				util.Logger.Printf("group1:%v, group2:%v", group1, group2)
+				//group1 := groups[0].Player.OpenID + groups[1].Player.OpenID
+				//group2 := groups[2].Player.OpenID + groups[3].Player.OpenID
+				//util.Logger.Printf("group1:%v, group2:%v", group1, group2)
 				// todo： 如果三次循环后还是不行，需要重新获取count最少的四个，否则会陷入无限循环
 				if checkGroupDedup(groups[0].Player, groups[1].Player, groupDedupMap) && checkGroupDedup(groups[2].Player, groups[3].Player, groupDedupMap) {
 
@@ -534,7 +534,7 @@ func divideAmericano(c *model.TeamUpContext, event *mysql.EventMeta, players []*
 					goto retry
 				}
 				times += 1
-				util.Logger.Printf("cycle, times:%d", times)
+				//util.Logger.Printf("cycle, times:%d", times)
 			}
 		}
 	}
