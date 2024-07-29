@@ -270,7 +270,7 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 // GetRecentLevelChanges 获取最近 limit 场次内，分数的变化情况
 func GetRecentLevelChanges(openID, sportType string, limit int, user *mysql.WechatUserInfo) []*LevelChange {
 	var records []mysql.UserEvent
-	err := util.DB().Where("open_id = ? AND sport_type = ?", openID, sportType).Order("updated_at desc").Find(&records).Limit(limit).Error
+	err := util.DB().Where("open_id = ? AND sport_type = ? AND is_published = 1", openID, sportType).Order("updated_at desc").Find(&records).Limit(limit).Error
 	if err != nil {
 		// 没有变化信息，返回空
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -279,7 +279,7 @@ func GetRecentLevelChanges(openID, sportType string, limit int, user *mysql.Wech
 		}
 	}
 	util.Logger.Printf("[GetRecentLevelChanges] record for level_change for open_id:%v sport_type:%v, is %v", openID, sportType, util.ToReadable(records))
-	dedupMap := make(map[string][]*mysql.UserEvent, 0)
+	dedupMap := make(map[string][]mysql.UserEvent, 0)
 	for _, record := range records {
 		// 只关注发布比分的比赛
 		if record.IsPublished != 1 {
@@ -287,9 +287,9 @@ func GetRecentLevelChanges(openID, sportType string, limit int, user *mysql.Wech
 		}
 		date := record.UpdatedAt.Format("20060102")
 		if _, ok := dedupMap[date]; !ok {
-			dedupMap[date] = []*mysql.UserEvent{&record}
+			dedupMap[date] = []mysql.UserEvent{record}
 		} else {
-			dedupMap[date] = append(dedupMap[date], &record)
+			dedupMap[date] = append(dedupMap[date], record)
 			sort.Slice(dedupMap[date], func(i, j int) bool {
 				// 越晚的比赛越靠前，发布的时候才会更新这个时间，所以最晚的就是当天最终的level信息
 				return dedupMap[date][i].UpdatedAt.Unix() > dedupMap[date][j].UpdatedAt.Unix()
