@@ -278,7 +278,7 @@ func GetRecentLevelChanges(openID, sportType string, limit int, user *mysql.Wech
 			return make([]*LevelChange, 0)
 		}
 	}
-	util.Logger.Printf("[GetRecentLevelChanges] record for level_change for open_id:%v, is %v", openID, util.ToReadable(records))
+	util.Logger.Printf("[GetRecentLevelChanges] record for level_change for open_id:%v sport_type:%v, is %v", openID, sportType, util.ToReadable(records))
 	dedupMap := make(map[string][]*mysql.UserEvent, 0)
 	for _, record := range records {
 		// 只关注发布比分的比赛
