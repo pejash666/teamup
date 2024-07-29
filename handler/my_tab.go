@@ -32,9 +32,9 @@ type SportTypeInfo struct {
 }
 
 type LevelInfo struct {
-	Status       string         `json:"status"` // 定级状态：need_to_calibrate;wait_for_approve;approved(7.0以下自动审批)
-	CurrentLevel float32        `json:"current_level"`
-	LevelDetail  []*LevelChange `json:"level_detail"`
+	Status       string        `json:"status"` // 定级状态：need_to_calibrate;wait_for_approve;approved(7.0以下自动审批)
+	CurrentLevel float32       `json:"current_level"`
+	LevelDetail  []LevelChange `json:"level_detail"`
 }
 
 type LevelChange struct {
@@ -268,14 +268,14 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 }
 
 // GetRecentLevelChanges 获取最近 limit 场次内，分数的变化情况
-func GetRecentLevelChanges(openID, sportType string, limit int, user *mysql.WechatUserInfo) []*LevelChange {
+func GetRecentLevelChanges(openID, sportType string, limit int, user *mysql.WechatUserInfo) []LevelChange {
 	var records []mysql.UserEvent
 	err := util.DB().Where("open_id = ? AND sport_type = ? AND is_published = 1", openID, sportType).Order("updated_at desc").Find(&records).Limit(limit).Error
 	if err != nil {
 		// 没有变化信息，返回空
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			util.Logger.Printf("[GetRecentLevelChanges] no record for level_change")
-			return make([]*LevelChange, 0)
+			return make([]LevelChange, 0)
 		}
 	}
 	util.Logger.Printf("[GetRecentLevelChanges] record for level_change for open_id:%v sport_type:%v, is %v", openID, sportType, util.ToReadable(records))
@@ -297,8 +297,8 @@ func GetRecentLevelChanges(openID, sportType string, limit int, user *mysql.Wech
 		}
 	}
 	util.Logger.Printf("[my_tab] dedup map for open_id:%v, is :%v", openID, util.ToReadable(dedupMap))
-	res := make([]*LevelChange, 0)
-	res = append(res, &LevelChange{
+	res := make([]LevelChange, 0)
+	res = append(res, LevelChange{
 		Level: float32(user.InitialLevel / 1000),
 		Date:  user.CreatedAt.Format("20060102"),
 	})
@@ -306,7 +306,7 @@ func GetRecentLevelChanges(openID, sportType string, limit int, user *mysql.Wech
 	for dt, rds := range dedupMap {
 		levelSnapshot := float32(rds[0].LevelSnapshot) / 1000
 		lc := float32(rds[0].LevelChange) / 1000
-		levelChange := &LevelChange{
+		levelChange := LevelChange{
 			Level:  levelSnapshot,
 			Date:   dt,
 			Change: lc,
