@@ -319,6 +319,7 @@ func GetRecentLevelChanges(openID, sportType string, limit int, user *mysql.Wech
 	if len(res) > 10 {
 		res = res[:10]
 	}
+	util.Logger.Printf("[my_tab] get recent level changes, open_id:%v, res is %v", openID, util.ToReadable(res))
 	return res
 }
 
