@@ -295,7 +295,7 @@ func GetRecentLevelChanges(openID, sportType string, limit int, user *mysql.Wech
 			})
 		}
 	}
-
+	util.Logger.Printf("[my_tab] dedup map for open_id:%v, is :%v", openID, util.ToReadable(dedupMap))
 	res := make([]*LevelChange, 0)
 	res = append(res, &LevelChange{
 		Level: float32(user.InitialLevel / 1000),
