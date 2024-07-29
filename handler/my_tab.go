@@ -125,7 +125,7 @@ func GetMyTab(c *model.TeamUpContext) (interface{}, error) {
 		// 只有定级过且审批通过的的人，才返回信息
 		if levelInfo.Status == "approved" {
 			levelInfo.CurrentLevel = float32(user.Level / 1000)
-			levelInfo.LevelDetail = GetRecentLevelChanges(user.OpenId, user.SportType, 10, &user)
+			levelInfo.LevelDetail = GetRecentLevelChanges(user.OpenId, user.SportType, 1000, &user)
 		}
 		sportTypeInfo.LevelInfo = levelInfo
 
@@ -315,6 +315,10 @@ func GetRecentLevelChanges(openID, sportType string, limit int, user *mysql.Wech
 	sort.Slice(res, func(i, j int) bool {
 		return res[i].Date < res[j].Date
 	})
+	// 只返回最近的10个
+	if len(res) > 10 {
+		res = res[:10]
+	}
 	return res
 }
 
