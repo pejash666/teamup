@@ -336,8 +336,8 @@ func divideTennis(c *model.TeamUpContext, event *mysql.EventMeta, players []*mod
 	return dividePickleBall(c, event, players)
 }
 
-// divideAmericano padel的Americano规则
-func divideAmericano(c *model.TeamUpContext, event *mysql.EventMeta, players []*model.Player) []*RoundInfo {
+// buggedDivideAmericano 有bug
+func buggedDivideAmericano(c *model.TeamUpContext, event *mysql.EventMeta, players []*model.Player) []*RoundInfo {
 	// adaptive算法
 	// 比如有abcd 4个人， 生成3场比赛
 	// Game1: ab vs cd    a:1, b:1, c:1, d:1
@@ -657,4 +657,28 @@ func checkGroupDedup(player1, player2 *model.Player, dedupMap map[string]int) bo
 		return false
 	}
 	return true
+}
+
+func divideAmericano(c *model.TeamUpContext, event *mysql.EventMeta, players []*model.Player) []*RoundInfo {
+	res := make([]*RoundInfo, 0)
+	playerNum := len(players)
+	ShufflePlayers(players)
+	for i := 0; i < playerNum; i++ {
+		round := &RoundInfo{
+			CourtNum: 1,
+			RoundNum: int32(i + 1),
+		}
+		homePlayers := make([]*model.Player, 0, 2)
+		awayPlayers := make([]*model.Player, 0, 2)
+		homePlayers = append(homePlayers, players[i%playerNum])
+		homePlayers = append(homePlayers, players[(i+1)%playerNum])
+		awayPlayers = append(awayPlayers, players[(i+2)%playerNum])
+		awayPlayers = append(awayPlayers, players[(i+3)%playerNum])
+		round.Home = homePlayers
+		round.Away = awayPlayers
+		round.HomeAvg = GetPlayersAvgLevel(homePlayers)
+		round.AwayAvg = GetPlayersAvgLevel(awayPlayers)
+		res = append(res, round)
+	}
+	return res
 }
