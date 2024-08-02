@@ -35,7 +35,7 @@ func PublishScore(c *model.TeamUpContext) (interface{}, error) {
 	err := c.BindJSON(body)
 	if err != nil {
 		util.Logger.Printf("[PublishScore] bindJSON failed, err:%v", err)
-		return nil, iface.NewBackEndError(iface.ParamsError, "invalid params")
+		return nil, iface.NewBackEndError(iface.ParamsError, "PublishScore请求参数不合法")
 	}
 	util.Logger.Printf("[PublishScore] starts, body:%v", util.ToReadable(body))
 	// 获取sport_type
@@ -43,7 +43,7 @@ func PublishScore(c *model.TeamUpContext) (interface{}, error) {
 	err = util.DB().Where("id = ?", body.EventID).Take(event).Error
 	if err != nil {
 		util.Logger.Printf("[PublishScore] query event failed, err:%v", err)
-		return nil, iface.NewBackEndError(iface.MysqlError, "query record failed")
+		return nil, iface.NewBackEndError(iface.MysqlError, "PublishScore查询活动信息失败")
 	}
 	// 更新每个用户的分数记录，增加一条分数变化记录，更新活动的状态
 	err = util.DB().Transaction(func(tx *gorm.DB) error {

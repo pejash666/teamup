@@ -64,20 +64,20 @@ type CalibrateRes struct {
 func Calibrate(c *model.TeamUpContext) (interface{}, error) {
 	sportType := c.PostForm("sport_type")
 	if sportType != constant.SportTypePadel && sportType != constant.SportTypeTennis && sportType != constant.SportTypePickelBall {
-		return nil, iface.NewBackEndError(iface.ParamsError, "invalid sport_type")
+		return nil, iface.NewBackEndError(iface.ParamsError, "Calibrate不合法的运动类型")
 	}
 	questionnaireParam := c.PostForm("questionnaire")
 	questionnaire := make([]*Question, 0)
 	err := sonic.UnmarshalString(questionnaireParam, &questionnaire)
 	if err != nil {
 		util.Logger.Printf("[Calibrate] unmarshal questionnaire failed, err:%v", err)
-		return nil, iface.NewBackEndError(iface.ParamsError, "invalid questionnaire")
+		return nil, iface.NewBackEndError(iface.ParamsError, "Calibrate不合法的问卷")
 	}
 	file := c.PostForm("proof")
 	preCalibrateStr := c.PostForm("pre_calibrate")
 	pc, err := strconv.ParseBool(preCalibrateStr)
 	if err != nil {
-		return nil, iface.NewBackEndError(iface.ParamsError, "invalid pre_calibrate")
+		return nil, iface.NewBackEndError(iface.ParamsError, "Calibrate不合法的请求参数")
 	}
 	//err := c.BindJSON(body)
 	//if err != nil {

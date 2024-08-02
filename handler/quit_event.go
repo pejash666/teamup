@@ -35,21 +35,21 @@ func QuitEvent(c *model.TeamUpContext) (interface{}, error) {
 	err := c.BindJSON(body)
 	if err != nil {
 		util.Logger.Printf("[QuitEvent] bindJSON failed, err:%v", err)
-		return nil, iface.NewBackEndError(iface.ParamsError, "invalid param")
+		return nil, iface.NewBackEndError(iface.ParamsError, "QuitEvent参数不合法")
 	}
 	event := &mysql.EventMeta{}
 	// 只有被创建 和 full状态的活动才可以退出
 	err = util.DB().Where("id = ? AND status IN ?", body.EventID, []string{constant.EventStatusFull, constant.EventStatusCreated}).Take(event).Error
 	if err != nil {
 		util.Logger.Printf("[[QuitEvent] query eventMeta failed, err:%v", err)
-		return nil, iface.NewBackEndError(iface.MysqlError, "query failed")
+		return nil, iface.NewBackEndError(iface.MysqlError, "QuitEvent查询活动信息失败")
 	}
 	// 判断当前时间距离开始时间，只有大于三小时才能退出
 	timeNow := time.Now().Unix()
 	eventStartTime := event.StartTime
 	if timeNow >= eventStartTime || (eventStartTime-timeNow) < ThreeHoursSeconds {
 		util.Logger.Printf("[QuitEvent] time is not invalid, eventStartTime:%v, timeNow:%v", eventStartTime, timeNow)
-		return nil, iface.NewBackEndError(iface.ParamsError, "invalid quit time")
+		return nil, iface.NewBackEndError(iface.ParamsError, "QuitEvent距离开始时间小于三小时，不允许退出")
 	}
 	// 开启事务
 	util.DB().Transaction(func(tx *gorm.DB) error {

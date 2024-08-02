@@ -43,11 +43,11 @@ func GetFieldsList(c *model.TeamUpContext) (interface{}, error) {
 		return nil, iface.NewBackEndError(iface.ParamsError, err.Error())
 	}
 	if body.SportType == "" || body.City == "" {
-		return nil, iface.NewBackEndError(iface.ParamsError, "invalid params")
+		return nil, iface.NewBackEndError(iface.ParamsError, "不合法请求")
 	}
 	var organizations []mysql.Organization
 	// 只展示通过审核的
-	err = util.DB().Where("sport_type = ? AND city = ? AND is_approved = 1", body.SportType, body.City).Find(&organizations).Error
+	err = util.DB().Where("sport_type = ? AND city = ? AND is_approved = 1 AND is_test = 0", body.SportType, body.City).Find(&organizations).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return make([]Organization, 0), nil

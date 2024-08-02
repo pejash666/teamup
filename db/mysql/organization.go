@@ -18,6 +18,7 @@ type Organization struct {
 	TotalEventNum int    `gorm:"column:total_event_num" json:"total_event_num"` // 活动次数
 	IsApproved    int    `gorm:"column:is_approved" json:"is_approved"`         // 是否通过审批
 	Reviewer      string `gorm:"column:reviewer" json:"reviewer"`               // 审批人
+	IsTest        int    `gorm:"column:is_test" json:"is_test"`                 // 是否是测试组织
 }
 
 func (o Organization) TableName() string {

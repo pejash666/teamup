@@ -70,12 +70,12 @@ func EventList(c *model.TeamUpContext) (interface{}, error) {
 	err := c.BindJSON(body)
 	if err != nil {
 		util.Logger.Printf("[GetEventList] invalid body:%v", body)
-		return nil, iface.NewBackEndError(iface.ParamsError, "invalid query")
+		return nil, iface.NewBackEndError(iface.ParamsError, "EventList请求参数不合法")
 	}
 	// 从DB根据查询条件获取对应的event
 	if body.SportType == "" || body.City == "" || body.StartTime == 0 || body.Num == 0 {
 		util.Logger.Printf("[GetEventList] invalid body:%v", body)
-		return nil, iface.NewBackEndError(iface.ParamsError, "invalid query")
+		return nil, iface.NewBackEndError(iface.ParamsError, "EventList请求参数不合法")
 	}
 	util.Logger.Printf("[GetEventList] req:%v", util.ToReadable(body))
 	// 获取筛选条件
@@ -123,7 +123,7 @@ func EventList(c *model.TeamUpContext) (interface{}, error) {
 	} else if body.EventListOrderOption.OrderBy == "by_distance" {
 		if body.EventListOrderOption.Latitude == nil || body.EventListOrderOption.Longitude == nil {
 			util.Logger.Printf("[GetEventList] invalid order option")
-			return nil, iface.NewBackEndError(iface.ParamsError, "invalid order option")
+			return nil, iface.NewBackEndError(iface.ParamsError, "EventList不合法的排序选项")
 		}
 		err = SortByDistance(body.EventListOrderOption.Latitude, body.EventListOrderOption.Longitude, eventList)
 		if err != nil {
@@ -131,7 +131,7 @@ func EventList(c *model.TeamUpContext) (interface{}, error) {
 		}
 	} else if body.EventListOrderOption.OrderBy == "by_level" {
 		if c.BasicUser == nil {
-			return nil, iface.NewBackEndError(iface.ParamsError, "need login")
+			return nil, iface.NewBackEndError(iface.ParamsError, "EventList需要登录")
 		}
 		var user mysql.WechatUserInfo
 		err = util.DB().Where(" open_id = ? AND sport_type = ?", c.BasicUser.OpenID, body.SportType).Take(&user).Error

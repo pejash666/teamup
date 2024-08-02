@@ -24,6 +24,8 @@ const (
 var AdminList = []string{
 	"oLI--62QB5L0bVJrFTFMTQj-lcGw", // 沙昊
 	"oLI--69NwbFabrcwx7tDFgyEJkqc", // 李宇宙
+	"oLI--635r8g0hwFquInKJQCatnik", // Flynn
+	"oLI--60yUDyagDYRZf-tgolEU7W8", //  brd                          // Brd
 }
 
 func API(handler iface.HandlerFunc, opt model.APIOption) gin.HandlerFunc {

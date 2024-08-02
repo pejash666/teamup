@@ -30,14 +30,14 @@ func UploadImage(c *model.TeamUpContext) (interface{}, error) {
 	imageType := c.Query("image_type")
 	if imageType != ImageTypeOrganizationLogo && imageType != ImageTypeCalibrationProof && imageType != ImageTypeEventImage && imageType != ImageTypeAvatar {
 		util.Logger.Printf("[UploadImage] invalid image type")
-		return nil, iface.NewBackEndError(iface.ParamsError, "invalid image type")
+		return nil, iface.NewBackEndError(iface.ParamsError, "UploadImage不合法图片类型")
 	}
 	// 使用分布式锁，保证无并发问题
 	get := util.GetLock(imageType, time.Second)
 	defer util.DelLock(imageType)
 	if !get {
 		util.Logger.Printf("[UploadImage] concurrent request for upload file, please try again")
-		return nil, iface.NewBackEndError(iface.ParamsError, "concurrent request")
+		return nil, iface.NewBackEndError(iface.ParamsError, "UploadImage请重试")
 	}
 
 	path := fmt.Sprintf("./%s", imageType)
@@ -59,19 +59,19 @@ func UploadImage(c *model.TeamUpContext) (interface{}, error) {
 	file, err := c.FormFile("file")
 	if err != nil {
 		util.Logger.Printf("[UploadImage] FormFile failed, err:%v", err)
-		return nil, iface.NewBackEndError(iface.ParamsError, "invalid file")
+		return nil, iface.NewBackEndError(iface.ParamsError, "UploadImage不合法的图片")
 	}
 	// 不能大于3mb
 	if file.Size > 3<<20 {
 		util.Logger.Printf("[UploadImage] file size is too big")
-		return nil, iface.NewBackEndError(iface.ParamsError, "file too big")
+		return nil, iface.NewBackEndError(iface.ParamsError, "UploadImage图片过大")
 	}
 	filePath := fmt.Sprintf("%s/%s", path, imageName)
 
 	err = c.SaveUploadedFile(file, filePath)
 	if err != nil {
 		util.Logger.Printf("[UploadImage] iSaveUploadedFile failed, err:%v", err)
-		return nil, iface.NewBackEndError(iface.ParamsError, "save file failed")
+		return nil, iface.NewBackEndError(iface.ParamsError, "UploadImage保存图片失败")
 	}
 	// 返回给前端一个图片的url
 	url := util.GetImageUrl(c, imageType, imageName)

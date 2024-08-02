@@ -85,19 +85,19 @@ func GetScoreboard(c *model.TeamUpContext) (interface{}, error) {
 			// padel 最少有4个人
 			if event.CurrentPlayerNum < 4 {
 				util.Logger.Printf("[GetScoreBoard] currentNum is less than 4, cant start")
-				return nil, iface.NewBackEndError(iface.ParamsError, "invalid player num")
+				return nil, iface.NewBackEndError(iface.ParamsError, "不合法的活动人数")
 			}
 		case constant.SportTypePickelBall:
 			// 双打必须是>4的偶数就是4个人
 			if event.GameType == constant.EventGameTypeDuo {
 				if event.CurrentPlayerNum < 4 || event.CurrentPlayerNum%2 != 0 {
 					util.Logger.Printf("[GetScoreBoard] game is duo, and playerNum is invalid")
-					return nil, iface.NewBackEndError(iface.ParamsError, "invalid player num")
+					return nil, iface.NewBackEndError(iface.ParamsError, "不合法的活动人数")
 				}
 			} else {
 				if event.CurrentPlayerNum != 2 {
 					util.Logger.Printf("[GetScoreBoard] game is solo, invalid player number")
-					return nil, iface.NewBackEndError(iface.ParamsError, "invalid player number")
+					return nil, iface.NewBackEndError(iface.ParamsError, "不合法的活动人数")
 				}
 			}
 		}

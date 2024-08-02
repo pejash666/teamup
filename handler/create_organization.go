@@ -66,6 +66,11 @@ func CreateOrganization(c *model.TeamUpContext) (interface{}, error) {
 			// 存一下经纬度
 			organization.Longitude = body.Longitude
 			organization.Latitude = body.Latitude
+			// 管理员创建的公会无需审核
+			if util.IsAdmin(c.BasicUser.OpenID) {
+				organization.IsTest = 1
+				organization.IsApproved = 1
+			}
 			result := util.DB().Create(organization)
 			if result.Error != nil {
 				util.Logger.Printf("[CreateOrganization] DB().Create failed, err:%v", result.Error)
