@@ -74,7 +74,10 @@ func getLogInfo(handler iface.HandlerFunc) model.LogInfo {
 }
 
 func NewTeamUpContext(c *gin.Context, opt model.APIOption) (*model.TeamUpContext, error) {
-
+	// 跳过教研
+	if opt.HackLogic {
+		return &model.TeamUpContext{}, nil
+	}
 	// 防止接口重放
 	timeStampStr := c.GetHeader("timestamp")
 	ts, err := strconv.ParseInt(timeStampStr, 10, 64)

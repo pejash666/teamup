@@ -179,6 +179,10 @@ func HttpHandler() *gin.Engine {
 		NeedLoginStatus:    true,
 		NeedAdminClearance: true,
 	}))
+	// 直接添加组织（for 场地）
+	adminGroup.POST("/hack_create_organization", API(handler.HackCreateOrganization, model.APIOption{
+		HackLogic: true,
+	}))
 
 	// 静态资源Group
 	imageGroup := r.Group("/team_up/static_image")
