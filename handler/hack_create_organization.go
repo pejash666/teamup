@@ -8,11 +8,13 @@ import (
 )
 
 func HackCreateOrganization(c *model.TeamUpContext) (interface{}, error) {
+	util.Logger.Printf("[HackCreateOrganization] starts")
 	body := &CreateOrganizationBody{}
 	err := c.BindJSON(body)
 	if err != nil {
 		return nil, iface.NewBackEndError(iface.ParamsError, err.Error())
 	}
+	util.Logger.Printf("[HackCreateOrganization] body:%v", util.ToReadable(body))
 	orga := &mysql.Organization{
 		SportType:  body.SportType,
 		Name:       body.Name,
@@ -26,5 +28,6 @@ func HackCreateOrganization(c *model.TeamUpContext) (interface{}, error) {
 	if err != nil {
 		return nil, iface.NewBackEndError(iface.MysqlError, err.Error())
 	}
+	util.Logger.Printf("[HackCreateOrganization] success")
 	return nil, nil
 }
