@@ -74,9 +74,16 @@ func getLogInfo(handler iface.HandlerFunc) model.LogInfo {
 }
 
 func NewTeamUpContext(c *gin.Context, opt model.APIOption) (*model.TeamUpContext, error) {
-	// 跳过教研
+	ctx := &model.TeamUpContext{
+		Context: c,
+		AppInfo: &model.AppInfo{
+			AppID:  constant.AppID,
+			Secret: constant.AppSecret,
+		},
+	}
+	// 跳过校验
 	if opt.HackLogic {
-		return &model.TeamUpContext{}, nil
+		return ctx, nil
 	}
 	// 防止接口重放
 	timeStampStr := c.GetHeader("timestamp")
@@ -99,14 +106,7 @@ func NewTeamUpContext(c *gin.Context, opt model.APIOption) (*model.TeamUpContext
 	//}
 	//_ = RedisSet(antiReplayKey, 1, time.Second*15)
 
-	ctx := &model.TeamUpContext{
-		Context: c,
-		AppInfo: &model.AppInfo{
-			AppID:  constant.AppID,
-			Secret: constant.AppSecret,
-		},
-		Timestamp: ts,
-	}
+	ctx.Timestamp = ts
 	// 获取语言
 	lang := c.GetHeader("lang")
 	if lang == "" {
